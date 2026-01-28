@@ -1,8 +1,8 @@
 const CACHE_NAME = 'ghost-shell-v3-cache';
 const ASSETS_TO_CACHE = [
-    '/new/',
-    '/new/index.html',
-    '/new/manifest.json',
+    '/',
+    '/index.html',
+    '/manifest.json',
     'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
     'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
