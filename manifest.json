@@ -6,9 +6,9 @@
   "dir": "auto",
   "display": "standalone",
   "orientation": "any",
-  "scope": "https://mohasin-alam.github.io/new/",
-  "start_url": "https://mohasin-alam.github.io/new/index.html",
-  "id": "https://mohasin-alam.github.io/new/",
+  "scope": "https://csm-note.github.io/",
+  "start_url": "https://csm-note.github.io/index.html",
+  "id": "https://csm-note.github.io/",
   "background_color": "#020202",
   "theme_color": "#020202",
   "categories": [
