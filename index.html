@@ -340,6 +340,15 @@
     const CACHE_KEY_PREFIX = 'ghost_cache_';
     const QUEUE_KEY_PREFIX = 'ghost_queue_';
 
+    // --- CRYPTO UTILS (New Feature 1) ---
+    async function sha256(message) {
+        if (!message) return null;
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // --- UTILS & NOTIFICATIONS ---
 
     function logActivity(msg, type = 'info') {
@@ -453,9 +462,11 @@
                 if (!note) return;
                 notesArr.push({id, ...note});
                 
-                // Extract tags
-                const tags = (note.text || '').match(/#[a-z0-9_]+/gi);
-                if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
+                // Extract tags (only if not locked to prevent leaking)
+                if (!note.lockHash) {
+                    const tags = (note.text || '').match(/#[a-z0-9_]+/gi);
+                    if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
+                }
             });
             
             // Sort: Pinned first, then Timestamp (Newest)
@@ -468,19 +479,21 @@
             renderTags(allTags);
 
             notesArr.forEach(note => {
-                // Filter logic
+                // Filter logic (bypass if locked so it still shows in list)
                 const noteText = (note.text || '').toLowerCase();
-                const noteTitle = (note.title || '').toLowerCase();
-                if(filterTag && !noteText.includes(filterTag)) return;
+                if(filterTag && !note.lockHash && !noteText.includes(filterTag)) return;
                 
                 const div = document.createElement('div');  
                 div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '');  
                 
                 const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
+                // New: Add Locked Indicator
+                const isLocked = note.lockHash ? ' <span style="color:var(--neon-red)">[LOCKED]</span>' : '';
+
                 div.innerHTML = `
                     <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                         <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i> 
-                        ${(note.title || 'UNTITLED') + isDirty}
+                        ${(note.title || 'UNTITLED') + isDirty + isLocked}
                     </div>
                     <i class="fas fa-star pin-icon"></i>
                 `;  
@@ -527,7 +540,21 @@
         if(navigator.onLine) processOfflineQueue();
     }  
 
-    function loadNoteIntoEditor(id, note) {
+    // --- MODIFIED: Load with Password Logic ---
+    async function loadNoteIntoEditor(id, note) {
+        // Access Control Check
+        if (note.lockHash) {
+            const password = prompt("SECURE NOTE. ENTER PASSWORD:");
+            if (!password) return; // Cancelled
+            const inputHash = await sha256(password);
+            
+            if (inputHash !== note.lockHash) {
+                alert("ACCESS DENIED. INVALID CREDENTIALS.");
+                return;
+            }
+            logActivity("DECRYPTION SUCCESSFUL", "success");
+        }
+
         document.getElementById('current-id').value = id;  
         document.getElementById('doc-title').value = note.title || '';  
         document.getElementById('doc-body').value = note.text || '';  
@@ -551,11 +578,13 @@
 
         // UI Highlighting
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
-        // Re-render handled by reactivity usually, but strictly adding class here for instant feedback
+        // Re-render to update UI list highlighting if needed
+        renderNoteList(getLocalCache());
         
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
 
+    // --- MODIFIED: Save Logic to preserve Lock Hash ---
     function saveNote(silent = false) {  
         if (!currentUser) return;  
         
@@ -572,10 +601,15 @@
         const text = document.getElementById('doc-body').value;  
         const pinned = document.getElementById('is-pinned').value === 'true';
 
+        // Retrieve existing lock hash if any from cache to preserve it
+        const cache = getLocalCache();
+        const existingNote = cache[id] || {};
+        const lockHash = existingNote.lockHash || null;
+
         const payload = { title, text, pinned, timestamp: Date.now() };  
+        if (lockHash) payload.lockHash = lockHash;
 
         // Optimistic Update
-        const cache = getLocalCache();
         cache[id] = payload;
         setLocalCache(cache);
         renderNoteList(cache); 
@@ -726,9 +760,6 @@
          <hr style="border-color:#333">
          <div id="snapshot-list" style="font-size:0.8rem; color:#888;">Fetching...</div>`);
          
-         // In a real app, query a sub-collection 'history/noteId'. 
-         // For this version, we'll mock it or just use simple localstorage history if needed.
-         // Let's implement a basic one:
          loadSnapshots(id);
     }
 
@@ -832,8 +863,6 @@
         const id = document.getElementById('current-id').value;
         if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
         
-        // In a real backend, we would set a 'public' flag.
-        // For this demo, we simulate a public link.
         const link = `${window.location.origin}${window.location.pathname}?share=${id}&user=${currentUser}`;
         
         navigator.clipboard.writeText(link).then(() => {
@@ -842,16 +871,14 @@
         });
     }
 
-    // Check for Shared Link on Load
     const urlParams = new URLSearchParams(window.location.search);
     const shareId = urlParams.get('share');
     const shareUser = urlParams.get('user');
 
     if(shareId && shareUser) {
-        // Read-only Mode
         document.getElementById('auth-layer').style.display = 'none';
         document.getElementById('app-layer').style.display = 'flex';
-        document.querySelector('header').style.display = 'none'; // Hide controls
+        document.querySelector('header').style.display = 'none'; 
         document.getElementById('sidebar').style.display = 'none';
         document.getElementById('doc-body').setAttribute('readonly', true);
         document.getElementById('doc-title').setAttribute('readonly', true);
@@ -861,7 +888,6 @@
                 const val = snap.val();
                 document.getElementById('doc-title').value = val.title;
                 document.getElementById('doc-body').value = val.text;
-                // Auto show markdown
                 toggleMarkdown();
             } else {
                 alert("Shared note not found or access denied.");
@@ -875,7 +901,6 @@
         document.getElementById('save-indicator').innerText = "[TYPING...]";  
         updateWordCount();
         
-        // Markdown Realtime
         if(document.getElementById('md-preview').classList.contains('active')) {
              document.getElementById('md-preview').innerHTML = marked.parse(document.getElementById('doc-body').value);
         }
@@ -887,7 +912,6 @@
     document.getElementById('doc-title').oninput = triggerSave;  
     document.getElementById('doc-body').oninput = triggerSave;  
     
-    // Search
     document.getElementById('search-bar').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         document.querySelectorAll('.note-item').forEach(item => {
@@ -920,18 +944,234 @@
         else if (document.exitFullscreen) document.exitFullscreen();
     }
     
-    // 8. Shortcuts
+    // --- ADVANCED FEATURE LOGIC ---
+
+    async function toggleLock() {
+        const id = document.getElementById('current-id').value;
+        if(!id) return logActivity("SELECT A NOTE TO LOCK", "error");
+
+        const cache = getLocalCache();
+        const note = cache[id];
+        
+        if(note.lockHash) {
+            // Unlock Protocol
+            const pass = prompt("UNLOCK: ENTER CURRENT PASSWORD");
+            if(!pass) return;
+            const hash = await sha256(pass);
+            if(hash === note.lockHash) {
+                delete cache[id].lockHash;
+                setLocalCache(cache);
+                saveNote();
+                logActivity("SECURITY REMOVED", "info");
+                renderNoteList(cache);
+            } else {
+                alert("INCORRECT PASSWORD");
+            }
+        } else {
+            // Lock Protocol
+            const pass = prompt("SECURE: SET NEW PASSWORD");
+            if(!pass) return;
+            const hash = await sha256(pass);
+            cache[id].lockHash = hash;
+            setLocalCache(cache);
+            saveNote();
+            logActivity("NOTE SECURED", "success");
+            renderNoteList(cache);
+        }
+    }
+
+    async function changePassword() {
+        const id = document.getElementById('current-id').value;
+        if(!id) return;
+        const cache = getLocalCache();
+        const note = cache[id];
+        
+        if(!note.lockHash) return logActivity("NOTE IS NOT LOCKED", "error");
+
+        const oldPass = prompt("VERIFY: ENTER OLD PASSWORD");
+        if(!oldPass) return;
+        
+        const oldHash = await sha256(oldPass);
+        if(oldHash !== note.lockHash) return alert("INVALID PASSWORD");
+
+        const newPass = prompt("UPDATE: ENTER NEW PASSWORD");
+        if(newPass) {
+            const newHash = await sha256(newPass);
+            cache[id].lockHash = newHash;
+            setLocalCache(cache);
+            saveNote();
+            logActivity("CREDENTIALS UPDATED", "success");
+        }
+    }
+
+    function duplicateNote() {
+        const title = document.getElementById('doc-title').value + " (COPY)";
+        const text = document.getElementById('doc-body').value;
+        if(!text) return;
+
+        createNewNote();
+        document.getElementById('doc-title').value = title;
+        document.getElementById('doc-body').value = text;
+        saveNote();
+        logActivity("NOTE DUPLICATED", "info");
+    }
+
+    function deleteAllNotes() {
+        if(!confirm("DANGER: DELETE ALL NOTES?")) return;
+        const cache = getLocalCache();
+        Object.keys(cache).forEach(id => {
+            if(!id.startsWith('temp_')) db.ref(`notes/${currentUser}/${id}`).remove();
+        });
+        setLocalCache({});
+        localStorage.removeItem(QUEUE_KEY_PREFIX + currentUser);
+        createNewNote();
+        renderNoteList({});
+        logActivity("DATABASE FLUSHED", "error");
+    }
+
+    function toggleReadOnly() {
+        const body = document.getElementById('doc-body');
+        const isRO = body.hasAttribute('readonly');
+        if(isRO) {
+            body.removeAttribute('readonly');
+            logActivity("EDIT MODE ENABLED", "info");
+        } else {
+            body.setAttribute('readonly', true);
+            logActivity("READ-ONLY ENABLED", "info");
+        }
+    }
+
+    function manipulateText(type) {
+        const ta = document.getElementById('doc-body');
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        let text = ta.value;
+        const sel = text.substring(start, end);
+
+        if(type === 'upper') {
+            ta.value = text.substring(0, start) + sel.toUpperCase() + text.substring(end);
+        } else if(type === 'lower') {
+            ta.value = text.substring(0, start) + sel.toLowerCase() + text.substring(end);
+        } else if(type === 'timestamp') {
+            ta.value = text.substring(0, start) + new Date().toLocaleString() + text.substring(end);
+        }
+        
+        ta.setSelectionRange(start, end); // restore selection
+        triggerSave();
+    }
+
+    // --- MASTER KEYBOARD CONTROLLER (Feature 2) ---
+
     document.addEventListener('keydown', (e) => {
-        if(e.ctrlKey || e.metaKey) {
-            switch(e.key.toLowerCase()) {
-                case 's': e.preventDefault(); saveNote(false); break;
-                case 'n': e.preventDefault(); createNewNote(); break;
-                case 'f': e.preventDefault(); document.getElementById('search-bar').focus(); break;
-                case 'z': e.preventDefault(); editorUndo(); break;
-                case 'y': e.preventDefault(); editorRedo(); break;
-                case 'p': e.preventDefault(); togglePin(); break;
+        // Global Shortcuts
+        if (e.ctrlKey || e.altKey) {
+            
+            // File Operations
+            if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                if(e.shiftKey) { /* Save All - redundant as all are auto-synced, but trigger manual */ saveNote(); } 
+                else { saveNote(false); }
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                e.shiftKey ? duplicateNote() : createNewNote();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                e.shiftKey ? deleteAllNotes() : confirmDelete();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                togglePin();
+            }
+
+            // Security
+            if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                e.shiftKey ? changePassword() : toggleLock();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                toggleReadOnly();
+            }
+
+            // Navigation
+            if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown')) {
+                e.preventDefault();
+                const items = Array.from(document.querySelectorAll('.note-item'));
+                if(items.length === 0) return;
+                
+                let activeIdx = items.findIndex(el => el.classList.contains('active'));
+                let targetIdx = activeIdx;
+
+                if (e.key === 'ArrowUp' || e.key === 'PageUp') targetIdx = activeIdx - 1;
+                if (e.key === 'ArrowDown' || e.key === 'PageDown') targetIdx = activeIdx + 1;
+                if (e.key === 'Home') targetIdx = 0;
+                if (e.key === 'End') targetIdx = items.length - 1;
+
+                if(targetIdx < 0) targetIdx = 0;
+                if(targetIdx >= items.length) targetIdx = items.length - 1;
+                
+                items[targetIdx].click();
+                items[targetIdx].scrollIntoView({block: 'center'});
+            }
+
+            // Focus
+            if (e.ctrlKey && e.key === '1') { e.preventDefault(); document.getElementById('doc-title').focus(); }
+            if (e.ctrlKey && e.key === '2') { e.preventDefault(); document.getElementById('doc-body').focus(); }
+            if (e.ctrlKey && e.key === '3') { e.preventDefault(); document.getElementById('search-bar').focus(); }
+
+            // Search
+            if (e.ctrlKey && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                if(e.shiftKey) { document.getElementById('search-bar').value = ''; loadNotes(); }
+                document.getElementById('search-bar').focus();
+            }
+
+            // History
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                if(e.shiftKey) editorRedo(); else editorUndo();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); editorRedo(); }
+
+            // Content Manipulation
+            if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveNote(false); }
+            if (e.ctrlKey && e.key === 'Backspace') {
+                if(document.activeElement === document.getElementById('doc-body')) {
+                    e.preventDefault();
+                    if(confirm("CLEAR CONTENT?")) {
+                        document.getElementById('doc-body').value = '';
+                        triggerSave();
+                    }
+                }
+            }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+                e.preventDefault();
+                if(confirm("CLEAR ALL FIELDS?")) {
+                    document.getElementById('doc-body').value = '';
+                    document.getElementById('doc-title').value = '';
+                    triggerSave();
+                }
+            }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'u') { e.preventDefault(); manipulateText('upper'); }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'o') { e.preventDefault(); manipulateText('lower'); }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 't') { e.preventDefault(); manipulateText('timestamp'); }
+
+            // Scrolling
+            if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                const body = document.getElementById('doc-body');
+                if (document.activeElement === body) {
+                    if (e.key === 'ArrowUp') body.scrollTop -= 20;
+                    if (e.key === 'ArrowDown') body.scrollTop += 20;
+                    if (e.key === 'ArrowLeft') body.setSelectionRange(0, 0);
+                    if (e.key === 'ArrowRight') body.setSelectionRange(body.value.length, body.value.length);
+                }
             }
         }
+
+        // Tab Cycling (Simple Trap)
+        if (e.key === 'Escape') { document.activeElement.blur(); }
     });
 
     setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);  
