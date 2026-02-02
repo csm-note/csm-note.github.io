@@ -2,8 +2,8 @@
 <html lang="en">  
 <head>  
     <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>DB NOTEPAD v5.0 [ULTIMATE]</title>  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+    <title>DB NOTEPAD v5.1 [ULTIMATE]</title>  
     <link rel="manifest" href="manifest.json">  
     <meta name="theme-color" content="#020202">  
     <meta name="apple-mobile-web-app-capable" content="yes">  
@@ -35,12 +35,19 @@
     ::-webkit-scrollbar-track { background: var(--bg-deep); }  
     ::-webkit-scrollbar-thumb { background: var(--neon-dim); }  
 
+    /* --- PART 1 FIX: Viewport Height --- */
     body {  
         margin: 0; padding: 0;  
         background-color: var(--bg-deep);  
         color: var(--neon-main);  
         font-family: var(--font-stack);  
-        height: 100vh; overflow: hidden;  
+        /* Fallback for older browsers */
+        height: 100vh; 
+        /* Modern mobile fix */
+        height: 100dvh; 
+        /* Robust JS Fallback implemented in scripts */
+        height: calc(var(--vh, 1vh) * 100); 
+        overflow: hidden;  
         display: flex; flex-direction: column;  
     }  
 
@@ -69,7 +76,7 @@
         background: black; border: 1px solid var(--neon-dim);  
         color: var(--neon-main); font-family: var(--font-stack);  
     }  
-    .login-input:focus { border-color: var(--neon-main); }
+    .login-input:focus { border-color: var(--neon-main); box-shadow: 0 0 5px var(--neon-dim); }
 
     /* --- App Layout --- */  
     #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }  
@@ -78,6 +85,7 @@
         display: flex; justify-content: space-between; align-items: center;  
         padding: 0 20px; background: var(--bg-panel);  
         z-index: 950;
+        flex-shrink: 0; /* Prevent header shrinking */
     }  
     .btn {  
         background: transparent; border: 1px solid var(--neon-dim);  
@@ -85,16 +93,16 @@
         font-family: var(--font-stack); font-size: 0.8rem; margin-left: 5px; 
         transition: 0.2s;
     }  
-    .btn:hover { background: var(--neon-main); color: black; box-shadow: 0 0 10px var(--neon-dim); }
+    .btn:hover, .btn:focus { background: var(--neon-main); color: black; box-shadow: 0 0 10px var(--neon-dim); }
     .btn.active { background: var(--neon-main); color: black; }
     
     .btn-danger { color: var(--neon-red); border-color: #500; }
-    .btn-danger:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px var(--neon-red); }
+    .btn-danger:hover, .btn-danger:focus { background: var(--neon-red); color: white; box-shadow: 0 0 15px var(--neon-red); }
     
     .btn-info { color: var(--neon-blue); border-color: #004d4d; }
-    .btn-info:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
+    .btn-info:hover, .btn-info:focus { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
       
-    .workspace { display: flex; flex: 1; overflow: hidden; }  
+    .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }  
     aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; z-index: 910; transition: 0.3s;}  
     
     .search-container { padding: 10px; position: relative; border-bottom: 1px solid #111; }
@@ -111,8 +119,7 @@
     .tag-pill:hover, .tag-pill.active { border-color: var(--neon-main); color: var(--neon-main); }
 
     .notes-list { flex: 1; overflow-y: auto; }  
-    .notes-section-title { font-size: 0.7rem; color: #555; padding: 10px 15px 5px; text-transform: uppercase; letter-spacing: 1px;}
-
+    
     .note-item { padding: 12px 20px; border-bottom: 1px solid #111; cursor: pointer; transition: 0.2s; position: relative; display: flex; justify-content: space-between; align-items: center; }  
     .note-item:hover { background: var(--bg-hover); padding-left: 25px; }  
     .note-item.active { background: rgba(0, 255, 0, 0.05); border-right: 4px solid var(--neon-main); }
@@ -123,7 +130,7 @@
     
     .editor-toolbar {
         display: flex; align-items: center; border-bottom: 1px dashed #333; padding: 5px 20px;
-        background: #050505;
+        background: #050505; flex-shrink: 0;
     }
     #doc-title { flex: 1; padding: 10px; background: transparent; border: none; color: var(--neon-main); font-family: var(--font-stack); font-size: 1.2rem; }  
     
@@ -143,7 +150,7 @@
     #md-preview code { background: #222; padding: 2px 5px; color: var(--neon-yellow); font-family: var(--font-stack); }
     #md-preview blockquote { border-left: 3px solid var(--neon-blue); margin-left: 0; padding-left: 10px; color: var(--neon-blue); }
 
-    .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; z-index: 950; }  
+    .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; z-index: 950; flex-shrink: 0;}  
 
     /* --- Modals --- */
     #modal-overlay {
@@ -153,15 +160,32 @@
         backdrop-filter: blur(2px);
     }
     .modal-box {
-        width: 450px; padding: 25px;
+        width: 450px; max-width: 90%; padding: 25px;
         background: #000; border: 2px solid;
         box-shadow: 0 0 30px rgba(0,0,0,0.8);
         text-align: center;
         animation: popIn 0.2s ease-out;
         border-color: var(--neon-main);
+        display: flex; flex-direction: column;
     }
     .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: var(--neon-main); border-bottom: 1px solid #333; padding-bottom: 10px;}
-    .modal-body { text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 20px; color: #ccc; font-size: 0.9rem; }
+    .modal-body { text-align: left; max-height: 50vh; overflow-y: auto; margin-bottom: 20px; color: #ccc; font-size: 0.9rem; }
+    
+    /* Part 4: Shortcut Table Styles */
+    .shortcut-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .shortcut-table td { padding: 5px; border-bottom: 1px solid #222; }
+    .shortcut-table .key { color: var(--neon-yellow); font-weight: bold; }
+    .shortcut-table .desc { color: #aaa; text-align: right; }
+    .shortcut-cat { color: var(--neon-blue); padding-top: 10px; font-weight: bold; border:none!important; }
+
+    /* Part 2: Custom Confirm/Prompt Styles */
+    .modal-input {
+        width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: white;
+        font-family: var(--font-stack); margin-top: 10px;
+    }
+    .modal-input:focus { border-color: var(--neon-main); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
     .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .theme-opt { padding: 10px; border: 1px solid #333; cursor: pointer; text-align: center; }
     .theme-opt:hover { border-color: white; }
@@ -186,6 +210,7 @@
         aside.open { transform: translateX(0); }  
         #menu-btn { display: block !important; }  
         #md-preview.active { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; }
+        .modal-box { width: 95%; }
     }  
 </style>
 
@@ -196,7 +221,7 @@
 <div id="auth-layer">  
     <div class="login-box">  
         <h2 style="color: var(--neon-main); margin-bottom:5px;">:: SYSTEM ACCESS ::</h2>  
-        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V5.0</p>
+        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V5.1</p>
         <input type="email" id="email" class="login-input" placeholder="IDENTIFICATION (EMAIL)">  
         <input type="password" id="pass" class="login-input" placeholder="ACCESS KEY (PASSWORD)">  
         <div style="margin-top: 20px; display: flex; gap: 10px;">  
@@ -207,13 +232,13 @@
     </div>  
 </div>  
 
-<!-- MODAL (Multipurpose) -->
-<div id="modal-overlay">
-    <div class="modal-box" id="modal-box">
+<!-- MODAL SYSTEM (Generic Reusable) -->
+<div id="modal-overlay" tabindex="-1">
+    <div class="modal-box" id="modal-box" role="dialog" aria-modal="true">
         <div class="modal-header" id="modal-title">TITLE</div>
         <div class="modal-body" id="modal-body">Content</div>
         <div class="modal-actions" id="modal-actions">
-            <button class="btn" onclick="closeModal()">CLOSE</button>
+            <!-- Buttons injected by JS -->
         </div>
     </div>
 </div>
@@ -223,13 +248,14 @@
     <header>  
         <div style="display: flex; align-items: center; gap: 15px;">  
             <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
-            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v5.0</div>  
+            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v5.1</div>  
         </div>  
         <div style="display:flex; align-items:center;">  
             <!-- Toolbar -->
             <button class="btn btn-info" onclick="toggleMarkdown()" title="Split Preview"><i class="fas fa-columns"></i> MD</button>
             <button class="btn" onclick="openSettings()" title="Themes & Settings"><i class="fas fa-cog"></i></button>
             <button class="btn" onclick="openExportMenu()" title="Export"><i class="fas fa-file-export"></i></button>
+            <button class="btn" onclick="showShortcuts()" title="Keyboard Shortcuts (Ctrl+/)"><i class="fas fa-keyboard"></i></button>
             
             <span style="width:1px; height:20px; background:#333; margin:0 10px;"></span>
             
@@ -301,6 +327,15 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
 
 <script>  
+    // --- PART 1: Viewport Fix (Mobile Address Bar) ---
+    function setVh() {
+        let vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', setVh);
+    setVh();
+    
+    // --- Firebase Config (Keep original) ---
     const firebaseConfig = {  
         apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",  
         authDomain: "notepad-c5b98.firebaseapp.com",  
@@ -319,7 +354,6 @@
     let currentTags = new Set();
     let filterTag = null;
     
-    // History System (Undo/Redo)
     class SimpleHistory {
         constructor() { this.stack = []; this.index = -1; this.max = 20; }
         push(state) {
@@ -340,7 +374,6 @@
     const CACHE_KEY_PREFIX = 'ghost_cache_';
     const QUEUE_KEY_PREFIX = 'ghost_queue_';
 
-    // --- CRYPTO UTILS (New Feature 1) ---
     async function sha256(message) {
         if (!message) return null;
         const msgBuffer = new TextEncoder().encode(message);
@@ -348,8 +381,6 @@
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
-
-    // --- UTILS & NOTIFICATIONS ---
 
     function logActivity(msg, type = 'info') {
         const container = document.getElementById('alert-system');
@@ -377,18 +408,142 @@
         }, 3500);
     }
 
-    function showCustomModal(title, htmlContent, actionsHtml = null) {
-        document.getElementById('modal-overlay').style.display = 'flex';
-        document.getElementById('modal-title').innerHTML = title;
-        document.getElementById('modal-body').innerHTML = htmlContent;
-        if(actionsHtml) document.getElementById('modal-actions').innerHTML = actionsHtml;
-        else document.getElementById('modal-actions').innerHTML = '<button class="btn" onclick="closeModal()">CLOSE</button>';
-    }
+    // --- PART 2 & 3: NEW MODAL SYSTEM (Promise based & Keyboard Friendly) ---
+    const SystemUI = {
+        overlay: document.getElementById('modal-overlay'),
+        box: document.getElementById('modal-box'),
+        title: document.getElementById('modal-title'),
+        body: document.getElementById('modal-body'),
+        actions: document.getElementById('modal-actions'),
+        lastFocus: null,
+        resolvePromise: null,
 
-    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+        reset: function() {
+            this.overlay.style.display = 'none';
+            this.title.innerHTML = '';
+            this.body.innerHTML = '';
+            this.actions.innerHTML = '';
+            this.resolvePromise = null;
+            if(this.lastFocus) this.lastFocus.focus();
+        },
+
+        show: function(title, contentHtml, buttonsHtml = null) {
+            this.lastFocus = document.activeElement;
+            this.title.innerHTML = title;
+            this.body.innerHTML = contentHtml;
+            
+            // Default close button if no actions provided
+            if(!buttonsHtml) {
+                this.actions.innerHTML = `<button class="btn" onclick="SystemUI.close()">CLOSE</button>`;
+            } else {
+                this.actions.innerHTML = buttonsHtml;
+            }
+
+            this.overlay.style.display = 'flex';
+            
+            // Focus Trap Logic
+            const focusables = this.box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if(focusables.length > 0) {
+                // Focus the first input or the primary action (usually the first button)
+                const input = this.box.querySelector('input');
+                if(input) input.focus();
+                else focusables[0].focus();
+            }
+        },
+
+        close: function() {
+            if(this.resolvePromise) this.resolvePromise(null); // Resolve with null on generic close
+            this.reset();
+        },
+
+        // Replaces window.confirm
+        confirm: function(title, msg, danger = false) {
+            return new Promise((resolve) => {
+                const btnClass = danger ? 'btn-danger' : 'btn';
+                const html = `
+                    <button class="btn ${btnClass}" id="sys-confirm-btn">CONFIRM</button>
+                    <button class="btn" onclick="SystemUI.close()">CANCEL</button>
+                `;
+                this.show(title, `<p>${msg}</p>`, html);
+                
+                const confirmBtn = document.getElementById('sys-confirm-btn');
+                confirmBtn.onclick = () => {
+                    resolve(true);
+                    this.reset();
+                };
+                
+                // Hook resolve to close for "False"
+                this.resolvePromise = (val) => { if(val === null) resolve(false); };
+                
+                confirmBtn.focus();
+            });
+        },
+
+        // Replaces window.prompt
+        prompt: function(title, msg, type = 'text') {
+            return new Promise((resolve) => {
+                const html = `
+                    <p>${msg}</p>
+                    <input type="${type}" id="sys-prompt-input" class="modal-input" autocomplete="off">
+                `;
+                const btns = `
+                    <button class="btn" id="sys-prompt-ok">OK</button>
+                    <button class="btn" onclick="SystemUI.close()">CANCEL</button>
+                `;
+                
+                this.show(title, html, btns);
+                
+                const input = document.getElementById('sys-prompt-input');
+                const okBtn = document.getElementById('sys-prompt-ok');
+                
+                const submit = () => {
+                    resolve(input.value);
+                    this.reset();
+                };
+                
+                okBtn.onclick = submit;
+                input.onkeydown = (e) => { if(e.key === 'Enter') submit(); };
+                
+                // Hook resolve to close
+                this.resolvePromise = (val) => { if(val === null) resolve(null); };
+                
+                input.focus();
+            });
+        }
+    };
+
+    // Global Key Listener for Modal Interaction (Enter, Escape, Tab Trap)
+    document.getElementById('modal-overlay').addEventListener('keydown', (e) => {
+        const overlay = document.getElementById('modal-overlay');
+        if(overlay.style.display === 'none') return;
+
+        if (e.key === 'Escape') {
+            SystemUI.close();
+            e.preventDefault();
+        }
+        
+        // Tab Trap
+        if (e.key === 'Tab') {
+            const focusables = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) { last.focus(); e.preventDefault(); }
+            } else {
+                if (document.activeElement === last) { first.focus(); e.preventDefault(); }
+            }
+        }
+    });
+
+    // Helper for legacy code calling showCustomModal
+    function showCustomModal(title, html, buttons = null) {
+        SystemUI.show(title, html, buttons);
+    }
+    function closeModal() { SystemUI.close(); }
+
 
     // --- AUTH LOGIC ---
-
     function authAction(type) {  
         const e = document.getElementById('email').value;  
         const p = document.getElementById('pass').value;  
@@ -411,9 +566,12 @@
         auth.sendPasswordResetEmail(e).then(() => logActivity("RECOVERY PROTOCOL SENT", 'info'));
     }
 
-    function confirmLogout() {
-        showCustomModal("TERMINATE SESSION?", "Unsaved local changes are preserved but sync will stop.", 
-        `<button class="btn btn-danger" onclick="auth.signOut(); closeModal(); logActivity('LOGGED OUT','error')">LOGOUT</button> <button class="btn" onclick="closeModal()">CANCEL</button>`);
+    async function confirmLogout() {
+        const yes = await SystemUI.confirm("TERMINATE SESSION?", "Unsaved local changes are preserved but sync will stop.", true);
+        if(yes) {
+            auth.signOut();
+            logActivity('LOGGED OUT','error');
+        }
     }
 
     auth.onAuthStateChanged(user => {  
@@ -434,7 +592,6 @@
     });  
 
     // --- DATA LOGIC ---
-
     function getLocalCache() { return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + currentUser)) || {}; }
     function setLocalCache(data) { localStorage.setItem(CACHE_KEY_PREFIX + currentUser, JSON.stringify(data)); }
     function getOfflineQueue() { return JSON.parse(localStorage.getItem(QUEUE_KEY_PREFIX + currentUser)) || {}; }
@@ -462,24 +619,20 @@
                 if (!note) return;
                 notesArr.push({id, ...note});
                 
-                // Extract tags (only if not locked to prevent leaking)
                 if (!note.lockHash) {
                     const tags = (note.text || '').match(/#[a-z0-9_]+/gi);
                     if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
                 }
             });
             
-            // Sort: Pinned first, then Timestamp (Newest)
             notesArr.sort((a, b) => {
                 if (a.pinned === b.pinned) return (b.timestamp || 0) - (a.timestamp || 0);
                 return a.pinned ? -1 : 1;
             });
 
-            // Update Tag Cloud
             renderTags(allTags);
 
             notesArr.forEach(note => {
-                // Filter logic (bypass if locked so it still shows in list)
                 const noteText = (note.text || '').toLowerCase();
                 if(filterTag && !note.lockHash && !noteText.includes(filterTag)) return;
                 
@@ -487,7 +640,6 @@
                 div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '');  
                 
                 const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
-                // New: Add Locked Indicator
                 const isLocked = note.lockHash ? ' <span style="color:var(--neon-red)">[LOCKED]</span>' : '';
 
                 div.innerHTML = `
@@ -540,16 +692,15 @@
         if(navigator.onLine) processOfflineQueue();
     }  
 
-    // --- MODIFIED: Load with Password Logic ---
+    // --- REFACTORED: Load with Async Modal Password ---
     async function loadNoteIntoEditor(id, note) {
-        // Access Control Check
         if (note.lockHash) {
-            const password = prompt("SECURE NOTE. ENTER PASSWORD:");
+            const password = await SystemUI.prompt("SECURE NOTE", "ENTER DECRYPTION KEY:", "password");
             if (!password) return; // Cancelled
             const inputHash = await sha256(password);
             
             if (inputHash !== note.lockHash) {
-                alert("ACCESS DENIED. INVALID CREDENTIALS.");
+                logActivity("ACCESS DENIED", "error");
                 return;
             }
             logActivity("DECRYPTION SUCCESSFUL", "success");
@@ -559,7 +710,6 @@
         document.getElementById('doc-title').value = note.title || '';  
         document.getElementById('doc-body').value = note.text || '';  
         
-        // Pin Button State
         const isPinned = note.pinned || false;
         document.getElementById('is-pinned').value = isPinned;
         updatePinBtnUI(isPinned);
@@ -567,24 +717,19 @@
         document.getElementById('del-btn').style.display = 'inline-block';
         updateWordCount(); 
         
-        // Markdown Update
         if(document.getElementById('md-preview').classList.contains('active')) {
             document.getElementById('md-preview').innerHTML = marked.parse(note.text || '');
         }
 
-        // History Reset
         noteHistory.reset();
         noteHistory.push(note.text || '');
 
-        // UI Highlighting
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
-        // Re-render to update UI list highlighting if needed
         renderNoteList(getLocalCache());
         
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
 
-    // --- MODIFIED: Save Logic to preserve Lock Hash ---
     function saveNote(silent = false) {  
         if (!currentUser) return;  
         
@@ -601,7 +746,6 @@
         const text = document.getElementById('doc-body').value;  
         const pinned = document.getElementById('is-pinned').value === 'true';
 
-        // Retrieve existing lock hash if any from cache to preserve it
         const cache = getLocalCache();
         const existingNote = cache[id] || {};
         const lockHash = existingNote.lockHash || null;
@@ -609,12 +753,10 @@
         const payload = { title, text, pinned, timestamp: Date.now() };  
         if (lockHash) payload.lockHash = lockHash;
 
-        // Optimistic Update
         cache[id] = payload;
         setLocalCache(cache);
         renderNoteList(cache); 
 
-        // Update Undo Stack if different
         if(noteHistory.current() !== text) noteHistory.push(text);
 
         if (navigator.onLine) {
@@ -637,12 +779,15 @@
         }
     } 
 
-    function confirmDelete() {
+    // --- REFACTORED: Delete with Async Modal ---
+    async function confirmDelete() {
         const id = document.getElementById('current-id').value;
         if(!id) return;
         
-        showCustomModal('DELETE FILE?', 'This cannot be undone.', 
-        `<button class="btn btn-danger" onclick="executeDelete('${id}')">CONFIRM DELETE</button> <button class="btn" onclick="closeModal()">CANCEL</button>`);
+        const yes = await SystemUI.confirm("DELETE FILE?", "This action is permanent and cannot be undone.", true);
+        if(yes) {
+            executeDelete(id);
+        }
     }
 
     function executeDelete(id) {
@@ -657,7 +802,6 @@
         }
         createNewNote();
         renderNoteList(cache);
-        closeModal();
         logActivity("FILE PURGED", "error");
     }
 
@@ -697,8 +841,6 @@
     window.addEventListener('offline', checkConnection);
 
     // --- EDITOR FEATURES ---
-
-    // 1. Markdown Split View
     function toggleMarkdown() {
         const preview = document.getElementById('md-preview');
         const editor = document.getElementById('doc-body');
@@ -706,14 +848,12 @@
         
         if(isActive) {
             preview.innerHTML = marked.parse(editor.value);
-            // On mobile, full screen overlay. On desktop, split view.
             if(window.innerWidth > 768) editor.style.width = '50%';
         } else {
             editor.style.width = '100%';
         }
     }
 
-    // 2. Pinning
     function togglePin() {
         const el = document.getElementById('is-pinned');
         const newState = !(el.value === 'true');
@@ -733,7 +873,6 @@
         }
     }
 
-    // 3. Undo/Redo
     function editorUndo() {
         const prev = noteHistory.undo();
         if(prev !== null) {
@@ -749,16 +888,14 @@
         }
     }
 
-    // 4. Version History (Snapshots)
     function openVersionHistory() {
         const id = document.getElementById('current-id').value;
         if(!id) return logActivity("SAVE FILE FIRST", "error");
 
-        showCustomModal("SNAPSHOT MANAGER", 
+        SystemUI.show("SNAPSHOT MANAGER", 
         `<p>Create a manual restore point for this session?</p>
-         <button class="btn btn-info" onclick="createSnapshot('${id}')">CREATE SNAPSHOT</button>
-         <hr style="border-color:#333">
-         <div id="snapshot-list" style="font-size:0.8rem; color:#888;">Fetching...</div>`);
+         <div id="snapshot-list" style="font-size:0.8rem; color:#888; margin-top:15px; max-height:200px; overflow-y:auto;">Fetching...</div>`,
+         `<button class="btn btn-info" onclick="createSnapshot('${id}')">CREATE SNAPSHOT</button> <button class="btn" onclick="SystemUI.close()">CLOSE</button>`);
          
          loadSnapshots(id);
     }
@@ -768,7 +905,6 @@
         const ts = Date.now();
         const snapData = { text, ts };
         
-        // Save to a sub-node
         db.ref(`snapshots/${currentUser}/${id}`).push(snapData).then(() => {
             logActivity("SNAPSHOT SAVED", "success");
             loadSnapshots(id);
@@ -784,9 +920,11 @@
             snap.forEach(child => {
                 const val = child.val();
                 const date = new Date(val.ts).toLocaleString();
+                // Escape simple quotes for the onclick handler
+                const safeText = (val.text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 list.innerHTML += `<div style="padding:5px; border-bottom:1px dashed #333; display:flex; justify-content:space-between;">
                     <span>${date}</span>
-                    <button class="btn" style="padding:2px 5px;" onclick="restoreSnapshot('${val.text ? val.text.replace(/'/g, "\\'") : ''}')">LOAD</button>
+                    <button class="btn" style="padding:2px 5px;" onclick="restoreSnapshot('${safeText}')">LOAD</button>
                 </div>`;
             });
         });
@@ -796,11 +934,10 @@
         document.getElementById('doc-body').value = text;
         updateWordCount();
         saveNote();
-        closeModal();
+        SystemUI.close();
         logActivity("VERSION RESTORED", "info");
     };
 
-    // 5. Themes
     function openSettings() {
         const themes = [
             { name: 'MATRIX', main: '#0f0', bg: '#020202' },
@@ -816,16 +953,15 @@
         });
         html += '</div>';
 
-        showCustomModal("SYSTEM CONFIGURATION", html);
+        SystemUI.show("SYSTEM CONFIGURATION", html);
     }
 
     function setTheme(main, bg) {
         document.documentElement.style.setProperty('--neon-main', main);
         document.documentElement.style.setProperty('--bg-deep', bg);
-        closeModal();
+        SystemUI.close();
     }
 
-    // 6. Exports
     function openExportMenu() {
         const html = `
             <div style="display:flex; flex-direction:column; gap:10px;">
@@ -835,7 +971,7 @@
                 <button class="btn" onclick="exportDoc('email')">SEND VIA EMAIL</button>
             </div>
         `;
-        showCustomModal("EXPORT DATA", html);
+        SystemUI.show("EXPORT DATA", html);
     }
 
     function exportDoc(type) {
@@ -855,10 +991,9 @@
             a.download = `${title}.${type}`;
             a.click();
         }
-        closeModal();
+        SystemUI.close();
     }
 
-    // 7. Sharing
     function generateShareLink() {
         const id = document.getElementById('current-id').value;
         if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
@@ -867,8 +1002,41 @@
         
         navigator.clipboard.writeText(link).then(() => {
             logActivity("LINK COPIED TO CLIPBOARD", "success");
-            showCustomModal("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;"> <p style="font-size:0.7rem; color:#666; margin-top:5px;">Note: Requires database rules to allow public read access.</p>`);
+            SystemUI.show("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;"> <p style="font-size:0.7rem; color:#666; margin-top:5px;">Note: Requires database rules to allow public read access.</p>`);
         });
+    }
+
+    // --- PART 4: KEYBOARD SHORTCUTS PANEL ---
+    function showShortcuts() {
+        const shortcuts = [
+            { cat: "FILE OPERATIONS", key: "Ctrl + N", desc: "New Note" },
+            { cat: "", key: "Ctrl + Shift + N", desc: "Duplicate Note" },
+            { cat: "", key: "Ctrl + S", desc: "Save Note" },
+            { cat: "", key: "Ctrl + D", desc: "Delete Note" },
+            { cat: "", key: "Ctrl + Shift + D", desc: "Delete All Notes" },
+            
+            { cat: "SECURITY", key: "Ctrl + L", desc: "Lock/Unlock Note" },
+            { cat: "", key: "Ctrl + Shift + L", desc: "Change Password" },
+            { cat: "", key: "Ctrl + B", desc: "Toggle Read-Only" },
+            
+            { cat: "EDITING", key: "Ctrl + Z / Y", desc: "Undo / Redo" },
+            { cat: "", key: "Ctrl + Shift + T", desc: "Insert Timestamp" },
+            { cat: "", key: "Ctrl + Shift + U", desc: "To Uppercase" },
+            
+            { cat: "NAVIGATION", key: "Ctrl + 1 / 2 / 3", desc: "Focus Title / Body / Search" },
+            { cat: "", key: "Ctrl + F", desc: "Search Notes" },
+            { cat: "", key: "Alt + Arrows", desc: "Navigate List" },
+            { cat: "", key: "Ctrl + /", desc: "Show Shortcuts" },
+        ];
+
+        let html = `<table class="shortcut-table">`;
+        shortcuts.forEach(s => {
+            if(s.cat) html += `<tr><td colspan="2" class="shortcut-cat">${s.cat}</td></tr>`;
+            html += `<tr><td class="key">${s.key}</td><td class="desc">${s.desc}</td></tr>`;
+        });
+        html += `</table>`;
+
+        SystemUI.show("KEYBOARD CONTROLS", html);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -894,8 +1062,6 @@
             }
         });
     }
-
-    // --- GENERAL INPUT HANDLERS ---
 
     function triggerSave() {  
         document.getElementById('save-indicator').innerText = "[TYPING...]";  
@@ -944,7 +1110,7 @@
         else if (document.exitFullscreen) document.exitFullscreen();
     }
     
-    // --- ADVANCED FEATURE LOGIC ---
+    // --- REFACTORED: Advanced Features with Async Modals ---
 
     async function toggleLock() {
         const id = document.getElementById('current-id').value;
@@ -954,8 +1120,7 @@
         const note = cache[id];
         
         if(note.lockHash) {
-            // Unlock Protocol
-            const pass = prompt("UNLOCK: ENTER CURRENT PASSWORD");
+            const pass = await SystemUI.prompt("UNLOCK NOTE", "ENTER CURRENT PASSWORD", "password");
             if(!pass) return;
             const hash = await sha256(pass);
             if(hash === note.lockHash) {
@@ -965,11 +1130,10 @@
                 logActivity("SECURITY REMOVED", "info");
                 renderNoteList(cache);
             } else {
-                alert("INCORRECT PASSWORD");
+                logActivity("INCORRECT PASSWORD", "error");
             }
         } else {
-            // Lock Protocol
-            const pass = prompt("SECURE: SET NEW PASSWORD");
+            const pass = await SystemUI.prompt("SECURE NOTE", "SET NEW PASSWORD", "password");
             if(!pass) return;
             const hash = await sha256(pass);
             cache[id].lockHash = hash;
@@ -988,13 +1152,13 @@
         
         if(!note.lockHash) return logActivity("NOTE IS NOT LOCKED", "error");
 
-        const oldPass = prompt("VERIFY: ENTER OLD PASSWORD");
+        const oldPass = await SystemUI.prompt("VERIFY CREDENTIALS", "ENTER OLD PASSWORD", "password");
         if(!oldPass) return;
         
         const oldHash = await sha256(oldPass);
-        if(oldHash !== note.lockHash) return alert("INVALID PASSWORD");
+        if(oldHash !== note.lockHash) return logActivity("INVALID PASSWORD", "error");
 
-        const newPass = prompt("UPDATE: ENTER NEW PASSWORD");
+        const newPass = await SystemUI.prompt("UPDATE CREDENTIALS", "ENTER NEW PASSWORD", "password");
         if(newPass) {
             const newHash = await sha256(newPass);
             cache[id].lockHash = newHash;
@@ -1016,8 +1180,10 @@
         logActivity("NOTE DUPLICATED", "info");
     }
 
-    function deleteAllNotes() {
-        if(!confirm("DANGER: DELETE ALL NOTES?")) return;
+    async function deleteAllNotes() {
+        const yes = await SystemUI.confirm("DANGER ZONE", "DELETE ALL NOTES? THIS CANNOT BE UNDONE.", true);
+        if(!yes) return;
+        
         const cache = getLocalCache();
         Object.keys(cache).forEach(id => {
             if(!id.startsWith('temp_')) db.ref(`notes/${currentUser}/${id}`).remove();
@@ -1060,16 +1226,19 @@
         triggerSave();
     }
 
-    // --- MASTER KEYBOARD CONTROLLER (Feature 2) ---
+    // --- MASTER KEYBOARD CONTROLLER ---
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', async (e) => {
+        // Prevent default shortcut conflicts if modal is open
+        if(document.getElementById('modal-overlay').style.display === 'flex') return;
+
         // Global Shortcuts
         if (e.ctrlKey || e.altKey) {
             
             // File Operations
             if (e.ctrlKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
-                if(e.shiftKey) { /* Save All - redundant as all are auto-synced, but trigger manual */ saveNote(); } 
+                if(e.shiftKey) { saveNote(); } 
                 else { saveNote(false); }
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'n') {
@@ -1134,13 +1303,19 @@
                 if(e.shiftKey) editorRedo(); else editorUndo();
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); editorRedo(); }
+            
+            // Show Shortcuts
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                showShortcuts();
+            }
 
             // Content Manipulation
             if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveNote(false); }
             if (e.ctrlKey && e.key === 'Backspace') {
                 if(document.activeElement === document.getElementById('doc-body')) {
-                    e.preventDefault();
-                    if(confirm("CLEAR CONTENT?")) {
+                    const confirmClear = await SystemUI.confirm("CLEAR WORKSPACE?", "This will wipe the current text editor.", true);
+                    if(confirmClear) {
                         document.getElementById('doc-body').value = '';
                         triggerSave();
                     }
@@ -1148,7 +1323,8 @@
             }
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
                 e.preventDefault();
-                if(confirm("CLEAR ALL FIELDS?")) {
+                const confirmWipe = await SystemUI.confirm("WIPE ALL FIELDS?", "Clear title and body?", true);
+                if(confirmWipe) {
                     document.getElementById('doc-body').value = '';
                     document.getElementById('doc-title').value = '';
                     triggerSave();
