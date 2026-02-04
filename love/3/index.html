@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>For Jhilik</title>
+  
+  <!-- Fonts: 'Orbitron' for Sci-Fi, 'Great Vibes' for Romance -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- CORE STYLES --- */
+    body {
+      margin: 0;
+      background-color: #000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Orbitron', sans-serif;
+      user-select: none; /* Prevent text selection */
+    }
+
+    /* --- CANVAS BACKGROUND --- */
+    #starfield {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* --- CENTRAL TEXT (HERO) --- */
+    .hero-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      text-align: center;
+      width: 100%;
+    }
+
+    .main-title {
+      font-size: 4rem;
+      color: #fff;
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+      opacity: 0; /* Hidden initially for typing effect */
+    }
+
+    .sub-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3rem;
+      color: #ff00de;
+      text-shadow: 0 0 10px #ff00de, 0 0 20px #ff00de;
+      margin-top: 10px;
+      opacity: 0;
+      transition: opacity 2s ease-in;
+    }
+
+    /* --- FLOATING MESSAGES --- */
+    .msg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .float-text {
+      position: absolute;
+      white-space: nowrap;
+      font-weight: bold;
+      opacity: 0;
+      animation: floatUp linear forwards;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes floatUp {
+      0% {
+        transform: translateY(110vh) scale(0.8);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.8;
+      }
+      80% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-20vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* Blink cursor effect */
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      background-color: #0ff;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 600px) {
+      .main-title { font-size: 2.5rem; }
+      .sub-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Starfield Background -->
+  <canvas id="starfield"></canvas>
+
+  <!-- 2. Central Hero Text -->
+  <div class="hero-container">
+    <div class="main-title" id="typewriter"></div>
+    <div class="sub-title" id="subtitle">Forever Yours</div>
+  </div>
+
+  <!-- 3. Layer for floating text -->
+  <div class="msg-layer" id="msgLayer"></div>
+
+  <!-- 4. Audio -->
+  <audio id="bgMusic" src="assets/AUDIO.mpeg" loop></audio>
+
+<script>
+  // --- CONFIGURATION ---
+  const CONFIG = {
+    loveName: "Jhilik",
+    spawnRate: 400, // Speed of text spawning
+    starSpeed: 2,   // Speed of background stars
+    typingSpeed: 150 // Speed of main text typing
+  };
+
+  const phrases = [
+    `I Love You ${CONFIG.loveName} 💝`,
+    "My Universe",
+    "Forever & Always",
+    `${CONFIG.loveName} is my Heart`,
+    "Destiny",
+    "Infinite Love",
+    "You are my Soul",
+    `Thinking of ${CONFIG.loveName}`,
+    "My Everything",
+    "Beyond Time",
+    "Purest Love",
+    "Together Forever"
+  ];
+
+  // Neon Colors Palette
+  const colors = [
+    "#ff00de", // Hot Pink
+    "#00ffff", // Cyan
+    "#ff3333", // Red
+    "#ffd700", // Gold
+    "#ffffff"  // White
+  ];
+
+  const audio = document.getElementById("bgMusic");
+
+  // --- 1. CANVAS STARFIELD (The Warp Speed Effect) ---
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let stars = [];
+
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Star {
+    constructor() {
+      this.x = Math.random() * width - width / 2;
+      this.y = Math.random() * height - height / 2;
+      this.z = Math.random() * width; // Depth
+    }
+
+    update() {
+      this.z -= CONFIG.starSpeed; 
+      if (this.z <= 0) {
+        this.z = width;
+        this.x = Math.random() * width - width / 2;
+        this.y = Math.random() * height - height / 2;
+      }
+    }
+
+    show() {
+      let x = (this.x / this.z) * width + width / 2;
+      let y = (this.y / this.z) * height + height / 2;
+      let radius = (1 - this.z / width) * 3; // Size based on depth
+
+      if (x < 0 || x >= width || y < 0 || y >= height) return;
+
+      ctx.beginPath();
+      ctx.fillStyle = "white";
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Initialize Stars
+  for (let i = 0; i < 400; i++) stars.push(new Star());
+
+  function animateStars() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
+    stars.forEach(star => {
+      star.update();
+      star.show();
+    });
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
+
+
+  // --- 2. FLOATING TEXT SYSTEM ---
+  function createFloatingText() {
+    const layer = document.getElementById("msgLayer");
+    const el = document.createElement("div");
+    el.className = "float-text";
+    
+    // Logic: 30% chance to show the Name specifically, 70% random phrase
+    const isSpecial = Math.random() > 0.7;
+    el.textContent = isSpecial ? CONFIG.loveName + " ❤️" : phrases[Math.floor(Math.random() * phrases.length)];
+    
+    // Random Styles
+    const color = isSpecial ? "#ff00de" : colors[Math.floor(Math.random() * colors.length)];
+    const size = Math.floor(Math.random() * 20) + 15; // 15px to 35px
+    const xPos = Math.random() * 90; // 0 to 90% width
+    const duration = Math.random() * 5 + 6; // 6s to 11s duration
+
+    el.style.left = xPos + "%";
+    el.style.fontSize = size + "px";
+    el.style.color = color;
+    el.style.textShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
+    el.style.fontFamily = isSpecial ? "'Orbitron', sans-serif" : "'Great Vibes', cursive";
+    el.style.animationDuration = duration + "s";
+
+    layer.appendChild(el);
+
+    // Remove after animation
+    setTimeout(() => { el.remove(); }, duration * 1000);
+  }
+
+  setInterval(createFloatingText, CONFIG.spawnRate);
+
+
+  // --- 3. TYPING EFFECT FOR MAIN TITLE ---
+  const typeWriterElement = document.getElementById('typewriter');
+  const textToType = `I Love You ${CONFIG.loveName}`;
+  let typeIndex = 0;
+
+  function typeText() {
+    if (typeIndex < textToType.length) {
+      typeWriterElement.style.opacity = 1;
+      typeWriterElement.innerHTML = textToType.substring(0, typeIndex + 1) + '<span class="cursor">|</span>';
+      typeIndex++;
+      setTimeout(typeText, CONFIG.typingSpeed);
+    } else {
+      // Finished typing, remove cursor and show subtitle
+      typeWriterElement.innerHTML = textToType; 
+      document.getElementById('subtitle').style.opacity = 1;
+    }
+  }
+
+  // --- 4. AUTO-START & FULLSCREEN LOGIC ---
+  function startExperience() {
+    // 1. Try to play audio
+    audio.play().then(() => {
+      console.log("Audio playing");
+    }).catch(e => {
+      console.log("Audio requires interaction");
+    });
+
+    // 2. Try Fullscreen
+    const docEl = document.documentElement;
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(()=>{});
+    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+    
+    // 3. Start Typing
+    if(typeIndex === 0) typeText();
+  }
+
+  // Browser Policy Hack: 
+  // Try immediately on load. If it fails (likely), wait for the first touch/click.
+  window.addEventListener('load', startExperience);
+  document.body.addEventListener('click', startExperience);
+  document.body.addEventListener('touchstart', startExperience);
+
+</script>
+</body>
+</html>
