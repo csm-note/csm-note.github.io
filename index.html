@@ -1,9 +1,9 @@
-<!DOCTYPE html>  
+l<!DOCTYPE html>  
 <html lang="en">  
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-    <title>DB NOTEPAD v5.1 [ULTIMATE]</title>  
+    <title>DB NOTEPAD v6.2 [ULTIMATE]</title>  
     <link rel="manifest" href="manifest.json">  
     <meta name="theme-color" content="#020202">  
     <meta name="apple-mobile-web-app-capable" content="yes">  
@@ -20,7 +20,7 @@
         --bg-deep: #020202;  
         --bg-panel: #0d0d0d;  
         --bg-hover: #1a1a1a;  
-        --neon-main: #0f0;  /* Dynamic Main Color */
+        --neon-main: #0f0;  
         --neon-dim: #004d00; 
         --neon-red: #ff003c;  
         --neon-blue: #00f3ff;  
@@ -35,17 +35,13 @@
     ::-webkit-scrollbar-track { background: var(--bg-deep); }  
     ::-webkit-scrollbar-thumb { background: var(--neon-dim); }  
 
-    /* --- PART 1 FIX: Viewport Height --- */
     body {  
         margin: 0; padding: 0;  
         background-color: var(--bg-deep);  
         color: var(--neon-main);  
         font-family: var(--font-stack);  
-        /* Fallback for older browsers */
         height: 100vh; 
-        /* Modern mobile fix */
         height: 100dvh; 
-        /* Robust JS Fallback implemented in scripts */
         height: calc(var(--vh, 1vh) * 100); 
         overflow: hidden;  
         display: flex; flex-direction: column;  
@@ -84,8 +80,7 @@
         height: 50px; border-bottom: 2px solid var(--border-color);  
         display: flex; justify-content: space-between; align-items: center;  
         padding: 0 20px; background: var(--bg-panel);  
-        z-index: 950;
-        flex-shrink: 0; /* Prevent header shrinking */
+        z-index: 950; flex-shrink: 0;
     }  
     .btn {  
         background: transparent; border: 1px solid var(--neon-dim);  
@@ -134,6 +129,8 @@
     }
     #doc-title { flex: 1; padding: 10px; background: transparent; border: none; color: var(--neon-main); font-family: var(--font-stack); font-size: 1.2rem; }  
     
+    #date-display { font-size: 0.65rem; color: #555; margin-right: 15px; white-space: nowrap; }
+
     .split-view { display: flex; flex: 1; overflow: hidden; position: relative; }
     #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; line-height: 1.6; z-index: 10; width: 100%; }  
     
@@ -142,7 +139,7 @@
         flex: 1; padding: 30px; background: #080808; 
         color: #aaa; overflow-y: auto; 
         border-left: 1px solid #333; 
-        display: none; /* Hidden by default */
+        display: none; 
         font-family: sans-serif;
     }
     #md-preview.active { display: block; }
@@ -171,14 +168,12 @@
     .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: var(--neon-main); border-bottom: 1px solid #333; padding-bottom: 10px;}
     .modal-body { text-align: left; max-height: 50vh; overflow-y: auto; margin-bottom: 20px; color: #ccc; font-size: 0.9rem; }
     
-    /* Part 4: Shortcut Table Styles */
     .shortcut-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     .shortcut-table td { padding: 5px; border-bottom: 1px solid #222; }
     .shortcut-table .key { color: var(--neon-yellow); font-weight: bold; }
     .shortcut-table .desc { color: #aaa; text-align: right; }
     .shortcut-cat { color: var(--neon-blue); padding-top: 10px; font-weight: bold; border:none!important; }
 
-    /* Part 2: Custom Confirm/Prompt Styles */
     .modal-input {
         width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: white;
         font-family: var(--font-stack); margin-top: 10px;
@@ -189,6 +184,27 @@
     .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .theme-opt { padding: 10px; border: 1px solid #333; cursor: pointer; text-align: center; }
     .theme-opt:hover { border-color: white; }
+
+    /* --- Command Palette Styles --- */
+    #cmd-palette {
+        display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
+        width: 600px; max-width: 90%; background: #0a0a0a;
+        border: 1px solid var(--neon-main);
+        box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        z-index: 4000; flex-direction: column;
+        border-radius: 4px;
+        animation: popIn 0.1s ease-out;
+    }
+    #cmd-input {
+        width: 100%; padding: 15px; background: transparent; border: none; border-bottom: 1px solid #222;
+        color: white; font-family: var(--font-stack); font-size: 1.1rem;
+    }
+    #cmd-list { max-height: 300px; overflow-y: auto; }
+    .cmd-item {
+        padding: 10px 15px; color: #888; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
+    .cmd-item:hover, .cmd-item.selected { background: #111; color: var(--neon-main); }
+    .cmd-key { font-size: 0.7rem; border: 1px solid #333; padding: 2px 4px; border-radius: 3px; }
 
     /* --- Alerts --- */
     #alert-system { position: fixed; top: 60px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }  
@@ -211,7 +227,18 @@
         #menu-btn { display: block !important; }  
         #md-preview.active { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; }
         .modal-box { width: 95%; }
-    }  
+        #cmd-palette { width: 95%; top: 5%; }
+    } 
+    
+    /* --- Folder Styles --- */
+    .folder-container { padding: 0; border-bottom: 1px solid #111; max-height: 150px; overflow-y: auto; background: #050505; }
+    .folder-header { padding: 5px 15px; font-size: 0.7rem; color: #555; background: #0a0a0a; display: flex; justify-content: space-between; align-items: center; }
+    .folder-item { padding: 8px 15px; font-size: 0.8rem; color: #aaa; cursor: pointer; border-bottom: 1px solid #1a1a1a; display:flex; justify-content:space-between; align-items:center;}
+    .folder-item:hover { color: white; background: #111; }
+    .folder-item.active { color: var(--neon-main); background: #111; border-left: 3px solid var(--neon-main); }
+    .folder-item.trash { color: var(--neon-red); } 
+    .folder-ops { opacity: 0; transition: 0.2s; }
+    .folder-item:hover .folder-ops { opacity: 1; }
 </style>
 
 </head>  
@@ -221,7 +248,7 @@
 <div id="auth-layer">  
     <div class="login-box">  
         <h2 style="color: var(--neon-main); margin-bottom:5px;">:: SYSTEM ACCESS ::</h2>  
-        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V5.1</p>
+        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V6.2</p>
         <input type="email" id="email" class="login-input" placeholder="IDENTIFICATION (EMAIL)">  
         <input type="password" id="pass" class="login-input" placeholder="ACCESS KEY (PASSWORD)">  
         <div style="margin-top: 20px; display: flex; gap: 10px;">  
@@ -232,15 +259,19 @@
     </div>  
 </div>  
 
-<!-- MODAL SYSTEM (Generic Reusable) -->
+<!-- MODAL SYSTEM -->
 <div id="modal-overlay" tabindex="-1">
     <div class="modal-box" id="modal-box" role="dialog" aria-modal="true">
         <div class="modal-header" id="modal-title">TITLE</div>
         <div class="modal-body" id="modal-body">Content</div>
-        <div class="modal-actions" id="modal-actions">
-            <!-- Buttons injected by JS -->
-        </div>
+        <div class="modal-actions" id="modal-actions"></div>
     </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div id="cmd-palette">
+    <input type="text" id="cmd-input" placeholder="> Type a command..." autocomplete="off">
+    <div id="cmd-list"></div>
 </div>
 
 <!-- APP LAYER -->
@@ -248,11 +279,11 @@
     <header>  
         <div style="display: flex; align-items: center; gap: 15px;">  
             <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
-            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v5.1</div>  
+            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v6.2</div>  
         </div>  
         <div style="display:flex; align-items:center;">  
-            <!-- Toolbar -->
             <button class="btn btn-info" onclick="toggleMarkdown()" title="Split Preview"><i class="fas fa-columns"></i> MD</button>
+            <button class="btn" onclick="toggleCommandPalette()" title="Command Palette (Ctrl+Shift+P)"><i class="fas fa-terminal"></i></button>
             <button class="btn" onclick="openSettings()" title="Themes & Settings"><i class="fas fa-cog"></i></button>
             <button class="btn" onclick="openExportMenu()" title="Export"><i class="fas fa-file-export"></i></button>
             <button class="btn" onclick="showShortcuts()" title="Keyboard Shortcuts (Ctrl+/)"><i class="fas fa-keyboard"></i></button>
@@ -272,14 +303,18 @@
                 <i class="fas fa-circle" style="color:var(--neon-main); font-size:0.5rem; align-self:center;"></i>
             </div>
             
+            <div class="folder-header">
+                <span>DIRECTORIES</span>
+                <i class="fas fa-plus" style="cursor:pointer;" onclick="createFolder()" title="Add Folder"></i>
+            </div>
+            <div id="folder-list" class="folder-container"></div>
+            
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="search-bar" class="search-bar" placeholder="SEARCH (Ctrl+F)">
             </div>
             
-            <div class="tag-cloud" id="tag-cloud">
-                <!-- Tags generated via JS -->
-            </div>
+            <div class="tag-cloud" id="tag-cloud"></div>
 
             <div style="padding:5px 15px; font-size:0.6rem; border-bottom:1px solid #222;" id="status-line">STATUS: CHECKING...</div>  
             
@@ -289,8 +324,10 @@
         <main>  
             <div class="editor-toolbar">
                 <button class="btn" onclick="togglePin()" title="Pin Note" id="pin-btn" style="border:none;"><i class="far fa-star"></i></button>
-                <input type="text" id="doc-title" placeholder="UNTITLED_DOC">  
+                <input type="text" id="doc-title" placeholder="UNTITLED_DOC">
+                <span id="date-display"></span>
                 <div style="font-size: 0.8rem; color: #555;">
+                    <button class="btn" onclick="openMoveMenu()" title="Move to Folder"><i class="fas fa-folder"></i></button>
                     <button class="btn" onclick="editorUndo()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
                     <button class="btn" onclick="editorRedo()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
                     <button class="btn" onclick="openVersionHistory()" title="Snapshots"><i class="fas fa-history"></i></button>
@@ -305,6 +342,7 @@
             
             <input type="hidden" id="current-id">  
             <input type="hidden" id="is-pinned" value="false">
+            <input type="hidden" id="current-folder-ref" value="INBOX">
         </main>  
     </div>  
 
@@ -314,20 +352,26 @@
             <span id="word-count" style="color: #666;">WORDS: 0</span>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-            <button class="btn btn-danger" style="padding: 0 10px; font-size: 0.7rem; height: 20px; display: none;" id="del-btn" onclick="confirmDelete()">DEL</button>
+            <div id="trash-ops" style="display:none; gap:5px;">
+                <button class="btn btn-info" style="padding:0 8px; font-size:0.7rem; height:20px;" onclick="restoreNote()">RESTORE</button>
+                <button class="btn btn-danger" style="padding:0 8px; font-size:0.7rem; height:20px;" onclick="permanentDelete()">DEL PERMANENT</button>
+            </div>
+
+            <button class="btn btn-danger" style="padding: 0 10px; font-size: 0.7rem; height: 20px; display: none;" id="del-btn" onclick="moveToTrash()">DEL</button>
             <span id="clock-display">00:00:00</span>  
         </div>
     </div>  
 </div>  
 
 <div id="alert-system"></div>  
+<input type="file" id="restore-input" style="display:none;" onchange="importDatabaseFile(this)">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
 
 <script>  
-    // --- PART 1: Viewport Fix (Mobile Address Bar) ---
+    // --- PART 1: Core Setup ---
     function setVh() {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -335,7 +379,6 @@
     window.addEventListener('resize', setVh);
     setVh();
     
-    // --- Firebase Config (Keep original) ---
     const firebaseConfig = {  
         apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",  
         authDomain: "notepad-c5b98.firebaseapp.com",  
@@ -353,7 +396,10 @@
     let autoSaveTimer;  
     let currentTags = new Set();
     let filterTag = null;
-    
+    let activeFolder = 'INBOX';
+    let knownFolders = new Set(['INBOX']);
+    let trashUnlocked = false; 
+
     class SimpleHistory {
         constructor() { this.stack = []; this.index = -1; this.max = 20; }
         push(state) {
@@ -370,7 +416,6 @@
         reset() { this.stack = []; this.index = -1; }
     }
     const noteHistory = new SimpleHistory();
-
     const CACHE_KEY_PREFIX = 'ghost_cache_';
     const QUEUE_KEY_PREFIX = 'ghost_queue_';
 
@@ -408,14 +453,13 @@
         }, 3500);
     }
 
-    // --- PART 2 & 3: NEW MODAL SYSTEM (Promise based & Keyboard Friendly) ---
+    // --- PART 2: UI System ---
     const SystemUI = {
         overlay: document.getElementById('modal-overlay'),
         box: document.getElementById('modal-box'),
         title: document.getElementById('modal-title'),
         body: document.getElementById('modal-body'),
         actions: document.getElementById('modal-actions'),
-        lastFocus: null,
         resolvePromise: null,
 
         reset: function() {
@@ -424,27 +468,19 @@
             this.body.innerHTML = '';
             this.actions.innerHTML = '';
             this.resolvePromise = null;
-            if(this.lastFocus) this.lastFocus.focus();
         },
 
         show: function(title, contentHtml, buttonsHtml = null) {
-            this.lastFocus = document.activeElement;
             this.title.innerHTML = title;
             this.body.innerHTML = contentHtml;
-            
-            // Default close button if no actions provided
             if(!buttonsHtml) {
                 this.actions.innerHTML = `<button class="btn" onclick="SystemUI.close()">CLOSE</button>`;
             } else {
                 this.actions.innerHTML = buttonsHtml;
             }
-
             this.overlay.style.display = 'flex';
-            
-            // Focus Trap Logic
             const focusables = this.box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
             if(focusables.length > 0) {
-                // Focus the first input or the primary action (usually the first button)
                 const input = this.box.querySelector('input');
                 if(input) input.focus();
                 else focusables[0].focus();
@@ -452,11 +488,10 @@
         },
 
         close: function() {
-            if(this.resolvePromise) this.resolvePromise(null); // Resolve with null on generic close
+            if(this.resolvePromise) this.resolvePromise(null);
             this.reset();
         },
 
-        // Replaces window.confirm
         confirm: function(title, msg, danger = false) {
             return new Promise((resolve) => {
                 const btnClass = danger ? 'btn-danger' : 'btn';
@@ -465,21 +500,13 @@
                     <button class="btn" onclick="SystemUI.close()">CANCEL</button>
                 `;
                 this.show(title, `<p>${msg}</p>`, html);
-                
                 const confirmBtn = document.getElementById('sys-confirm-btn');
-                confirmBtn.onclick = () => {
-                    resolve(true);
-                    this.reset();
-                };
-                
-                // Hook resolve to close for "False"
+                confirmBtn.onclick = () => { resolve(true); this.reset(); };
                 this.resolvePromise = (val) => { if(val === null) resolve(false); };
-                
                 confirmBtn.focus();
             });
         },
 
-        // Replaces window.prompt
         prompt: function(title, msg, type = 'text') {
             return new Promise((resolve) => {
                 const html = `
@@ -490,58 +517,21 @@
                     <button class="btn" id="sys-prompt-ok">OK</button>
                     <button class="btn" onclick="SystemUI.close()">CANCEL</button>
                 `;
-                
                 this.show(title, html, btns);
-                
                 const input = document.getElementById('sys-prompt-input');
                 const okBtn = document.getElementById('sys-prompt-ok');
-                
-                const submit = () => {
-                    resolve(input.value);
-                    this.reset();
-                };
-                
+                const submit = () => { resolve(input.value); this.reset(); };
                 okBtn.onclick = submit;
                 input.onkeydown = (e) => { if(e.key === 'Enter') submit(); };
-                
-                // Hook resolve to close
                 this.resolvePromise = (val) => { if(val === null) resolve(null); };
-                
                 input.focus();
             });
         }
     };
 
-    // Global Key Listener for Modal Interaction (Enter, Escape, Tab Trap)
     document.getElementById('modal-overlay').addEventListener('keydown', (e) => {
-        const overlay = document.getElementById('modal-overlay');
-        if(overlay.style.display === 'none') return;
-
-        if (e.key === 'Escape') {
-            SystemUI.close();
-            e.preventDefault();
-        }
-        
-        // Tab Trap
-        if (e.key === 'Tab') {
-            const focusables = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            const first = focusables[0];
-            const last = focusables[focusables.length - 1];
-
-            if (e.shiftKey) {
-                if (document.activeElement === first) { last.focus(); e.preventDefault(); }
-            } else {
-                if (document.activeElement === last) { first.focus(); e.preventDefault(); }
-            }
-        }
+        if(e.key === 'Escape') { SystemUI.close(); e.preventDefault(); }
     });
-
-    // Helper for legacy code calling showCustomModal
-    function showCustomModal(title, html, buttons = null) {
-        SystemUI.show(title, html, buttons);
-    }
-    function closeModal() { SystemUI.close(); }
-
 
     // --- AUTH LOGIC ---
     function authAction(type) {  
@@ -571,6 +561,8 @@
         if(yes) {
             auth.signOut();
             logActivity('LOGGED OUT','error');
+            activeFolder = 'INBOX';
+            trashUnlocked = false;
         }
     }
 
@@ -605,22 +597,175 @@
         delete queue[id];
         localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
     }
+    
+    // --- FOLDER LOGIC ---
+    async function switchFolder(folderName) {
+        if(folderName === 'TRASH') {
+            if(!trashUnlocked) {
+                const pass = await SystemUI.prompt("TRASH BIN LOCKED", "ENTER PASSWORD (Samiya) TO ACCESS:", "password");
+                if(pass === "Samiya") {
+                    trashUnlocked = true;
+                    logActivity("TRASH UNLOCKED", "success");
+                } else {
+                    logActivity("ACCESS DENIED", "error");
+                    return;
+                }
+            }
+        }
+        
+        activeFolder = folderName;
+        renderFolders(getLocalCache());
+        renderNoteList(getLocalCache());
+        createNewNote();
+        logActivity(`DIRECTORY: ${folderName}`, "info");
+    }
+
+    function renderFolders(notesData) {
+        const folderList = document.getElementById('folder-list');
+        folderList.innerHTML = '';
+
+        knownFolders = new Set(['INBOX']);
+        let trashCount = 0;
+
+        if(notesData) {
+            Object.values(notesData).forEach(note => {
+                const nf = note.folder || 'INBOX';
+                if(nf === 'TRASH') {
+                    trashCount++;
+                } else {
+                    knownFolders.add(nf);
+                }
+            });
+        }
+        
+        const sorted = Array.from(knownFolders).sort();
+        if(sorted.indexOf('INBOX') > -1) {
+            sorted.splice(sorted.indexOf('INBOX'), 1);
+            sorted.unshift('INBOX');
+        }
+
+        sorted.forEach(folder => {
+            const div = document.createElement('div');
+            div.className = `folder-item ${activeFolder === folder ? 'active' : ''}`;
+            
+            let count = 0;
+            if(notesData) {
+                Object.values(notesData).forEach(n => {
+                    const nf = n.folder || 'INBOX';
+                    if(nf === folder) count++;
+                });
+            }
+
+            let manageBtn = '';
+            if(folder !== 'INBOX') {
+                manageBtn = `<i class="fas fa-cog folder-ops" style="margin-left:5px; opacity:0.5; cursor:pointer;" onclick="event.stopPropagation(); manageFolder('${folder}')" title="Manage"></i>`;
+            }
+
+            div.innerHTML = `<span><i class="fas fa-folder${activeFolder===folder?'-open':''}"></i> ${folder}</span> 
+                             <span style="display:flex; align-items:center; gap:5px;">
+                                <span style="opacity:0.5; font-size:0.7rem;">${count}</span>
+                                ${manageBtn}
+                             </span>`;
+            div.onclick = () => switchFolder(folder);
+            folderList.appendChild(div);
+        });
+
+        const trashDiv = document.createElement('div');
+        trashDiv.className = `folder-item trash ${activeFolder === 'TRASH' ? 'active' : ''}`;
+        trashDiv.innerHTML = `<span><i class="fas fa-trash-alt"></i> TRASH BIN</span><span>${trashCount}</span>`;
+        trashDiv.onclick = () => switchFolder('TRASH');
+        folderList.appendChild(trashDiv);
+    }
+
+    function manageFolder(folder) {
+        const html = `
+            <p style="margin-bottom:15px; color:var(--neon-main);">MANAGE DIRECTORY: <strong>${folder}</strong></p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-info" onclick="renameFolder('${folder}')">RENAME DIRECTORY</button>
+                <button class="btn btn-danger" onclick="deleteFolder('${folder}')">DELETE DIRECTORY</button>
+            </div>
+            <p style="font-size:0.7rem; color:#666; margin-top:15px;">Deleting a folder moves notes to INBOX.</p>
+        `;
+        SystemUI.show("DIRECTORY OPTIONS", html);
+    }
+
+    async function renameFolder(oldName) {
+        const newName = await SystemUI.prompt("RENAME DIRECTORY", `Rename ${oldName} to:`);
+        if(!newName) return;
+        const clean = newName.toUpperCase().replace(/[^A-Z0-9_-]/g, ''); 
+        if(!clean || clean === oldName) return;
+
+        const cache = getLocalCache();
+        let count = 0;
+        Object.keys(cache).forEach(id => {
+            if(cache[id].folder === oldName) {
+                cache[id].folder = clean;
+                if(navigator.onLine) db.ref(`notes/${currentUser}/${id}/folder`).set(clean);
+                count++;
+            }
+        });
+        setLocalCache(cache);
+        if(activeFolder === oldName) activeFolder = clean;
+        renderFolders(cache);
+        renderNoteList(cache);
+        SystemUI.close();
+        logActivity(`RENAMED ${count} FILES`, "success");
+    }
+
+    async function deleteFolder(folder) {
+        const confirm = await SystemUI.confirm("DELETE DIRECTORY?", `Notes in <b>${folder}</b> will be moved to INBOX.`, true);
+        if(!confirm) return;
+
+        const cache = getLocalCache();
+        Object.keys(cache).forEach(id => {
+            if(cache[id].folder === folder) {
+                cache[id].folder = 'INBOX';
+                if(navigator.onLine) db.ref(`notes/${currentUser}/${id}/folder`).set('INBOX');
+            }
+        });
+        setLocalCache(cache);
+        activeFolder = 'INBOX';
+        renderFolders(cache);
+        renderNoteList(cache);
+        SystemUI.close();
+        logActivity("DIRECTORY REMOVED", "error");
+    }
+    
+    async function createFolder() {
+        const name = await SystemUI.prompt("NEW DIRECTORY", "Enter Folder Name:", "text");
+        if(name) {
+            const clean = name.toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+            if(clean.length > 0) {
+                activeFolder = clean;
+                renderFolders(getLocalCache());
+                renderNoteList(getLocalCache());
+                createNewNote(); 
+                logActivity("DIRECTORY CREATED", "success");
+            }
+        }
+    }
 
     function renderNoteList(data) {
         const list = document.getElementById('notes-list');  
         const activeId = document.getElementById('current-id').value;
         list.innerHTML = '';  
         
+        renderFolders(data);
+
         let allTags = new Set();
         let notesArr = [];
 
         if (data) {  
             Object.entries(data).forEach(([id, note]) => {  
                 if (!note) return;
+                
+                const noteFolder = note.folder || 'INBOX';
+                if(noteFolder !== activeFolder) return;
+
                 notesArr.push({id, ...note});
                 
-                if (!note.lockHash) {
-                    const tags = (note.text || '').match(/#[a-z0-9_]+/gi);
+                if (!note.lockHash && note.text) {
+                    const tags = note.text.match(/#[a-z0-9_]+/gi);
                     if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
                 }
             });
@@ -653,13 +798,13 @@
                 list.appendChild(div);  
             });  
         }
-        if(notesArr.length === 0) list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">NO DATA FOUND</div>';
+        if(notesArr.length === 0) list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">EMPTY DIRECTORY</div>';
     }
 
     function renderTags(tags) {
         const cloud = document.getElementById('tag-cloud');
         cloud.innerHTML = '';
-        if(tags.size === 0) { cloud.style.display = 'none'; return; }
+        if(activeFolder === 'TRASH' || tags.size === 0) { cloud.style.display = 'none'; return; }
         cloud.style.display = 'flex';
         
         const allBtn = document.createElement('span');
@@ -692,29 +837,42 @@
         if(navigator.onLine) processOfflineQueue();
     }  
 
-    // --- REFACTORED: Load with Async Modal Password ---
     async function loadNoteIntoEditor(id, note) {
         if (note.lockHash) {
             const password = await SystemUI.prompt("SECURE NOTE", "ENTER DECRYPTION KEY:", "password");
-            if (!password) return; // Cancelled
+            if (!password) return; 
             const inputHash = await sha256(password);
-            
             if (inputHash !== note.lockHash) {
                 logActivity("ACCESS DENIED", "error");
                 return;
             }
-            logActivity("DECRYPTION SUCCESSFUL", "success");
         }
 
         document.getElementById('current-id').value = id;  
         document.getElementById('doc-title').value = note.title || '';  
         document.getElementById('doc-body').value = note.text || '';  
-        
+        document.getElementById('current-folder-ref').value = note.folder || 'INBOX';
+
+        const dateStr = note.timestamp ? new Date(note.timestamp).toLocaleString() : 'Just now';
+        document.getElementById('date-display').innerText = dateStr;
+
         const isPinned = note.pinned || false;
         document.getElementById('is-pinned').value = isPinned;
         updatePinBtnUI(isPinned);
 
-        document.getElementById('del-btn').style.display = 'inline-block';
+        // --- TRASH UI TOGGLE ---
+        if(activeFolder === 'TRASH') {
+            document.getElementById('del-btn').style.display = 'none';
+            document.getElementById('trash-ops').style.display = 'flex'; // SHOW Trash buttons
+            document.getElementById('doc-body').setAttribute('readonly', true);
+            document.getElementById('doc-title').setAttribute('readonly', true);
+        } else {
+            document.getElementById('del-btn').style.display = 'inline-block';
+            document.getElementById('trash-ops').style.display = 'none'; // HIDE Trash buttons
+            document.getElementById('doc-body').removeAttribute('readonly');
+            document.getElementById('doc-title').removeAttribute('readonly');
+        }
+
         updateWordCount(); 
         
         if(document.getElementById('md-preview').classList.contains('active')) {
@@ -727,12 +885,22 @@
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         renderNoteList(getLocalCache());
         
+        logActivity(`OPENED: ${note.title || 'UNTITLED'}`, "info");
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
 
-    function saveNote(silent = false) {  
+    async function saveNote(isAuto = false) {  
         if (!currentUser) return;  
-        
+        if (activeFolder === 'TRASH') return;
+
+        // Ensure AUTO SAVE is logged to notice bar as requested
+        if(isAuto) {
+             // Non-blocking log for auto-save
+             // Don't show modal, just sidebar log
+        } else {
+             logActivity("MANUAL SAVE...", "info");
+        }
+
         let id = document.getElementById('current-id').value;  
         const isNew = !id;
         
@@ -745,17 +913,22 @@
         const title = document.getElementById('doc-title').value;  
         const text = document.getElementById('doc-body').value;  
         const pinned = document.getElementById('is-pinned').value === 'true';
+        
+        let folder = isNew ? activeFolder : document.getElementById('current-folder-ref').value;
+        if(!folder || folder === 'TRASH') folder = 'INBOX'; 
 
         const cache = getLocalCache();
         const existingNote = cache[id] || {};
         const lockHash = existingNote.lockHash || null;
 
-        const payload = { title, text, pinned, timestamp: Date.now() };  
+        const ts = Date.now();
+        const payload = { title, text, pinned, folder, timestamp: ts };  
         if (lockHash) payload.lockHash = lockHash;
 
         cache[id] = payload;
         setLocalCache(cache);
         renderNoteList(cache); 
+        document.getElementById('date-display').innerText = new Date(ts).toLocaleString();
 
         if(noteHistory.current() !== text) noteHistory.push(text);
 
@@ -766,7 +939,8 @@
 
             updatePromise.then(() => {
                 document.getElementById('save-indicator').innerText = "[SAVED]";
-                if(!silent) logActivity("DATA SECURE & SYNCED", "success");
+                if(isAuto) logActivity("AUTO-SAVE COMPLETE", "info");
+                else logActivity("SYNC COMPLETE", "success");
             }).catch(err => {
                 addToOfflineQueue(id, payload);
                 document.getElementById('save-indicator').innerText = "[QUEUED]";
@@ -775,34 +949,75 @@
         } else {
             addToOfflineQueue(id, payload);
             document.getElementById('save-indicator').innerText = "[LOCAL]";
-            if(!silent) logActivity("OFFLINE SAVE", "info");
+            logActivity(isAuto ? "AUTO-SAVED (LOCAL)" : "SAVED LOCALLY", "info");
         }
     } 
 
-    // --- REFACTORED: Delete with Async Modal ---
-    async function confirmDelete() {
+    // --- TRASH LOGIC ---
+    async function moveToTrash() {
+        const confirm = await SystemUI.confirm("MOVE TO TRASH?", "This note will be moved to the Trash Bin.", true);
+        if(!confirm) return;
+
         const id = document.getElementById('current-id').value;
         if(!id) return;
         
-        const yes = await SystemUI.confirm("DELETE FILE?", "This action is permanent and cannot be undone.", true);
-        if(yes) {
-            executeDelete(id);
+        const cache = getLocalCache();
+        if(cache[id]) {
+            cache[id].folder = 'TRASH';
+            setLocalCache(cache);
+            
+            if(navigator.onLine && !id.startsWith('temp_')) {
+                db.ref(`notes/${currentUser}/${id}/folder`).set('TRASH');
+            } else {
+                 addToOfflineQueue(id, { ...cache[id] });
+            }
+            
+            createNewNote();
+            renderNoteList(cache);
+            logActivity("MOVED TO TRASH BIN", "error");
         }
     }
 
-    function executeDelete(id) {
-        const cache = getLocalCache();
-        delete cache[id]; setLocalCache(cache);
-        
-        const queue = getOfflineQueue();
-        if(queue[id]) { delete queue[id]; removeFromOfflineQueue(id); }
+    async function restoreNote() {
+        const confirm = await SystemUI.confirm("RESTORE NOTE?", "This note will be moved back to Inbox.", false);
+        if(!confirm) return;
 
-        if(navigator.onLine && !id.startsWith('temp_')) {
-            db.ref(`notes/${currentUser}/${id}`).remove();
+        const id = document.getElementById('current-id').value;
+        if(!id) return;
+
+        const cache = getLocalCache();
+        if(cache[id]) {
+            cache[id].folder = 'INBOX';
+            setLocalCache(cache);
+            
+            if(navigator.onLine && !id.startsWith('temp_')) {
+                db.ref(`notes/${currentUser}/${id}/folder`).set('INBOX');
+            } else {
+                 addToOfflineQueue(id, { ...cache[id] });
+            }
+            
+            createNewNote();
+            renderNoteList(cache); 
+            logActivity("NOTE RESTORED", "success");
         }
-        createNewNote();
-        renderNoteList(cache);
-        logActivity("FILE PURGED", "error");
+    }
+
+    async function permanentDelete() {
+        const yes = await SystemUI.confirm("DELETE PERMANENTLY?", "This cannot be undone.", true);
+        if(yes) {
+            const id = document.getElementById('current-id').value;
+            const cache = getLocalCache();
+            delete cache[id];
+            setLocalCache(cache);
+            
+            if(navigator.onLine && !id.startsWith('temp_')) {
+                db.ref(`notes/${currentUser}/${id}`).remove();
+            }
+            
+            createNewNote();
+            renderNoteList(cache);
+            logActivity("DELETED FOREVER", "error");
+        }
     }
 
     function processOfflineQueue() {
@@ -852,6 +1067,7 @@
         } else {
             editor.style.width = '100%';
         }
+        logActivity("MD PREVIEW TOGGLED", "info");
     }
 
     function togglePin() {
@@ -860,32 +1076,25 @@
         el.value = newState;
         updatePinBtnUI(newState);
         saveNote(true);
+        logActivity("PIN TOGGLED", "info");
     }
     
     function updatePinBtnUI(isPinned) {
         const btn = document.getElementById('pin-btn');
         if(isPinned) {
-            btn.innerHTML = '<i class="fas fa-star"></i>';
-            btn.style.color = 'var(--neon-yellow)';
+            btn.innerHTML = '<i class="fas fa-star" style="color:var(--neon-yellow)"></i>';
         } else {
             btn.innerHTML = '<i class="far fa-star"></i>';
-            btn.style.color = 'var(--neon-main)';
         }
     }
 
     function editorUndo() {
         const prev = noteHistory.undo();
-        if(prev !== null) {
-            document.getElementById('doc-body').value = prev;
-            updateWordCount();
-        }
+        if(prev !== null) { document.getElementById('doc-body').value = prev; updateWordCount(); logActivity("UNDO", "info"); }
     }
     function editorRedo() {
         const next = noteHistory.redo();
-        if(next !== null) {
-            document.getElementById('doc-body').value = next;
-            updateWordCount();
-        }
+        if(next !== null) { document.getElementById('doc-body').value = next; updateWordCount(); logActivity("REDO", "info"); }
     }
 
     function openVersionHistory() {
@@ -920,7 +1129,6 @@
             snap.forEach(child => {
                 const val = child.val();
                 const date = new Date(val.ts).toLocaleString();
-                // Escape simple quotes for the onclick handler
                 const safeText = (val.text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 list.innerHTML += `<div style="padding:5px; border-bottom:1px dashed #333; display:flex; justify-content:space-between;">
                     <span>${date}</span>
@@ -933,7 +1141,7 @@
     window.restoreSnapshot = (text) => {
         document.getElementById('doc-body').value = text;
         updateWordCount();
-        saveNote();
+        saveNote(false);
         SystemUI.close();
         logActivity("VERSION RESTORED", "info");
     };
@@ -960,18 +1168,66 @@
         document.documentElement.style.setProperty('--neon-main', main);
         document.documentElement.style.setProperty('--bg-deep', bg);
         SystemUI.close();
+        logActivity("THEME UPDATED", "success");
     }
 
     function openExportMenu() {
         const html = `
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn" onclick="exportDoc('txt')">DOWNLOAD .TXT</button>
-                <button class="btn" onclick="exportDoc('md')">DOWNLOAD .MD</button>
-                <button class="btn" onclick="exportDoc('pdf')">EXPORT PDF</button>
+                <label style="color:#666; font-size:0.7rem;">CURRENT NOTE</label>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn" style="flex:1" onclick="exportDoc('txt')">TXT</button>
+                    <button class="btn" style="flex:1" onclick="exportDoc('md')">MD</button>
+                    <button class="btn" style="flex:1" onclick="exportDoc('pdf')">PDF</button>
+                </div>
                 <button class="btn" onclick="exportDoc('email')">SEND VIA EMAIL</button>
+                
+                <div style="margin-top:10px; border-top:1px dashed #333; padding-top:10px;">
+                    <label style="color:var(--neon-blue); font-size:0.7rem;">FULL DATABASE (BACKUP/RESTORE)</label>
+                    <button class="btn btn-info" style="width:100%; margin-top:5px;" onclick="exportAllNotes()">BACKUP DATABASE (.JSON)</button>
+                    <button class="btn" style="width:100%; margin-top:5px;" onclick="triggerImport()">RESTORE DATABASE</button>
+                </div>
             </div>
         `;
-        SystemUI.show("EXPORT DATA", html);
+        SystemUI.show("EXPORT & BACKUP", html);
+    }
+    
+    function exportAllNotes() {
+        const data = getLocalCache();
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `DB_BACKUP_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        logActivity("DATABASE EXPORTED", "success");
+    }
+
+    function triggerImport() { document.getElementById('restore-input').click(); }
+
+    function importDatabaseFile(input) {
+        if(input.files.length === 0) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                const yes = await SystemUI.confirm("RESTORE DATABASE?", "This will merge imported notes with existing ones.", true);
+                if(yes) {
+                    const current = getLocalCache();
+                    const merged = { ...current, ...importedData };
+                    setLocalCache(merged);
+                    if(navigator.onLine) {
+                        db.ref(`notes/${currentUser}`).update(merged).then(() => logActivity("DATABASE RESTORED & SYNCED", "success"));
+                    } else {
+                        logActivity("RESTORED LOCALLY", "info");
+                    }
+                    loadNotes();
+                    SystemUI.close();
+                }
+            } catch(err) { logActivity("INVALID JSON FILE", "error"); }
+        };
+        reader.readAsText(file);
     }
 
     function exportDoc(type) {
@@ -992,8 +1248,93 @@
             a.click();
         }
         SystemUI.close();
+        logActivity("DOCUMENT EXPORTED", "success");
     }
 
+    // --- COMMAND PALETTE Logic ---
+    function toggleCommandPalette() {
+        const p = document.getElementById('cmd-palette');
+        const input = document.getElementById('cmd-input');
+        
+        if(p.style.display === 'flex') {
+            p.style.display = 'none';
+            return;
+        }
+        
+        p.style.display = 'flex';
+        input.value = '';
+        input.focus();
+        renderCommands();
+    }
+
+    const commands = [
+        { name: "New Note", key: "Ctrl+N", action: createNewNote },
+        { name: "Save Note", key: "Ctrl+S", action: () => saveNote(false) },
+        { name: "Delete / Move to Trash", key: "Ctrl+D", action: moveToTrash },
+        { name: "Toggle Full Screen", key: "Ctrl+Shift+F", action: () => document.documentElement.requestFullscreen() },
+        { name: "Toggle Markdown", key: "Ctrl+M", action: toggleMarkdown },
+        { name: "Toggle Pin", key: "Ctrl+P", action: togglePin },
+        { name: "Change Theme", key: "", action: openSettings },
+        { name: "Export Note", key: "", action: openExportMenu },
+        { name: "Keyboard Shortcuts", key: "Ctrl+/", action: showShortcuts },
+        { name: "Log Out", key: "", action: confirmLogout }
+    ];
+
+    function renderCommands(filter = "") {
+        const list = document.getElementById('cmd-list');
+        list.innerHTML = '';
+        
+        let idx = 0;
+        commands.forEach(cmd => {
+            if(cmd.name.toLowerCase().includes(filter.toLowerCase())) {
+                const div = document.createElement('div');
+                div.className = 'cmd-item';
+                if(idx === 0) div.classList.add('selected'); 
+                
+                div.innerHTML = `
+                    <span>${cmd.name}</span>
+                    ${cmd.key ? `<span class="cmd-key">${cmd.key}</span>` : ''}
+                `;
+                div.onclick = () => {
+                    cmd.action();
+                    // FIX: Hide command palette on click
+                    document.getElementById('cmd-palette').style.display = 'none'; 
+                };
+                list.appendChild(div);
+                idx++;
+            }
+        });
+    }
+
+    document.getElementById('cmd-input').addEventListener('input', (e) => {
+        renderCommands(e.target.value);
+    });
+
+    document.getElementById('cmd-input').addEventListener('keydown', (e) => {
+        const items = document.querySelectorAll('.cmd-item');
+        let selected = document.querySelector('.cmd-item.selected');
+        let idx = Array.from(items).indexOf(selected);
+
+        if(e.key === 'ArrowDown') {
+            idx = (idx + 1) % items.length;
+            selected.classList.remove('selected');
+            items[idx].classList.add('selected');
+            items[idx].scrollIntoView({block: 'nearest'});
+        } else if(e.key === 'ArrowUp') {
+            idx = (idx - 1 + items.length) % items.length;
+            selected.classList.remove('selected');
+            items[idx].classList.add('selected');
+            items[idx].scrollIntoView({block: 'nearest'});
+        } else if(e.key === 'Enter') {
+            if(selected) {
+                selected.click(); // This triggers the onclick handler which hides palette
+            }
+        } else if(e.key === 'Escape') {
+            toggleCommandPalette();
+        }
+    });
+
+    // --- Share Link Generation ---
     function generateShareLink() {
         const id = document.getElementById('current-id').value;
         if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
@@ -1002,26 +1343,23 @@
         
         navigator.clipboard.writeText(link).then(() => {
             logActivity("LINK COPIED TO CLIPBOARD", "success");
-            SystemUI.show("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;"> <p style="font-size:0.7rem; color:#666; margin-top:5px;">Note: Requires database rules to allow public read access.</p>`);
+            SystemUI.show("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;"> <p style="font-size:0.7rem; color:#666; margin-top:5px;">Note: Direct public read-only access.</p>`);
         });
     }
 
-    // --- PART 4: KEYBOARD SHORTCUTS PANEL ---
+    // --- KEYBOARD SHORTCUTS PANEL ---
     function showShortcuts() {
         const shortcuts = [
+            { cat: "GENERAL", key: "Ctrl + Shift + P", desc: "Command Palette" },
             { cat: "FILE OPERATIONS", key: "Ctrl + N", desc: "New Note" },
-            { cat: "", key: "Ctrl + Shift + N", desc: "Duplicate Note" },
             { cat: "", key: "Ctrl + S", desc: "Save Note" },
-            { cat: "", key: "Ctrl + D", desc: "Delete Note" },
-            { cat: "", key: "Ctrl + Shift + D", desc: "Delete All Notes" },
+            { cat: "", key: "Ctrl + D", desc: "Delete / Trash" },
             
-            { cat: "SECURITY", key: "Ctrl + L", desc: "Lock/Unlock Note" },
-            { cat: "", key: "Ctrl + Shift + L", desc: "Change Password" },
-            { cat: "", key: "Ctrl + B", desc: "Toggle Read-Only" },
+            { cat: "SYSTEM", key: "Ctrl + Shift + F", desc: "Toggle Full Screen" },
+            { cat: "", key: "Ctrl + Shift + E", desc: "Backup Database" },
             
             { cat: "EDITING", key: "Ctrl + Z / Y", desc: "Undo / Redo" },
             { cat: "", key: "Ctrl + Shift + T", desc: "Insert Timestamp" },
-            { cat: "", key: "Ctrl + Shift + U", desc: "To Uppercase" },
             
             { cat: "NAVIGATION", key: "Ctrl + 1 / 2 / 3", desc: "Focus Title / Body / Search" },
             { cat: "", key: "Ctrl + F", desc: "Search Notes" },
@@ -1039,6 +1377,7 @@
         SystemUI.show("KEYBOARD CONTROLS", html);
     }
 
+    // --- PUBLIC LINK HANDLER ---
     const urlParams = new URLSearchParams(window.location.search);
     const shareId = urlParams.get('share');
     const shareUser = urlParams.get('user');
@@ -1050,6 +1389,8 @@
         document.getElementById('sidebar').style.display = 'none';
         document.getElementById('doc-body').setAttribute('readonly', true);
         document.getElementById('doc-title').setAttribute('readonly', true);
+        
+        document.querySelector('.editor-toolbar').innerHTML = '<div style="padding:10px; color:var(--neon-main); font-weight:bold;">:: PUBLIC VIEW MODE ::</div>';
         
         db.ref(`notes/${shareUser}/${shareId}`).once('value').then(snap => {
             if(snap.exists()) {
@@ -1072,7 +1413,7 @@
         }
 
         clearTimeout(autoSaveTimer);  
-        autoSaveTimer = setTimeout(() => saveNote(true), 2000); 
+        autoSaveTimer = setTimeout(() => saveNote(true), 1500); // 1.5s Auto Save
     }  
 
     document.getElementById('doc-title').oninput = triggerSave;  
@@ -1083,6 +1424,7 @@
         document.querySelectorAll('.note-item').forEach(item => {
             item.style.display = item.innerText.toLowerCase().includes(term) ? 'flex' : 'none';
         });
+        logActivity("SEARCHING...", "info");
     });
 
     function createNewNote() {  
@@ -1090,121 +1432,53 @@
         document.getElementById('doc-title').value = '';  
         document.getElementById('doc-body').value = '';  
         document.getElementById('is-pinned').value = 'false';
-        updatePinBtnUI(false);
+        
+        document.getElementById('current-folder-ref').value = activeFolder === 'TRASH' ? 'INBOX' : activeFolder;
+
         document.getElementById('del-btn').style.display = 'none';
+        document.getElementById('trash-ops').style.display = 'none';
+        document.getElementById('doc-body').removeAttribute('readonly');
+        document.getElementById('doc-title').removeAttribute('readonly');
+        document.getElementById('date-display').innerText = '';
+
+        updatePinBtnUI(false);
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         updateWordCount();
         document.getElementById('doc-title').focus(); 
-        logActivity("NEW WORKSPACE", "info"); 
+        logActivity("NEW WORKSPACE", "info");
     }  
     
-    function updateWordCount() {
-        const text = document.getElementById('doc-body').value;
-        const count = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-        document.getElementById('word-count').innerText = `WORDS: ${count}`;
-    }
-
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }  
     function toggleFullScreen() {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen();
         else if (document.exitFullscreen) document.exitFullscreen();
     }
     
-    // --- REFACTORED: Advanced Features with Async Modals ---
-
-    async function toggleLock() {
+    async function openMoveMenu() {
         const id = document.getElementById('current-id').value;
-        if(!id) return logActivity("SELECT A NOTE TO LOCK", "error");
+        if(!id) return logActivity("SELECT A NOTE TO MOVE", "error");
 
-        const cache = getLocalCache();
-        const note = cache[id];
-        
-        if(note.lockHash) {
-            const pass = await SystemUI.prompt("UNLOCK NOTE", "ENTER CURRENT PASSWORD", "password");
-            if(!pass) return;
-            const hash = await sha256(pass);
-            if(hash === note.lockHash) {
-                delete cache[id].lockHash;
-                setLocalCache(cache);
-                saveNote();
-                logActivity("SECURITY REMOVED", "info");
-                renderNoteList(cache);
-            } else {
-                logActivity("INCORRECT PASSWORD", "error");
-            }
-        } else {
-            const pass = await SystemUI.prompt("SECURE NOTE", "SET NEW PASSWORD", "password");
-            if(!pass) return;
-            const hash = await sha256(pass);
-            cache[id].lockHash = hash;
-            setLocalCache(cache);
-            saveNote();
-            logActivity("NOTE SECURED", "success");
-            renderNoteList(cache);
-        }
-    }
-
-    async function changePassword() {
-        const id = document.getElementById('current-id').value;
-        if(!id) return;
-        const cache = getLocalCache();
-        const note = cache[id];
-        
-        if(!note.lockHash) return logActivity("NOTE IS NOT LOCKED", "error");
-
-        const oldPass = await SystemUI.prompt("VERIFY CREDENTIALS", "ENTER OLD PASSWORD", "password");
-        if(!oldPass) return;
-        
-        const oldHash = await sha256(oldPass);
-        if(oldHash !== note.lockHash) return logActivity("INVALID PASSWORD", "error");
-
-        const newPass = await SystemUI.prompt("UPDATE CREDENTIALS", "ENTER NEW PASSWORD", "password");
-        if(newPass) {
-            const newHash = await sha256(newPass);
-            cache[id].lockHash = newHash;
-            setLocalCache(cache);
-            saveNote();
-            logActivity("CREDENTIALS UPDATED", "success");
-        }
-    }
-
-    function duplicateNote() {
-        const title = document.getElementById('doc-title').value + " (COPY)";
-        const text = document.getElementById('doc-body').value;
-        if(!text) return;
-
-        createNewNote();
-        document.getElementById('doc-title').value = title;
-        document.getElementById('doc-body').value = text;
-        saveNote();
-        logActivity("NOTE DUPLICATED", "info");
-    }
-
-    async function deleteAllNotes() {
-        const yes = await SystemUI.confirm("DANGER ZONE", "DELETE ALL NOTES? THIS CANNOT BE UNDONE.", true);
-        if(!yes) return;
-        
-        const cache = getLocalCache();
-        Object.keys(cache).forEach(id => {
-            if(!id.startsWith('temp_')) db.ref(`notes/${currentUser}/${id}`).remove();
+        let html = `<div style="display:flex; flex-direction:column; gap:5px; max-height:200px; overflow-y:auto;">`;
+        knownFolders.forEach(folder => {
+             html += `<button class="btn" style="text-align:left;" onclick="moveNoteTo('${folder}')"><i class="fas fa-folder"></i> ${folder}</button>`;
         });
-        setLocalCache({});
-        localStorage.removeItem(QUEUE_KEY_PREFIX + currentUser);
-        createNewNote();
-        renderNoteList({});
-        logActivity("DATABASE FLUSHED", "error");
+        html += `</div>`;
+        SystemUI.show("MOVE TO FOLDER", html);
     }
 
-    function toggleReadOnly() {
-        const body = document.getElementById('doc-body');
-        const isRO = body.hasAttribute('readonly');
-        if(isRO) {
-            body.removeAttribute('readonly');
-            logActivity("EDIT MODE ENABLED", "info");
-        } else {
-            body.setAttribute('readonly', true);
-            logActivity("READ-ONLY ENABLED", "info");
+    function moveNoteTo(folder) {
+        const id = document.getElementById('current-id').value;
+        document.getElementById('current-folder-ref').value = folder;
+        const cache = getLocalCache();
+        if(cache[id]) {
+            cache[id].folder = folder;
+            setLocalCache(cache);
         }
+        saveNote(true); 
+        SystemUI.close();
+        renderFolders(getLocalCache()); 
+        renderNoteList(getLocalCache()); 
+        logActivity(`MOVED TO ${folder}`, "success");
     }
 
     function manipulateText(type) {
@@ -1212,75 +1486,62 @@
         const start = ta.selectionStart;
         const end = ta.selectionEnd;
         let text = ta.value;
-        const sel = text.substring(start, end);
 
-        if(type === 'upper') {
-            ta.value = text.substring(0, start) + sel.toUpperCase() + text.substring(end);
-        } else if(type === 'lower') {
-            ta.value = text.substring(0, start) + sel.toLowerCase() + text.substring(end);
-        } else if(type === 'timestamp') {
+        if(type === 'timestamp') {
             ta.value = text.substring(0, start) + new Date().toLocaleString() + text.substring(end);
         }
         
-        ta.setSelectionRange(start, end); // restore selection
+        ta.setSelectionRange(start, end); 
         triggerSave();
     }
 
     // --- MASTER KEYBOARD CONTROLLER ---
 
     document.addEventListener('keydown', async (e) => {
-        // Prevent default shortcut conflicts if modal is open
         if(document.getElementById('modal-overlay').style.display === 'flex') return;
+        if(document.getElementById('cmd-palette').style.display === 'flex') return;
 
         // Global Shortcuts
         if (e.ctrlKey || e.altKey) {
-            
+            // New: Command Palette
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                toggleCommandPalette();
+            }
+
             // File Operations
             if (e.ctrlKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
-                if(e.shiftKey) { saveNote(); } 
-                else { saveNote(false); }
+                saveNote(false);
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'n') {
                 e.preventDefault();
-                e.shiftKey ? duplicateNote() : createNewNote();
+                createNewNote();
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'd') {
                 e.preventDefault();
-                e.shiftKey ? deleteAllNotes() : confirmDelete();
+                moveToTrash();
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'p') {
                 e.preventDefault();
                 togglePin();
             }
 
-            // Security
-            if (e.ctrlKey && e.key.toLowerCase() === 'l') {
-                e.preventDefault();
-                e.shiftKey ? changePassword() : toggleLock();
-            }
-            if (e.ctrlKey && e.key.toLowerCase() === 'b') {
-                e.preventDefault();
-                toggleReadOnly();
-            }
+            // SYSTEM COMMANDS
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); toggleFullScreen(); }
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'e') { e.preventDefault(); exportAllNotes(); }
 
             // Navigation
-            if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown')) {
+            if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
                 e.preventDefault();
                 const items = Array.from(document.querySelectorAll('.note-item'));
                 if(items.length === 0) return;
-                
                 let activeIdx = items.findIndex(el => el.classList.contains('active'));
                 let targetIdx = activeIdx;
-
-                if (e.key === 'ArrowUp' || e.key === 'PageUp') targetIdx = activeIdx - 1;
-                if (e.key === 'ArrowDown' || e.key === 'PageDown') targetIdx = activeIdx + 1;
-                if (e.key === 'Home') targetIdx = 0;
-                if (e.key === 'End') targetIdx = items.length - 1;
-
+                if (e.key === 'ArrowUp') targetIdx = activeIdx - 1;
+                if (e.key === 'ArrowDown') targetIdx = activeIdx + 1;
                 if(targetIdx < 0) targetIdx = 0;
                 if(targetIdx >= items.length) targetIdx = items.length - 1;
-                
                 items[targetIdx].click();
                 items[targetIdx].scrollIntoView({block: 'center'});
             }
@@ -1293,15 +1554,11 @@
             // Search
             if (e.ctrlKey && e.key.toLowerCase() === 'f') {
                 e.preventDefault();
-                if(e.shiftKey) { document.getElementById('search-bar').value = ''; loadNotes(); }
                 document.getElementById('search-bar').focus();
             }
 
             // History
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
-                e.preventDefault();
-                if(e.shiftKey) editorRedo(); else editorUndo();
-            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); editorUndo(); }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); editorRedo(); }
             
             // Show Shortcuts
@@ -1310,44 +1567,9 @@
                 showShortcuts();
             }
 
-            // Content Manipulation
-            if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveNote(false); }
-            if (e.ctrlKey && e.key === 'Backspace') {
-                if(document.activeElement === document.getElementById('doc-body')) {
-                    const confirmClear = await SystemUI.confirm("CLEAR WORKSPACE?", "This will wipe the current text editor.", true);
-                    if(confirmClear) {
-                        document.getElementById('doc-body').value = '';
-                        triggerSave();
-                    }
-                }
-            }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
-                e.preventDefault();
-                const confirmWipe = await SystemUI.confirm("WIPE ALL FIELDS?", "Clear title and body?", true);
-                if(confirmWipe) {
-                    document.getElementById('doc-body').value = '';
-                    document.getElementById('doc-title').value = '';
-                    triggerSave();
-                }
-            }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'u') { e.preventDefault(); manipulateText('upper'); }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'o') { e.preventDefault(); manipulateText('lower'); }
+            // Timestamp
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 't') { e.preventDefault(); manipulateText('timestamp'); }
-
-            // Scrolling
-            if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-                const body = document.getElementById('doc-body');
-                if (document.activeElement === body) {
-                    if (e.key === 'ArrowUp') body.scrollTop -= 20;
-                    if (e.key === 'ArrowDown') body.scrollTop += 20;
-                    if (e.key === 'ArrowLeft') body.setSelectionRange(0, 0);
-                    if (e.key === 'ArrowRight') body.setSelectionRange(body.value.length, body.value.length);
-                }
-            }
         }
-
-        // Tab Cycling (Simple Trap)
-        if (e.key === 'Escape') { document.activeElement.blur(); }
     });
 
     setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);  
