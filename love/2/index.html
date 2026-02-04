@@ -2,165 +2,299 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>I Love You | Futuristic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jhilik | My Love</title>
   
-  <!-- Import Futuristic Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Sacramento&display=swap" rel="stylesheet">
+  <!-- Fonts: 'Orbitron' (Future) and 'Dancing Script' (Romance) -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 
   <style>
+    /* --- BASE SETTINGS --- */
     body {
       margin: 0;
-      background-color: #050505;
-      background: radial-gradient(circle at center, #1a0b1a 0%, #000000 100%);
+      background: radial-gradient(circle at center, #1a0510 0%, #000000 100%); /* Deep Romantic Dark */
       overflow: hidden;
       height: 100vh;
       width: 100vw;
-      perspective: 1000px; /* For 3D feel */
-    }
-
-    /* The glowing text elements */
-    .love-msg {
-      position: absolute;
       font-family: 'Orbitron', sans-serif;
-      color: #fff;
-      white-space: nowrap;
-      pointer-events: none; /* Let clicks pass through */
-      text-shadow: 
-        0 0 5px #fff,
-        0 0 10px #fff,
-        0 0 20px #ff00de,
-        0 0 30px #ff00de,
-        0 0 40px #ff00de;
-      animation: floatUp linear forwards;
-      opacity: 0;
-      z-index: 10;
+      color: white;
     }
 
-    /* Central pulsing heart/core */
-    .core {
+    /* --- BACKGROUND PARTICLES --- */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    /* --- CENTRAL CONTAINER --- */
+    .center-stage {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 100px;
-      filter: blur(2px);
-      opacity: 0.3;
-      animation: pulse 2s infinite;
-      z-index: 0;
+      text-align: center;
+      z-index: 10;
+      width: 90%;
     }
 
-    @keyframes pulse {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; text-shadow: 0 0 20px red; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; text-shadow: 0 0 50px red; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; text-shadow: 0 0 20px red; }
+    /* --- THE NEON HEART --- */
+    .heart-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 40px auto;
+      animation: heartbeat 1.5s infinite ease-in-out;
+    }
+
+    .heart {
+      background-color: #ff0055;
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      position: relative;
+      transform: rotate(-45deg);
+      box-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055; /* Neon Glow */
+    }
+
+    .heart:before,
+    .heart:after {
+      content: "";
+      background-color: #ff0055;
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      box-shadow: 0 0 20px #ff0055;
+    }
+
+    .heart:before { top: -50px; left: 0; }
+    .heart:after { top: 0; left: 50px; }
+
+    /* Heartbeat Animation */
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      15% { transform: scale(1.2); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+      60% { transform: scale(1); }
+    }
+
+    /* --- TYPEWRITER TEXT --- */
+    .typing-area {
+      min-height: 80px; /* Prevent jumping */
+    }
+
+    .main-text {
+      font-family: 'Dancing Script', cursive; /* Romantic Font */
+      font-size: 2.5rem;
+      color: #fff;
+      text-shadow: 0 0 10px #ff00de, 0 0 20px #ff00de;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 2.5rem;
+      background-color: #0ff; /* Cyan Tech Cursor */
+      margin-left: 5px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* --- FLOATING ELEMENTS --- */
+    .floater {
+      position: absolute;
+      bottom: -50px;
+      opacity: 0;
+      animation: floatUp linear forwards;
+      pointer-events: none;
+      z-index: 5;
     }
 
     @keyframes floatUp {
-      0% {
-        transform: translateY(110vh) scale(0.5) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-      }
-      90% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-20vh) scale(1.5) rotate(10deg);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.6; }
+      100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+    }
+
+    /* --- MOBILE RESPONSIVENESS --- */
+    @media (max-width: 600px) {
+      .heart-container { transform: scale(0.7); margin-bottom: 20px; }
+      .main-text { font-size: 1.8rem; }
+      .cursor { height: 1.8rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Background decorative element -->
-  <div class="core">💝</div>
+  <!-- Background Canvas -->
+  <canvas id="dust"></canvas>
 
-  <!-- Audio Source -->
-  <audio id="backgroundMusic" src="assets/AUDIO.mpeg" loop></audio>
+  <!-- Central Visuals -->
+  <div class="center-stage">
+    <div class="heart-container">
+      <div class="heart"></div>
+    </div>
+    
+    <div class="typing-area">
+      <span class="main-text" id="typewriter"></span><span class="cursor"></span>
+    </div>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bgMusic" src="assets/AUDIO.mpeg" loop></audio>
 
 <script>
-  const messages = ["I love you 💝", "Forever", "My Love", "Always", "I love you 💝", "You are my world"];
-  const audio = document.getElementById("backgroundMusic");
-  const body = document.body;
+  // --- CONFIGURATION ---
+  const CONFIG = {
+    name: "Jhilik",
+    typingSpeed: 100,
+    deletingSpeed: 50,
+    pauseBetween: 2000,
+    particleCount: 100
+  };
 
-  // Configuration for density
-  const spawnRate = 200; // Create a new text every 200ms
+  // The romantic messages to type
+  const messages = [
+    `Dearest ${CONFIG.name}...`,
+    "You are my heartbeat 💝",
+    "In a world of data, you are my only truth.",
+    "My love for you is infinite.",
+    `I miss you, ${CONFIG.name}.`,
+    "Forever and Always.",
+    "You complete my code."
+  ];
 
-  function createFloatingText() {
-    const el = document.createElement("div");
-    el.className = "love-msg";
-    el.textContent = messages[Math.floor(Math.random() * messages.length)];
+  // --- 1. DREAMY PARTICLE BACKGROUND (Not chaotic, but magical) ---
+  const canvas = document.getElementById('dust');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let particles = [];
 
-    // Random positioning
-    const x = Math.random() * 100; // 0 to 100vw
-    
-    // Random styling properties
-    const duration = Math.random() * 5 + 5; // Between 5s and 10s speed
-    const size = Math.random() * 20 + 15; // Font size between 15px and 35px
-    const delay = Math.random() * 2; 
+  const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+  window.addEventListener('resize', resize);
+  resize();
 
-    el.style.left = `${x}vw`;
-    el.style.fontSize = `${size}px`;
-    el.style.animationDuration = `${duration}s`;
-    
-    // Add slightly different neon colors
-    const colors = ['#ff00de', '#00ffff', '#ff0055'];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    el.style.textShadow = `0 0 10px ${randomColor}, 0 0 20px ${randomColor}`;
-
-    body.appendChild(el);
-
-    // Cleanup DOM to prevent lag
-    setTimeout(() => {
-      el.remove();
-    }, duration * 1000);
+  class Particle {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.size = Math.random() * 2;
+      this.speedY = Math.random() * 0.5 + 0.2; // Slow drift up
+      this.opacity = Math.random() * 0.5 + 0.1;
+    }
+    update() {
+      this.y -= this.speedY;
+      if (this.y < 0) {
+        this.y = h;
+        this.x = Math.random() * w;
+      }
+    }
+    draw() {
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
-  // Start the visuals IMMEDIATELY
-  function initVisuals() {
-    setInterval(createFloatingText, spawnRate);
+  for(let i=0; i<CONFIG.particleCount; i++) particles.push(new Particle());
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // --- 2. INTELLIGENT TYPEWRITER ---
+  const textElement = document.getElementById('typewriter');
+  let msgIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+
+  function typeLoop() {
+    const currentMsg = messages[msgIndex];
+    
+    if (isDeleting) {
+      textElement.textContent = currentMsg.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      textElement.textContent = currentMsg.substring(0, charIndex + 1);
+      charIndex++;
+    }
+
+    let speed = isDeleting ? CONFIG.deletingSpeed : CONFIG.typingSpeed;
+
+    if (!isDeleting && charIndex === currentMsg.length) {
+      // Finished typing sentence, pause before deleting
+      speed = CONFIG.pauseBetween;
+      isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+      // Finished deleting, move to next sentence
+      isDeleting = false;
+      msgIndex = (msgIndex + 1) % messages.length;
+      speed = 500;
+    }
+
+    setTimeout(typeLoop, speed);
   }
 
-  // Attempt to enter fullscreen and play audio
-  // Note: Browsers block this on load. We try, but if it fails,
-  // we wait for the first user interaction (touch/move) to trigger it.
-  function attemptImmersion() {
-    // Audio
-    audio.play().then(() => {
-      console.log("Audio playing");
-    }).catch(() => {
-      console.log("Autoplay prevented. Waiting for interaction.");
-    });
+  // --- 3. FLOATING ROMANCE (Hearts & Name) ---
+  function spawnFloater() {
+    const el = document.createElement('div');
+    el.classList.add('floater');
+    
+    // 50% chance of Heart emoji, 50% chance of Name or text
+    const rand = Math.random();
+    if(rand < 0.4) {
+      el.textContent = "❤️";
+      el.style.fontSize = (Math.random() * 20 + 20) + "px";
+    } else if (rand < 0.7) {
+      el.textContent = CONFIG.name;
+      el.style.fontFamily = "'Dancing Script', cursive";
+      el.style.fontSize = (Math.random() * 15 + 20) + "px";
+      el.style.color = "#ff00de"; // Neon Pink
+    } else {
+      el.textContent = "Love";
+      el.style.fontFamily = "'Orbitron', sans-serif";
+      el.style.fontSize = "12px";
+      el.style.color = "#00ffff"; // Cyan
+    }
 
-    // Fullscreen
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.animationDuration = (Math.random() * 5 + 5) + "s"; // 5-10 seconds
+    
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 10000);
+  }
+
+  setInterval(spawnFloater, 600); // Spawn something every 600ms
+
+  // --- 4. AUTO START SYSTEM ---
+  function init() {
+    // Start Typing
+    typeLoop();
+    
+    // Try Audio & Fullscreen
+    const audio = document.getElementById('bgMusic');
     const docEl = document.documentElement;
-    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+
+    audio.play().catch(() => console.log("Waiting for interaction..."));
+
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(()=>{});
+    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
   }
 
-  // --- Logic Execution ---
-
-  // 1. Start visuals instantly
-  initVisuals();
-
-  // 2. Try to play audio instantly (Works in some settings, fails in Chrome/Safari)
-  window.onload = attemptImmersion;
-
-  // 3. Fallback: If autoplay failed, enable everything on the very first click/touch anywhere
-  function unlockExperience() {
-    attemptImmersion();
-    // Remove listener so it doesn't keep firing
-    document.removeEventListener('click', unlockExperience);
-    document.removeEventListener('touchstart', unlockExperience);
-    document.removeEventListener('scroll', unlockExperience);
-  }
-
-  document.addEventListener('click', unlockExperience);
-  document.addEventListener('touchstart', unlockExperience);
-  document.addEventListener('scroll', unlockExperience);
+  // Trigger on load and first click
+  window.addEventListener('load', init);
+  document.addEventListener('click', init);
+  document.addEventListener('touchstart', init);
 
 </script>
 </body>
