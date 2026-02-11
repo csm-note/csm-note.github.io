@@ -240,6 +240,36 @@
     .folder-item.trash { color: var(--neon-red); } 
     .folder-ops { opacity: 0; transition: 0.2s; }
     .folder-item:hover .folder-ops { opacity: 1; }
+
+
+
+
+#privacy-lock{
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+ background:#000;
+ z-index:9999;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
+ color:#0f0;
+ font-family:var(--font-stack);
+}
+
+.lock-text{
+ font-size:2rem;
+ letter-spacing:3px;
+}
+
+.lock-sub{
+ font-size:0.7rem;
+ color:#555;
+ margin-top:10px;
+}
 </style>
 
 </head>  
@@ -365,6 +395,14 @@
 </div>  
 
 <div id="alert-system"></div>  
+
+<!-- PRIVACY LOCK SCREEN -->
+<div id="privacy-lock">
+  <div class="lock-text">ACCESS DENIED</div>
+  <div class="lock-sub">Swipe down with 2 fingers</div>
+</div>
+
+
 <input type="file" id="restore-input" style="display:none;" onchange="importDatabaseFile(this)">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>  
@@ -372,7 +410,73 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
 
 <script>  
-    // --- CORE SETUP (Unchanged) ---
+  
+// ===== PRIVACY LOCK SYSTEM =====
+let privacyUnlocked = false;
+const OTP_PASSWORD = "123456"; // 🔐 এখানে তোমার 6 digit password
+
+// page load এ app hide
+document.addEventListener("DOMContentLoaded",()=>{
+    document.getElementById("app-layer").style.display="none";
+});
+
+
+// ---- 2 finger swipe detect ----
+let startY = null;
+
+document.addEventListener("touchstart",(e)=>{
+    if(e.touches.length === 2){
+        startY = e.touches[0].clientY;
+    }
+});
+
+document.addEventListener("touchend",(e)=>{
+    if(startY === null) return;
+    
+    let endY = e.changedTouches[0].clientY;
+
+    if(endY - startY > 80){ // swipe down distance
+        showOtpPrompt();
+    }
+
+    startY = null;
+});
+
+
+// ---- OTP popup ----
+async function showOtpPrompt(){
+    if(privacyUnlocked) return;
+
+    const code = await SystemUI.prompt(
+        "SECURE ACCESS",
+        "ENTER 6 DIGIT ACCESS CODE:",
+        "password"
+    );
+
+    if(code === OTP_PASSWORD){
+        unlockPrivacy();
+    }else{
+        logActivity("ACCESS DENIED","error");
+    }
+}
+
+
+// ---- Unlock function ----
+function unlockPrivacy(){
+    privacyUnlocked = true;
+
+    const lock = document.getElementById("privacy-lock");
+    if(lock) lock.style.display="none";
+
+    document.getElementById("app-layer").style.display="flex";
+
+    logActivity("PRIVACY LOCK BYPASSED","success");
+}
+
+
+
+
+  // --- CORE SETUP (Unchanged) ---
     function setVh() {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
