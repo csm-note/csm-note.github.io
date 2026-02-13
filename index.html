@@ -3,7 +3,7 @@
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-    <title>DB NOTEPAD v6.4 [FIXED]</title>  
+    <title>DB NOTEPAD v6.2 [ULTIMATE]</title>  
     <link rel="manifest" href="manifest.json">  
     <meta name="theme-color" content="#020202">  
     <meta name="apple-mobile-web-app-capable" content="yes">  
@@ -16,7 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>  
-    /* --- ORIGINAL CSS PRESERVED --- */
     :root {  
         --bg-deep: #020202;  
         --bg-panel: #0d0d0d;  
@@ -249,7 +248,7 @@
 <div id="auth-layer">  
     <div class="login-box">  
         <h2 style="color: var(--neon-main); margin-bottom:5px;">:: SYSTEM ACCESS ::</h2>  
-        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V6.4</p>
+        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V6.2</p>
         <input type="email" id="email" class="login-input" placeholder="IDENTIFICATION (EMAIL)">  
         <input type="password" id="pass" class="login-input" placeholder="ACCESS KEY (PASSWORD)">  
         <div style="margin-top: 20px; display: flex; gap: 10px;">  
@@ -280,7 +279,7 @@
     <header>  
         <div style="display: flex; align-items: center; gap: 15px;">  
             <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
-            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v6.4</div>  
+            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v6.2</div>  
         </div>  
         <div style="display:flex; align-items:center;">  
             <button class="btn btn-info" onclick="toggleMarkdown()" title="Split Preview"><i class="fas fa-columns"></i> MD</button>
@@ -355,7 +354,7 @@
         <div style="display:flex; align-items:center; gap:10px;">
             <div id="trash-ops" style="display:none; gap:5px;">
                 <button class="btn btn-info" style="padding:0 8px; font-size:0.7rem; height:20px;" onclick="restoreNote()">RESTORE</button>
-                <button class="btn btn-danger" style="padding:0 8px; font-size:0.7rem; height:20px;" onclick="permanentDelete()">DEL FOREVER</button>
+                <button class="btn btn-danger" style="padding:0 8px; font-size:0.7rem; height:20px;" onclick="permanentDelete()">DEL PERMANENT</button>
             </div>
 
             <button class="btn btn-danger" style="padding: 0 10px; font-size: 0.7rem; height: 20px; display: none;" id="del-btn" onclick="moveToTrash()">DEL</button>
@@ -372,7 +371,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
 
 <script>  
-    // --- CORE SETUP (Unchanged) ---
+    // --- PART 1: Core Setup ---
     function setVh() {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -395,11 +394,12 @@
 
     let currentUser = null;  
     let autoSaveTimer;  
+    let currentTags = new Set();
+    let filterTag = null;
     let activeFolder = 'INBOX';
     let knownFolders = new Set(['INBOX']);
     let trashUnlocked = false; 
 
-    // --- LOGIC: HELPER CLASSES ---
     class SimpleHistory {
         constructor() { this.stack = []; this.index = -1; this.max = 20; }
         push(state) {
@@ -453,7 +453,7 @@
         }, 3500);
     }
 
-    // --- LOGIC: UI MODALS ---
+    // --- PART 2: UI System ---
     const SystemUI = {
         overlay: document.getElementById('modal-overlay'),
         box: document.getElementById('modal-box'),
@@ -533,7 +533,7 @@
         if(e.key === 'Escape') { SystemUI.close(); e.preventDefault(); }
     });
 
-    // --- LOGIC: AUTH ---
+    // --- AUTH LOGIC ---
     function authAction(type) {  
         const e = document.getElementById('email').value;  
         const p = document.getElementById('pass').value;  
@@ -575,6 +575,7 @@
             appLayer.style.display = 'flex';  
             document.getElementById('user-display').innerHTML = `<span>OP: ${user.email.split('@')[0].toUpperCase()}</span> <i class="fas fa-wifi"></i>`;
             loadNotes();  
+            checkConnection();
         } else {  
             authLayer.style.display = 'flex';  
             appLayer.style.display = 'none';  
@@ -582,7 +583,7 @@
         }  
     });  
 
-    // --- LOGIC: DATA & CACHE ---
+    // --- DATA LOGIC ---
     function getLocalCache() { return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + currentUser)) || {}; }
     function setLocalCache(data) { localStorage.setItem(CACHE_KEY_PREFIX + currentUser, JSON.stringify(data)); }
     function getOfflineQueue() { return JSON.parse(localStorage.getItem(QUEUE_KEY_PREFIX + currentUser)) || {}; }
@@ -597,7 +598,7 @@
         localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
     }
     
-    // --- LOGIC: FOLDER & TRASH ---
+    // --- FOLDER LOGIC ---
     async function switchFolder(folderName) {
         if(folderName === 'TRASH') {
             if(!trashUnlocked) {
@@ -750,15 +751,19 @@
         list.innerHTML = '';  
         
         renderFolders(data);
-        const allTags = new Set();
+
+        let allTags = new Set();
         let notesArr = [];
 
         if (data) {  
             Object.entries(data).forEach(([id, note]) => {  
                 if (!note) return;
+                
                 const noteFolder = note.folder || 'INBOX';
                 if(noteFolder !== activeFolder) return;
+
                 notesArr.push({id, ...note});
+                
                 if (!note.lockHash && note.text) {
                     const tags = note.text.match(/#[a-z0-9_]+/gi);
                     if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
@@ -774,6 +779,8 @@
 
             notesArr.forEach(note => {
                 const noteText = (note.text || '').toLowerCase();
+                if(filterTag && !note.lockHash && !noteText.includes(filterTag)) return;
+                
                 const div = document.createElement('div');  
                 div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '');  
                 
@@ -800,10 +807,17 @@
         if(activeFolder === 'TRASH' || tags.size === 0) { cloud.style.display = 'none'; return; }
         cloud.style.display = 'flex';
         
+        const allBtn = document.createElement('span');
+        allBtn.className = `tag-pill ${!filterTag ? 'active' : ''}`;
+        allBtn.innerText = "ALL";
+        allBtn.onclick = () => { filterTag = null; loadNotes(); };
+        cloud.appendChild(allBtn);
+
         tags.forEach(tag => {
             const pill = document.createElement('span');
-            pill.className = `tag-pill`;
+            pill.className = `tag-pill ${filterTag === tag ? 'active' : ''}`;
             pill.innerText = tag;
+            pill.onclick = () => { filterTag = tag; loadNotes(); };
             cloud.appendChild(pill);
         });
     }
@@ -823,7 +837,6 @@
         if(navigator.onLine) processOfflineQueue();
     }  
 
-    // --- LOGIC: EDITOR & AUTO SAVE FIX ---
     async function loadNoteIntoEditor(id, note) {
         if (note.lockHash) {
             const password = await SystemUI.prompt("SECURE NOTE", "ENTER DECRYPTION KEY:", "password");
@@ -847,15 +860,15 @@
         document.getElementById('is-pinned').value = isPinned;
         updatePinBtnUI(isPinned);
 
-        // --- TRASH UI LOGIC ---
+        // --- TRASH UI TOGGLE ---
         if(activeFolder === 'TRASH') {
             document.getElementById('del-btn').style.display = 'none';
-            document.getElementById('trash-ops').style.display = 'flex';
+            document.getElementById('trash-ops').style.display = 'flex'; // SHOW Trash buttons
             document.getElementById('doc-body').setAttribute('readonly', true);
             document.getElementById('doc-title').setAttribute('readonly', true);
         } else {
             document.getElementById('del-btn').style.display = 'inline-block';
-            document.getElementById('trash-ops').style.display = 'none';
+            document.getElementById('trash-ops').style.display = 'none'; // HIDE Trash buttons
             document.getElementById('doc-body').removeAttribute('readonly');
             document.getElementById('doc-title').removeAttribute('readonly');
         }
@@ -872,42 +885,18 @@
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         renderNoteList(getLocalCache());
         
-        logActivity("NOTE LOADED", "info");
+        logActivity(`OPENED: ${note.title || 'UNTITLED'}`, "info");
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
 
-    // *** FIX: ROBUST AUTO SAVE LISTENERS ***
-    function triggerSave() {  
-        document.getElementById('save-indicator').innerText = "[TYPING...]";  
-        updateWordCount();
-        
-        if(document.getElementById('md-preview').classList.contains('active')) {
-             document.getElementById('md-preview').innerHTML = marked.parse(document.getElementById('doc-body').value);
-        }
-
-        clearTimeout(autoSaveTimer);  
-        autoSaveTimer = setTimeout(() => saveNote(true), 1000); 
-    }  
-
-    // Attach listeners in JS
-    const docTitle = document.getElementById('doc-title');
-    const docBody = document.getElementById('doc-body');
-    docTitle.addEventListener('input', triggerSave);
-    docBody.addEventListener('input', triggerSave);
-    // Auto save on blur/tab switch
-    docTitle.addEventListener('blur', () => saveNote(true));
-    docBody.addEventListener('blur', () => saveNote(true));
-
-
     async function saveNote(isAuto = false) {  
         if (!currentUser) return;  
-        if (activeFolder === 'TRASH') return; // Do not save edits in trash
+        if (activeFolder === 'TRASH') return;
 
-        // Log auto save to notice bar as requested
+        // Ensure AUTO SAVE is logged to notice bar as requested
         if(isAuto) {
-             // We can log it, but maybe keep it silent if too spammy? 
-             // Request said "all activities show notice".
-             // logActivity("AUTO-SAVED", "info"); 
+             // Non-blocking log for auto-save
+             // Don't show modal, just sidebar log
         } else {
              logActivity("MANUAL SAVE...", "info");
         }
@@ -960,11 +949,11 @@
         } else {
             addToOfflineQueue(id, payload);
             document.getElementById('save-indicator').innerText = "[LOCAL]";
-            if(isAuto) logActivity("AUTO-SAVED (LOCAL)", "info");
+            logActivity(isAuto ? "AUTO-SAVED (LOCAL)" : "SAVED LOCALLY", "info");
         }
     } 
 
-    // --- LOGIC: TRASH ACTIONS ---
+    // --- TRASH LOGIC ---
     async function moveToTrash() {
         const confirm = await SystemUI.confirm("MOVE TO TRASH?", "This note will be moved to the Trash Bin.", true);
         if(!confirm) return;
@@ -1066,7 +1055,7 @@
     window.addEventListener('online', checkConnection);
     window.addEventListener('offline', checkConnection);
 
-    // --- LOGIC: OTHER FEATURES ---
+    // --- EDITOR FEATURES ---
     function toggleMarkdown() {
         const preview = document.getElementById('md-preview');
         const editor = document.getElementById('doc-body');
@@ -1262,7 +1251,7 @@
         logActivity("DOCUMENT EXPORTED", "success");
     }
 
-    // --- LOGIC: COMMAND PALETTE ---
+    // --- COMMAND PALETTE Logic ---
     function toggleCommandPalette() {
         const p = document.getElementById('cmd-palette');
         const input = document.getElementById('cmd-input');
@@ -1345,7 +1334,7 @@
         }
     });
 
-    // --- LOGIC: SHARE LINK ---
+    // --- Share Link Generation ---
     function generateShareLink() {
         const id = document.getElementById('current-id').value;
         if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
@@ -1358,16 +1347,24 @@
         });
     }
 
+    // --- KEYBOARD SHORTCUTS PANEL ---
     function showShortcuts() {
         const shortcuts = [
             { cat: "GENERAL", key: "Ctrl + Shift + P", desc: "Command Palette" },
             { cat: "FILE OPERATIONS", key: "Ctrl + N", desc: "New Note" },
             { cat: "", key: "Ctrl + S", desc: "Save Note" },
             { cat: "", key: "Ctrl + D", desc: "Delete / Trash" },
+            
             { cat: "SYSTEM", key: "Ctrl + Shift + F", desc: "Toggle Full Screen" },
+            { cat: "", key: "Ctrl + Shift + E", desc: "Backup Database" },
+            
             { cat: "EDITING", key: "Ctrl + Z / Y", desc: "Undo / Redo" },
             { cat: "", key: "Ctrl + Shift + T", desc: "Insert Timestamp" },
-            { cat: "NAVIGATION", key: "Ctrl + F", desc: "Search Notes" },
+            
+            { cat: "NAVIGATION", key: "Ctrl + 1 / 2 / 3", desc: "Focus Title / Body / Search" },
+            { cat: "", key: "Ctrl + F", desc: "Search Notes" },
+            { cat: "", key: "Alt + Arrows", desc: "Navigate List" },
+            { cat: "", key: "Ctrl + /", desc: "Show Shortcuts" },
         ];
 
         let html = `<table class="shortcut-table">`;
@@ -1380,7 +1377,7 @@
         SystemUI.show("KEYBOARD CONTROLS", html);
     }
 
-    // --- LOGIC: PUBLIC LINK VIEW ---
+    // --- PUBLIC LINK HANDLER ---
     const urlParams = new URLSearchParams(window.location.search);
     const shareId = urlParams.get('share');
     const shareUser = urlParams.get('user');
@@ -1407,6 +1404,21 @@
         });
     }
 
+    function triggerSave() {  
+        document.getElementById('save-indicator').innerText = "[TYPING...]";  
+        updateWordCount();
+        
+        if(document.getElementById('md-preview').classList.contains('active')) {
+             document.getElementById('md-preview').innerHTML = marked.parse(document.getElementById('doc-body').value);
+        }
+
+        clearTimeout(autoSaveTimer);  
+        autoSaveTimer = setTimeout(() => saveNote(true), 1500); // 1.5s Auto Save
+    }  
+
+    document.getElementById('doc-title').oninput = triggerSave;  
+    document.getElementById('doc-body').oninput = triggerSave;  
+    
     document.getElementById('search-bar').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         document.querySelectorAll('.note-item').forEach(item => {
@@ -1469,12 +1481,6 @@
         logActivity(`MOVED TO ${folder}`, "success");
     }
 
-    function updateWordCount() {
-        const text = document.getElementById('doc-body').value;
-        const count = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-        document.getElementById('word-count').innerText = `WORDS: ${count}`;
-    }
-
     function manipulateText(type) {
         const ta = document.getElementById('doc-body');
         const start = ta.selectionStart;
@@ -1490,6 +1496,7 @@
     }
 
     // --- MASTER KEYBOARD CONTROLLER ---
+
     document.addEventListener('keydown', async (e) => {
         if(document.getElementById('modal-overlay').style.display === 'flex') return;
         if(document.getElementById('cmd-palette').style.display === 'flex') return;
