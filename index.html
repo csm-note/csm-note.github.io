@@ -3,16 +3,14 @@
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-    <title>DB NOTEPAD v6.2 [ULTIMATE]</title>  
+    <title>DB NOTEPAD v6.3 [ULTIMATE]</title>  
     <link rel="manifest" href="manifest.json">  
     <meta name="theme-color" content="#020202">  
     <meta name="apple-mobile-web-app-capable" content="yes">  
   
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
-    <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>  
@@ -53,6 +51,29 @@
         background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));  
         z-index: 900; background-size: 100% 2px, 3px 100%; pointer-events: none;  
     }  
+
+    /* --- FEATURE 2: SECURITY LOCK STYLES --- */
+    #lock-layer {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--bg-deep); z-index: 9999;
+        display: flex; justify-content: center; align-items: center;
+        flex-direction: column;
+    }
+    .otp-container {
+        display: flex; gap: 15px; margin-top: 20px;
+    }
+    .otp-input {
+        width: 50px; height: 60px;
+        background: #000; border: 2px solid var(--neon-dim);
+        color: var(--neon-main); font-family: var(--font-stack);
+        font-size: 1.5rem; text-align: center;
+        transition: 0.2s;
+    }
+    .otp-input:focus {
+        border-color: var(--neon-main);
+        box-shadow: 0 0 15px var(--neon-dim);
+        transform: scale(1.1);
+    }
 
     /* --- Auth Screen --- */  
     #auth-layer {  
@@ -100,7 +121,7 @@
     .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }  
     aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; z-index: 910; transition: 0.3s;}  
     
-    .search-container { padding: 10px; position: relative; border-bottom: 1px solid #111; }
+    .search-container { padding: 10px; position: relative; border-bottom: 1px solid #111; display: flex; gap: 5px; }
     .search-bar {
         width: 100%; padding: 8px 8px 8px 30px;
         background: black; border: 1px solid var(--border-color);
@@ -115,11 +136,20 @@
 
     .notes-list { flex: 1; overflow-y: auto; }  
     
+    /* Updated Note Item for Selection */
     .note-item { padding: 12px 20px; border-bottom: 1px solid #111; cursor: pointer; transition: 0.2s; position: relative; display: flex; justify-content: space-between; align-items: center; }  
-    .note-item:hover { background: var(--bg-hover); padding-left: 25px; }  
+    .note-item:hover { background: var(--bg-hover); }  
     .note-item.active { background: rgba(0, 255, 0, 0.05); border-right: 4px solid var(--neon-main); }
+    .note-item.selected { background: rgba(0, 255, 0, 0.1); border-left: 4px solid var(--neon-main); }
     .note-item .pin-icon { opacity: 0; font-size: 0.7rem; color: var(--neon-yellow); }
     .note-item.pinned .pin-icon { opacity: 1; }
+    
+    .custom-checkbox { 
+        width: 16px; height: 16px; margin-right: 12px; border: 1px solid var(--neon-dim); 
+        display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--neon-main);
+    }
+    .custom-checkbox.checked { background: var(--neon-dim); }
+    .custom-checkbox.checked::after { content: '✓'; }
 
     main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); position: relative; }  
     
@@ -134,7 +164,6 @@
     .split-view { display: flex; flex: 1; overflow: hidden; position: relative; }
     #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; line-height: 1.6; z-index: 10; width: 100%; }  
     
-    /* Markdown Preview */
     #md-preview { 
         flex: 1; padding: 30px; background: #080808; 
         color: #aaa; overflow-y: auto; 
@@ -148,6 +177,14 @@
     #md-preview blockquote { border-left: 3px solid var(--neon-blue); margin-left: 0; padding-left: 10px; color: var(--neon-blue); }
 
     .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; z-index: 950; flex-shrink: 0;}  
+
+    /* --- Bulk Action Toolbar --- */
+    #bulk-toolbar {
+        background: #111; padding: 10px; border-top: 1px solid var(--neon-main);
+        display: none; flex-direction: column; gap: 5px;
+    }
+    #bulk-toolbar.visible { display: flex; animation: slideUp 0.2s ease-out; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
     /* --- Modals --- */
     #modal-overlay {
@@ -244,6 +281,21 @@
 </head>  
 <body class="crt">  
 
+<!-- FEATURE 2: OTP SECURITY LOCK LAYER -->
+<div id="lock-layer">
+    <div class="login-box">
+        <h2 style="color: var(--neon-main); margin-bottom:5px;">:: SECURITY CLEARANCE ::</h2>
+        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">ENTER PASSCODE TO UNLOCK TERMINAL</p>
+        <div class="otp-container">
+            <input type="text" maxlength="1" class="otp-input" data-idx="0" autocomplete="off">
+            <input type="text" maxlength="1" class="otp-input" data-idx="1" autocomplete="off">
+            <input type="text" maxlength="1" class="otp-input" data-idx="2" autocomplete="off">
+            <input type="text" maxlength="1" class="otp-input" data-idx="3" autocomplete="off">
+            <input type="text" maxlength="1" class="otp-input" data-idx="4" autocomplete="off">
+        </div>
+    </div>
+</div>
+
 <!-- AUTH LAYER -->
 <div id="auth-layer">  
     <div class="login-box">  
@@ -279,7 +331,7 @@
     <header>  
         <div style="display: flex; align-items: center; gap: 15px;">  
             <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
-            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v6.2</div>  
+            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v6.3</div>  
         </div>  
         <div style="display:flex; align-items:center;">  
             <button class="btn btn-info" onclick="toggleMarkdown()" title="Split Preview"><i class="fas fa-columns"></i> MD</button>
@@ -312,13 +364,22 @@
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="search-bar" class="search-bar" placeholder="SEARCH (Ctrl+F)">
+                <!-- FEATURE: Toggle Selection Mode -->
+                <button class="btn" onclick="toggleSelectionMode()" id="select-toggle-btn" title="Toggle Selection Mode"><i class="fas fa-check-square"></i></button>
             </div>
             
             <div class="tag-cloud" id="tag-cloud"></div>
+            
+            <div class="notes-list" id="notes-list"></div> 
+            
+            <!-- FEATURE: Bulk Action Toolbar -->
+            <div id="bulk-toolbar">
+                <div style="font-size:0.7rem; color:#888; text-align:center;">SELECTED: <span id="sel-count">0</span></div>
+                <!-- Dynamic Buttons will be injected here -->
+                <div id="bulk-btns" style="display:flex; gap:5px; flex-direction:column;"></div>
+            </div>
 
             <div style="padding:5px 15px; font-size:0.6rem; border-bottom:1px solid #222;" id="status-line">STATUS: CHECKING...</div>  
-            
-            <div class="notes-list" id="notes-list"></div>  
         </aside>  
         
         <main>  
@@ -371,6 +432,66 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
 
 <script>  
+    // --- PART 0: SECURITY LOCK LOGIC (Feature 2) ---
+    let isUnlocked = false;
+    
+    function initSecurityLock() {
+        const correctCode = "13579";
+        const inputs = document.querySelectorAll('.otp-input');
+        
+        // Auto-focus first box
+        if(inputs.length > 0) inputs[0].focus();
+
+        inputs.forEach((input, idx) => {
+            input.addEventListener('input', (e) => {
+                // Ensure only numbers
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+
+                if(e.target.value.length === 1) {
+                    // Auto-tab to next
+                    if(idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                    validateCode();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Backspace logic
+                if(e.key === 'Backspace' && !e.target.value && idx > 0) {
+                    inputs[idx - 1].focus();
+                }
+            });
+        });
+
+        function validateCode() {
+            let currentCode = "";
+            inputs.forEach(i => currentCode += i.value);
+            
+            if(currentCode === correctCode) {
+                isUnlocked = true;
+                setTimeout(() => {
+                    document.getElementById('lock-layer').style.display = 'none';
+                    logActivity("SYSTEM UNLOCKED", "success");
+                }, 200);
+            } else if (currentCode.length === 5) {
+                // Wrong code feedback
+                inputs.forEach(i => {
+                    i.style.borderColor = "var(--neon-red)";
+                    i.value = "";
+                });
+                setTimeout(() => {
+                     inputs.forEach(i => i.style.borderColor = "var(--neon-dim)");
+                     inputs[0].focus();
+                }, 500);
+            }
+        }
+    }
+    
+    // Initialize Lock
+    document.addEventListener('DOMContentLoaded', initSecurityLock);
+
+
     // --- PART 1: Core Setup ---
     function setVh() {
         let vh = window.innerHeight * 0.01;
@@ -399,6 +520,10 @@
     let activeFolder = 'INBOX';
     let knownFolders = new Set(['INBOX']);
     let trashUnlocked = false; 
+    
+    // --- MULTI-SELECT STATE ---
+    let isSelectionMode = false;
+    let selectedNotes = new Set();
 
     class SimpleHistory {
         constructor() { this.stack = []; this.index = -1; this.max = 20; }
@@ -576,6 +701,8 @@
             document.getElementById('user-display').innerHTML = `<span>OP: ${user.email.split('@')[0].toUpperCase()}</span> <i class="fas fa-wifi"></i>`;
             loadNotes();  
             checkConnection();
+            // Feature 1: Explicitly clear editor on load, do not create new note
+            clearEditor(true);
         } else {  
             authLayer.style.display = 'flex';  
             appLayer.style.display = 'none';  
@@ -613,10 +740,19 @@
             }
         }
         
+        // Reset selection when switching folders
+        isSelectionMode = false;
+        selectedNotes.clear();
+        document.getElementById('select-toggle-btn').classList.remove('active');
+        document.getElementById('bulk-toolbar').classList.remove('visible');
+        
         activeFolder = folderName;
         renderFolders(getLocalCache());
         renderNoteList(getLocalCache());
-        createNewNote();
+        
+        // Feature 1: Disable auto-creation of new note on folder switch
+        clearEditor(true);
+        
         logActivity(`DIRECTORY: ${folderName}`, "info");
     }
 
@@ -745,6 +881,168 @@
         }
     }
 
+    // --- SELECTION & LIST LOGIC ---
+
+    function toggleSelectionMode() {
+        isSelectionMode = !isSelectionMode;
+        
+        // Toggle Button Active State
+        const btn = document.getElementById('select-toggle-btn');
+        if(isSelectionMode) btn.classList.add('active');
+        else btn.classList.remove('active');
+
+        // Reset selections if turning off
+        if(!isSelectionMode) {
+            selectedNotes.clear();
+            document.getElementById('bulk-toolbar').classList.remove('visible');
+        }
+
+        renderNoteList(getLocalCache());
+        logActivity(isSelectionMode ? "SELECTION MODE: ACTIVE" : "SELECTION MODE: OFF", "info");
+    }
+
+    function toggleNoteSelection(id, event) {
+        // Prevent opening the note
+        if(event) event.stopPropagation();
+
+        if (selectedNotes.has(id)) {
+            selectedNotes.delete(id);
+        } else {
+            selectedNotes.add(id);
+        }
+        
+        // Refresh UI for specific item instead of full re-render for speed, 
+        // but full re-render is safer for syncing checkbox state
+        renderNoteList(getLocalCache());
+        updateBulkToolbar();
+    }
+
+    function updateBulkToolbar() {
+        const toolbar = document.getElementById('bulk-toolbar');
+        const countSpan = document.getElementById('sel-count');
+        const btnsDiv = document.getElementById('bulk-btns');
+
+        if(selectedNotes.size > 0) {
+            toolbar.classList.add('visible');
+            countSpan.innerText = selectedNotes.size;
+            
+            // Generate Context-Aware Buttons
+            btnsDiv.innerHTML = '';
+            
+            if(activeFolder === 'TRASH') {
+                // Restore Button
+                const btnRes = document.createElement('button');
+                btnRes.className = 'btn btn-info';
+                btnRes.innerText = 'RESTORE SELECTED';
+                btnRes.onclick = bulkRestore;
+                btnsDiv.appendChild(btnRes);
+
+                // Permanent Delete Button
+                const btnDel = document.createElement('button');
+                btnDel.className = 'btn btn-danger';
+                btnDel.innerText = 'DELETE PERMANENTLY';
+                btnDel.onclick = bulkPermanentDelete;
+                btnsDiv.appendChild(btnDel);
+            } else {
+                // Trash Button
+                const btnTrash = document.createElement('button');
+                btnTrash.className = 'btn btn-danger';
+                btnTrash.innerText = 'MOVE TO TRASH';
+                btnTrash.onclick = bulkMoveToTrash;
+                btnsDiv.appendChild(btnTrash);
+            }
+
+        } else {
+            toolbar.classList.remove('visible');
+        }
+    }
+
+    // --- BULK OPERATIONS ---
+    async function bulkMoveToTrash() {
+        if(selectedNotes.size === 0) return;
+        const confirm = await SystemUI.confirm("BULK DELETE", `Move ${selectedNotes.size} notes to Trash?`, true);
+        if(!confirm) return;
+
+        const cache = getLocalCache();
+        let count = 0;
+        
+        selectedNotes.forEach(id => {
+            if(cache[id]) {
+                cache[id].folder = 'TRASH';
+                if(navigator.onLine && !id.startsWith('temp_')) {
+                    db.ref(`notes/${currentUser}/${id}/folder`).set('TRASH');
+                } else {
+                    addToOfflineQueue(id, { ...cache[id] });
+                }
+                count++;
+            }
+        });
+
+        setLocalCache(cache);
+        selectedNotes.clear();
+        isSelectionMode = false;
+        document.getElementById('select-toggle-btn').classList.remove('active');
+        document.getElementById('bulk-toolbar').classList.remove('visible');
+        
+        // If current open note was deleted, clear editor
+        if(selectedNotes.has(document.getElementById('current-id').value)) {
+            clearEditor(true);
+        }
+        
+        renderNoteList(cache);
+        logActivity(`MOVED ${count} ITEMS TO TRASH`, "error");
+    }
+
+    async function bulkRestore() {
+        if(selectedNotes.size === 0) return;
+        
+        const cache = getLocalCache();
+        let count = 0;
+        
+        selectedNotes.forEach(id => {
+            if(cache[id]) {
+                cache[id].folder = 'INBOX';
+                if(navigator.onLine && !id.startsWith('temp_')) {
+                    db.ref(`notes/${currentUser}/${id}/folder`).set('INBOX');
+                } else {
+                    addToOfflineQueue(id, { ...cache[id] });
+                }
+                count++;
+            }
+        });
+
+        setLocalCache(cache);
+        selectedNotes.clear();
+        updateBulkToolbar();
+        renderNoteList(cache);
+        logActivity(`RESTORED ${count} ITEMS`, "success");
+    }
+
+    async function bulkPermanentDelete() {
+         if(selectedNotes.size === 0) return;
+         const confirm = await SystemUI.confirm("DELETE FOREVER?", `Permanently remove ${selectedNotes.size} notes?`, true);
+         if(!confirm) return;
+
+         const cache = getLocalCache();
+         selectedNotes.forEach(id => {
+            delete cache[id];
+            if(navigator.onLine && !id.startsWith('temp_')) {
+                db.ref(`notes/${currentUser}/${id}`).remove();
+            }
+         });
+         
+         setLocalCache(cache);
+         selectedNotes.clear();
+         updateBulkToolbar();
+         
+         if(selectedNotes.has(document.getElementById('current-id').value)) {
+             clearEditor(true);
+         }
+         
+         renderNoteList(cache);
+         logActivity("SELECTED ITEMS DELETED", "error");
+    }
+
     function renderNoteList(data) {
         const list = document.getElementById('notes-list');  
         const activeId = document.getElementById('current-id').value;
@@ -781,20 +1079,40 @@
                 const noteText = (note.text || '').toLowerCase();
                 if(filterTag && !note.lockHash && !noteText.includes(filterTag)) return;
                 
-                const div = document.createElement('div');  
-                div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '');  
+                const div = document.createElement('div');
+                const isSelected = selectedNotes.has(note.id);
+                
+                div.className = 'note-item' + 
+                    (note.id === activeId ? ' active' : '') + 
+                    (note.pinned ? ' pinned' : '') + 
+                    (isSelected ? ' selected' : '');
                 
                 const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
                 const isLocked = note.lockHash ? ' <span style="color:var(--neon-red)">[LOCKED]</span>' : '';
 
+                // Checkbox Logic
+                let checkHtml = '';
+                if(isSelectionMode) {
+                    checkHtml = `<div class="custom-checkbox ${isSelected ? 'checked' : ''}"></div>`;
+                }
+
                 div.innerHTML = `
-                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                        <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i> 
-                        ${(note.title || 'UNTITLED') + isDirty + isLocked}
+                    <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
+                        ${checkHtml}
+                        <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i> 
+                            ${(note.title || 'UNTITLED') + isDirty + isLocked}
+                        </div>
                     </div>
                     <i class="fas fa-star pin-icon"></i>
-                `;  
-                div.onclick = () => loadNoteIntoEditor(note.id, note);  
+                `;
+                
+                if(isSelectionMode) {
+                    div.onclick = (e) => toggleNoteSelection(note.id, e);
+                } else {
+                    div.onclick = () => loadNoteIntoEditor(note.id, note);  
+                }
+                
                 list.appendChild(div);  
             });  
         }
@@ -893,15 +1211,20 @@
         if (!currentUser) return;  
         if (activeFolder === 'TRASH') return;
 
-        // Ensure AUTO SAVE is logged to notice bar as requested
+        let id = document.getElementById('current-id').value;  
+        // Feature 1: Check if this is a "real" note save or just an empty accidental save
+        const title = document.getElementById('doc-title').value;  
+        const text = document.getElementById('doc-body').value;  
+
+        // If no ID and no content, do not create a note
+        if(!id && !title && !text) return;
+
         if(isAuto) {
              // Non-blocking log for auto-save
-             // Don't show modal, just sidebar log
         } else {
              logActivity("MANUAL SAVE...", "info");
         }
 
-        let id = document.getElementById('current-id').value;  
         const isNew = !id;
         
         if (isNew) {
@@ -910,8 +1233,6 @@
             document.getElementById('del-btn').style.display = 'inline-block';
         }
 
-        const title = document.getElementById('doc-title').value;  
-        const text = document.getElementById('doc-body').value;  
         const pinned = document.getElementById('is-pinned').value === 'true';
         
         let folder = isNew ? activeFolder : document.getElementById('current-folder-ref').value;
@@ -972,7 +1293,7 @@
                  addToOfflineQueue(id, { ...cache[id] });
             }
             
-            createNewNote();
+            clearEditor(true); // Don't create new note immediately, just clear
             renderNoteList(cache);
             logActivity("MOVED TO TRASH BIN", "error");
         }
@@ -996,7 +1317,7 @@
                  addToOfflineQueue(id, { ...cache[id] });
             }
             
-            createNewNote();
+            clearEditor(true);
             renderNoteList(cache); 
             logActivity("NOTE RESTORED", "success");
         }
@@ -1014,7 +1335,7 @@
                 db.ref(`notes/${currentUser}/${id}`).remove();
             }
             
-            createNewNote();
+            clearEditor(true);
             renderNoteList(cache);
             logActivity("DELETED FOREVER", "error");
         }
@@ -1426,8 +1747,15 @@
         });
         logActivity("SEARCHING...", "info");
     });
+    
+    function updateWordCount() {
+        const text = document.getElementById('doc-body').value || '';
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        document.getElementById('word-count').innerText = `WORDS: ${words}`;
+    }
 
-    function createNewNote() {  
+    // New helper to clear editor without triggering "New Note" logic
+    function clearEditor(passive = false) {
         document.getElementById('current-id').value = '';  
         document.getElementById('doc-title').value = '';  
         document.getElementById('doc-body').value = '';  
@@ -1444,8 +1772,15 @@
         updatePinBtnUI(false);
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         updateWordCount();
-        document.getElementById('doc-title').focus(); 
-        logActivity("NEW WORKSPACE", "info");
+        
+        if(!passive) {
+            document.getElementById('doc-title').focus(); 
+            logActivity("NEW WORKSPACE", "info");
+        }
+    }
+
+    function createNewNote() {  
+        clearEditor(false);
     }  
     
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }  
@@ -1500,6 +1835,9 @@
     document.addEventListener('keydown', async (e) => {
         if(document.getElementById('modal-overlay').style.display === 'flex') return;
         if(document.getElementById('cmd-palette').style.display === 'flex') return;
+        
+        // Block keys if locked
+        if(!isUnlocked && document.getElementById('lock-layer').style.display !== 'none') return;
 
         // Global Shortcuts
         if (e.ctrlKey || e.altKey) {
