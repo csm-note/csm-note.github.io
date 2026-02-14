@@ -3,60 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSM Cloud OS | Secure Trash & Star</title>
-    
+    <title>CSM Cloud OS | Auto-Category Fixed</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
-    
     <style>
         :root { --accent: #00ffcc; --bg: #0a0a0a; --card: #161616; --border: #333; --star: #ffd700; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #eee; min-height: 100vh; user-select: none; }
-        
+        body { background: var(--bg); color: #eee; min-height: 100vh; user-select: none; overflow-x: hidden; }
         #loginOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
         .card-ui { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; }
-
         #mainContent { display: none; }
         header { padding: 15px 30px; background: #111; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        
         .manager-tools { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #888; transition: 0.3s; }
-        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .tab { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #888; transition: 0.3s; white-space: nowrap; }
+        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px rgba(0,255,204,0.3); }
         .tab-trash { border-color: #ff4444; color: #ff4444; }
-
-        /* File Cards */
-        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
-        .preview-area { height: 130px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
-        .preview-area img, .preview-area video { width: 100%; height: 100%; object-fit: cover; }
-        
-        .file-info { padding: 12px; }
-        .file-name { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 5px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* Star & Action Buttons */
-        .star-btn { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; z-index: 10; font-size: 18px; line-height: 30px; }
-        .star-btn.starred { color: var(--star); text-shadow: 0 0 10px var(--star); }
-        .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.6); color: #fff; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; z-index: 10; }
-
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #1a1a1a; }
-        .act-btn { padding: 8px; font-size: 10px; font-weight: bold; border-radius: 5px; border: none; background: #333; color: #ccc; cursor: pointer; }
-        .act-btn:hover { background: var(--accent); color: #000; }
-
-        /* Modals */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 6000; }
+        .upload-area { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 1px dashed var(--border); }
         .input-text { padding: 12px; background: #222; border: 1px solid var(--border); border-radius: 10px; color: white; width: 100%; text-align: center; margin-bottom: 15px; outline: none; }
-        .btn-main { background: var(--accent); color: #000; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; width: 100%; }
-
-        #progressWrap { display: none; margin: 20px 0; }
-        .p-bar { height: 8px; background: #222; border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        #p-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: 0.3s; }
+        .btn-main { background: var(--accent); color: #000; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; display: inline-block; width: 100%; max-width: 250px; }
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
+        .preview-area { height: 140px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .preview-area img, .preview-area video { width: 100%; height: 100%; object-fit: cover; }
+        .file-info { padding: 10px; border-top: 1px solid #222; }
+        .file-name { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .star-btn { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; z-index: 5; }
+        .star-btn.starred { color: var(--star); }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px; background: #1a1a1a; }
+        .act-btn { padding: 6px; font-size: 9px; font-weight: bold; border-radius: 4px; border: none; background: #333; color: #ccc; cursor: pointer; }
+        #progressWrap { display: none; margin-top: 15px; }
+        .p-bar { height: 6px; background: #222; border-radius: 10px; overflow: hidden; }
+        #p-fill { height: 100%; width: 0%; background: var(--accent); transition: 0.3s; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 6000; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
 <div id="loginOverlay">
     <div class="card-ui">
-        <h2 style="color:var(--accent); margin-bottom:20px;">CSM CLOUD OS</h2>
+        <h2 style="color:var(--accent); margin-bottom:20px;">CSM DRIVE LOGIN</h2>
         <input type="email" id="loginEmail" class="input-text" placeholder="Admin Email">
         <input type="password" id="loginPass" class="input-text" placeholder="Password">
         <button id="doLogin" class="btn-main">Unlock Drive</button>
@@ -65,8 +50,8 @@
 
 <div id="mainContent">
     <header>
-        <div style="font-weight: 800; color: var(--accent);">CSM DRIVE v3.0</div>
-        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; cursor:pointer;">Logout</button>
+        <div style="font-weight: 800; color: var(--accent);">CSM DRIVE v3.1</div>
+        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; cursor:pointer; font-weight:bold;">Logout</button>
     </header>
 
     <div class="manager-tools">
@@ -79,13 +64,13 @@
             <div class="tab tab-trash" onclick="openTrashTab(this)">🗑 Trash</div>
         </div>
 
-        <div style="background:var(--card); padding:20px; border-radius:15px; text-align:center; margin-bottom:25px; border:1px dashed var(--border);">
-            <input type="text" id="filePass" class="input-text" style="max-width:300px" placeholder="File Password (Optional)">
+        <div class="upload-area">
+            <input type="text" id="filePass" class="input-text" style="max-width:300px" placeholder="Optional File Password">
             <br>
-            <label for="fileInput" class="btn-main" style="max-width:200px">+ Upload File</label>
+            <label for="fileInput" class="btn-main">+ Upload New File</label>
             <input type="file" id="fileInput" style="display:none">
             <div id="progressWrap">
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--accent);"><span>Uploading...</span><span id="p-percent">0%</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;"><span id="p-status">Uploading...</span><span id="p-percent">0%</span></div>
                 <div class="p-bar"><div id="p-fill"></div></div>
             </div>
         </div>
@@ -96,11 +81,10 @@
 
 <div id="trashAuthModal" class="modal">
     <div class="card-ui">
-        <h3 style="color:#ff4444; margin-bottom:15px;">Secret Trash Access</h3>
-        <p style="font-size:12px; color:#888; margin-bottom:15px;">Enter Trash Secret Password</p>
-        <input type="password" id="trashSecretPass" class="input-text" placeholder="Secret Key">
+        <h3 style="color:#ff4444; margin-bottom:15px;">Trash Security</h3>
+        <input type="password" id="trashSecretPass" class="input-text" placeholder="Enter Trash Secret">
         <button id="confirmTrashAuth" class="btn-main" style="background:#ff4444; color:white;">Unlock Trash</button>
-        <button onclick="closeModal('trashAuthModal')" style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer;">Cancel</button>
+        <button onclick="document.getElementById('trashAuthModal').style.display='none'" style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
@@ -123,17 +107,20 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const driveRef = ref(db, 'my_gallery');
-    const TRASH_PASSWORD = "123"; // আপনার ট্র্যাশ সিক্রেট পাসওয়ার্ড এখানে দিন
+    
+    // গুরুত্বপূর্ণ: আপনার পুরনো ফাইলের ডাটাবেস পাথটি এখানে দিন (যেমন 'my_gallery')
+    const DB_PATH = 'my_gallery'; 
+    const driveRef = ref(db, DB_PATH);
+    const TRASH_PASSWORD = "123";
 
     let activeTab = 'image';
     let allData = [];
     let isTrashUnlocked = false;
 
-    // Auth
+    // Authentication
     document.getElementById('doLogin').onclick = async () => {
-        try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } 
-        catch (err) { alert("Denied!"); }
+        try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); }
+        catch (err) { alert("Access Denied!"); }
     };
 
     onAuthStateChanged(auth, user => {
@@ -150,45 +137,48 @@
     };
 
     window.openTrashTab = (el) => {
-        if(isTrashUnlocked) {
-            setTab('trash', el);
-        } else {
+        if(isTrashUnlocked) { setTab('trash', el); } 
+        else {
             document.getElementById('trashAuthModal').style.display = 'flex';
             document.getElementById('confirmTrashAuth').onclick = () => {
                 if(document.getElementById('trashSecretPass').value === TRASH_PASSWORD) {
                     isTrashUnlocked = true;
                     document.getElementById('trashAuthModal').style.display = 'none';
                     setTab('trash', el);
-                } else { alert("Wrong Secret Password!"); }
+                } else { alert("Wrong Secret!"); }
             };
         }
     };
 
+    // --- AUTO CATEGORY & DATA FIX LOGIC ---
     function loadFiles() {
         onValue(driveRef, snap => {
             allData = [];
             const data = snap.val();
-            if(data) Object.keys(data).forEach(id => allData.push({id, ...data[id]}));
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    let item = data[id];
+                    const url = (item.url || "").toLowerCase();
+
+                    // যদি ক্যাটাগরি না থাকে, ব্রাউজার নিজে ফাইল চিনে নেবে
+                    if(!item.cat) {
+                        if(url.match(/\.(jpg|jpeg|png|gif|webp|svg)/)) item.cat = 'image';
+                        else if(url.match(/\.(mp4|webm|mov|avi)/)) item.cat = 'video';
+                        else if(url.match(/\.(mp3|wav|m4a|ogg)/)) item.cat = 'audio';
+                        else item.cat = 'raw';
+                    }
+
+                    // পুরনো ফাইলের জন্য ডিফল্ট ভ্যালু
+                    item.trash = item.trash || false;
+                    item.starred = item.starred || false;
+                    item.name = item.name || "File_" + id.substring(0,4);
+                    
+                    allData.push({id, ...item});
+                });
+            }
             renderFiles();
         });
     }
-
-    // Advanced Logic
-    window.toggleStar = (id, currentStatus) => {
-        update(ref(db, `csm_v3_drive/${id}`), { starred: !currentStatus });
-    };
-
-    window.moveToTrash = (id) => {
-        if(confirm("Move to Trash?")) update(ref(db, `csm_v3_drive/${id}`), { trash: true });
-    };
-
-    window.restoreFile = (id) => {
-        update(ref(db, `csm_v3_drive/${id}`), { trash: false });
-    };
-
-    window.permanentDelete = (id) => {
-        if(confirm("Delete forever? This cannot be undone.")) remove(ref(db, `csm_v3_drive/${id}`));
-    };
 
     function renderFiles() {
         const grid = document.getElementById('fileGrid');
@@ -201,7 +191,7 @@
         });
 
         if(filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#555; padding:50px;">Folder is empty.</p>`;
+            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#444;">No files found in ${activeTab}</div>`;
             return;
         }
 
@@ -209,23 +199,23 @@
             const card = document.createElement('div');
             card.className = 'file-card';
             
-            let preview = `<span>${file.cat === 'audio' ? '🎵' : '📄'}</span>`;
+            let preview = `<span>📄</span>`;
             if(file.cat === 'image') preview = `<img src="${file.url}" data-fancybox="gallery">`;
             if(file.cat === 'video') preview = `<video src="${file.url}"></video>`;
+            if(file.cat === 'audio') preview = `<div style="font-size:30px">🎵</div>`;
 
             card.innerHTML = `
-                <button class="star-btn ${file.starred ? 'starred' : ''}" onclick="toggleStar('${file.id}', ${file.starred || false})">★</button>
+                <button class="star-btn ${file.starred ? 'starred' : ''}" onclick="toggleStar('${file.id}', ${file.starred})">★</button>
                 <div class="preview-area">${preview}</div>
                 <div class="file-info">
-                    <div class="file-name">${file.name || 'Untitled'}</div>
-                    <div style="font-size:10px; color:#555;">${file.size} | ${new Date(file.timestamp).toLocaleDateString()}</div>
+                    <div class="file-name">${file.name}</div>
                 </div>
                 <div class="action-grid">
                     ${activeTab === 'trash' ? 
                         `<button class="act-btn" onclick="restoreFile('${file.id}')">Restore</button>
-                         <button class="act-btn" style="color:red" onclick="permanentDelete('${file.id}')">Delete</button>` :
-                        `<button class="act-btn" onclick="window.open('${file.url}')">Open</button>
-                         <button class="act-btn" style="color:#ff4444" onclick="moveToTrash('${file.id}')">Trash</button>`
+                         <button class="act-btn" style="color:#ff4444" onclick="permDelete('${file.id}')">Delete</button>` :
+                        `<button class="act-btn" onclick="window.open('${file.url}')">View</button>
+                         <button class="act-btn" onclick="moveToTrash('${file.id}')">Trash</button>`
                     }
                 </div>
             `;
@@ -233,13 +223,19 @@
         });
     }
 
-    // Upload Logic
+    // Handlers
+    window.toggleStar = (id, cur) => update(ref(db, `${DB_PATH}/${id}`), { starred: !cur });
+    window.moveToTrash = (id) => update(ref(db, `${DB_PATH}/${id}`), { trash: true });
+    window.restoreFile = (id) => update(ref(db, `${DB_PATH}/${id}`), { trash: false });
+    window.permDelete = (id) => { if(confirm("Permanently delete?")) remove(ref(db, `${DB_PATH}/${id}`)); };
+
+    // Upload
     document.getElementById('fileInput').onchange = async (e) => {
         const file = e.target.files[0];
         if(!file) return;
         const wrap = document.getElementById('progressWrap');
         const fill = document.getElementById('p-fill');
-        const pcent = document.getElementById('p-percent');
+        const pTxt = document.getElementById('p-percent');
         wrap.style.display = 'block';
 
         const formData = new FormData();
@@ -250,27 +246,19 @@
         xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
         xhr.upload.onprogress = ev => {
             const p = Math.round((ev.loaded/ev.total)*100);
-            fill.style.width = p + "%"; pcent.innerText = p + "%";
+            fill.style.width = p+"%"; pTxt.innerText = p+"%";
         };
         xhr.onload = () => {
             const res = JSON.parse(xhr.responseText);
-            let cat = 'raw';
-            if(file.type.startsWith('image')) cat = 'image';
-            if(file.type.startsWith('video')) cat = 'video';
-            if(file.type.startsWith('audio')) cat = 'audio';
-
             push(driveRef, {
-                url: res.secure_url, name: file.name, size: (file.size/1024/1024).toFixed(2)+"MB",
-                cat: cat, starred: false, trash: false, timestamp: Date.now(),
-                password: document.getElementById('filePass').value
+                url: res.secure_url, name: file.name, timestamp: Date.now(),
+                starred: false, trash: false
+                // cat লজিক অটোমেটিক loadFiles এ হ্যান্ডেল হবে
             });
             wrap.style.display = 'none';
-            document.getElementById('filePass').value = "";
         };
         xhr.send(formData);
     };
-
-    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 </script>
 </body>
 </html>
