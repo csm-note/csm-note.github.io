@@ -3,92 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Gallery | Secure Cloud</title>
+    <title>Professional Secure Gallery</title>
     <style>
-        /* --- CSS Styling --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0f0f0f; color: white; min-height: 100vh; }
         
         header { 
-            padding: 15px 30px; 
-            background: #141414; 
-            border-bottom: 1px solid #222; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 15px 30px; background: #141414; border-bottom: 1px solid #222; 
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
         }
-        .logo { font-size: 22px; font-weight: bold; color: #00ffcc; letter-spacing: 1px; }
+        .logo { font-size: 22px; font-weight: bold; color: #00ffcc; }
         
         /* Admin Section */
         #adminControls { 
-            display: none; 
-            margin: 20px auto; 
-            max-width: 800px;
-            padding: 30px; 
-            border: 2px dashed #333; 
-            border-radius: 15px; 
-            text-align: center; 
-            background: #141414; 
+            display: none; margin: 20px auto; max-width: 600px; padding: 30px; 
+            border: 1px solid #333; border-radius: 15px; text-align: center; background: #141414; 
         }
-        
+        .admin-header { color: #00ffcc; margin-bottom: 10px; font-size: 20px; }
+        .admin-sub { color: #888; margin-bottom: 20px; font-size: 14px; }
+
+        /* Professional Upload Button Style */
+        .upload-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .custom-upload-btn {
+            background: #00ffcc; color: #000; padding: 12px 30px;
+            border-radius: 50px; cursor: pointer; font-weight: bold;
+            font-size: 16px; transition: 0.3s; display: inline-block;
+        }
+        .custom-upload-btn:hover { background: #00d4aa; transform: translateY(-2px); }
+        input[type="file"] { display: none; } /* ব্রাউজারের ডিফল্ট বাটন হাইড করা হয়েছে */
+
+        .password-input {
+            padding: 12px; border-radius: 8px; border: 1px solid #333;
+            background: #222; color: white; width: 250px; outline: none; text-align: center;
+        }
+        .password-input:focus { border-color: #00ffcc; }
+
         /* Gallery Grid */
-        .gallery { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 15px; 
-            padding: 20px; 
-        }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
         .card { 
-            position: relative; 
-            background: #1a1a1a; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            aspect-ratio: 1/1;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative; background: #1a1a1a; border-radius: 12px; 
+            overflow: hidden; aspect-ratio: 1/1; cursor: pointer;
         }
         .card img, .card video { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-        .card:hover img { transform: scale(1.05); }
         
-        /* Buttons */
-        button { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; transition: 0.3s; }
-        .login-btn { background: #00ffcc; color: #000; }
-        .login-btn:hover { background: #00d4aa; }
-        .logout-btn { background: #ff4444; color: #fff; display: none; }
-        .upload-btn { background: #00ffcc; color: #000; margin-top: 10px; font-size: 16px; }
+        /* Lock & Blur Effect */
+        .locked-blur { filter: blur(25px); scale: 1.1; }
+        .lock-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5); z-index: 5;
+        }
+        .lock-icon { font-size: 30px; margin-bottom: 5px; }
+
+        /* Delete Button */
         .delete-btn { 
-            position: absolute; top: 8px; right: 8px; 
-            background: rgba(255, 0, 0, 0.8); color: white; 
-            border-radius: 50%; width: 30px; height: 30px; 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: #ff4444; color: white; 
+            border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 10;
         }
 
-        /* Modal Styling */
-        #loginModal { 
-            display: none; position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
-            justify-content: center; align-items: center; z-index: 1000; 
+        /* Modals */
+        #loginModal, #unlockModal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 1000; 
         }
-        .modal-content { 
-            background: #1a1a1a; padding: 30px; border-radius: 15px; 
-            width: 90%; max-width: 350px; text-align: center; 
-            border: 1px solid #333;
-        }
-        .modal-content input { 
-            width: 100%; padding: 12px; margin: 10px 0; 
-            border-radius: 8px; border: 1px solid #333; 
-            background: #222; color: white; outline: none;
-        }
-        .modal-content input:focus { border-color: #00ffcc; }
+        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 320px; text-align: center; border: 1px solid #333; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #333; }
         
-        .progress { width: 100%; height: 6px; background: #222; margin-top: 20px; border-radius: 10px; overflow: hidden; }
+        .progress-container { width: 100%; height: 6px; background: #222; margin-top: 20px; border-radius: 10px; overflow: hidden; display: none; }
         #progressBar { height: 100%; width: 0%; background: #00ffcc; transition: .3s; }
-        
-        .forgot-link { display: block; margin-top: 15px; color: #00ffcc; text-decoration: none; font-size: 14px; }
-        .forgot-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -96,45 +79,56 @@
 <header>
     <div class="logo">Cloud Gallery</div>
     <div class="auth-box">
-        <button id="authBtn" class="login-btn" onclick="openModal()">Admin Login</button>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
+        <button id="authBtn" style="background:#00ffcc; color:#000; padding:8px 20px; font-weight:bold; border-radius:5px; border:none; cursor:pointer;" onclick="document.getElementById('loginModal').style.display='flex'">Admin Login</button>
+        <button id="logoutBtn" style="background:#ff4444; color:#fff; padding:8px 20px; font-weight:bold; border-radius:5px; border:none; cursor:pointer; display:none;">Logout</button>
     </div>
 </header>
 
 <div id="adminControls">
-    <h3 style="margin-bottom: 10px; color: #00ffcc;">Admin Dashboard</h3>
-    <p style="color: #888; margin-bottom: 15px;">Upload new photos or videos to the gallery</p>
-    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">+ Upload File</button>
-    <input type="file" id="fileInput" accept="image/*,video/*">
-    <div class="progress"><div id="progressBar"></div></div>
+    <h3 class="admin-header">Admin Dashboard</h3>
+    <p class="admin-sub">Upload new photos or videos to the gallery</p>
+    
+    <div class="upload-container">
+        <input type="text" id="filePass" class="password-input" placeholder="Set Protection Password (Optional)">
+        
+        <label for="fileInput" class="custom-upload-btn">
+            + Upload File
+        </label>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        
+        <div class="progress-container" id="pContainer">
+            <div id="progressBar"></div>
+        </div>
+    </div>
 </div>
 
 <div class="gallery" id="gallery"></div>
 
 <div id="loginModal">
     <div class="modal-content">
-        <h2 style="margin-bottom: 15px;">Admin Login</h2>
-        <input type="email" id="email" placeholder="Admin Email">
+        <h2 style="margin-bottom:10px;">Admin Login</h2>
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Password">
-        <button class="login-btn" style="width: 100%;" id="doLogin">Sign In</button>
-        
-        <a href="#" class="forgot-link" id="forgotPassword">Forgot Password?</a>
-        
-        <button style="background:none; color:#888; margin-top:15px; font-size: 14px;" onclick="closeModal()">Cancel</button>
+        <button id="doLogin" style="width:100%; background:#00ffcc; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;">Login</button>
+        <button style="background:none; color:#888; margin-top:10px; border:none; cursor:pointer;" onclick="this.parentElement.parentElement.style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<div id="unlockModal">
+    <div class="modal-content">
+        <h2>Locked Content</h2>
+        <p style="font-size: 14px; color: #888; margin: 10px 0;">This file is password protected.</p>
+        <input type="password" id="unlockPassInput" placeholder="Enter Password">
+        <button id="confirmUnlock" style="width:100%; background:#00ffcc; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Unlock Now</button>
+        <button style="background:none; color:#888; margin-top:10px; border:none; cursor:pointer;" onclick="document.getElementById('unlockModal').style.display='none'">Close</button>
     </div>
 </div>
 
 <script type="module">
-    // --- Firebase Modular Imports ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { 
-        getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { 
-        getDatabase, ref, push, onValue, remove 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    // --- Configurations ---
     const firebaseConfig = {
         apiKey: "AIzaSyBtmUmV1KxQDB0jN9gUQnh-eYWKllMPav0",
         authDomain: "photos-58c8e.firebaseapp.com",
@@ -153,78 +147,72 @@
     const cloudName = "dx7aankx2";
     const uploadPreset = "github_unsigned";
 
-    // --- Modal Controls ---
-    window.openModal = () => { document.getElementById('loginModal').style.display = 'flex'; };
-    window.closeModal = () => { document.getElementById('loginModal').style.display = 'none'; };
-
-    // --- Admin Auth Logic ---
+    // Auth Logic
     document.getElementById('doLogin').addEventListener('click', async () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            closeModal();
+            await signInWithEmailAndPassword(auth, e, p);
+            document.getElementById('loginModal').style.display = 'none';
         } catch (err) { alert("Login Error: " + err.message); }
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-    // Forgot Password Logic
-    document.getElementById('forgotPassword').addEventListener('click', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        if (!email) return alert("Please type your admin email in the box first.");
-        try {
-            await sendPasswordResetEmail(auth, email);
-            alert("A password reset link has been sent to your email!");
-        } catch (err) { alert("Error: " + err.message); }
-    });
-
-    // Monitor Auth Status
     onAuthStateChanged(auth, (user) => {
-        const adminPanel = document.getElementById('adminControls');
-        const authBtn = document.getElementById('authBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        
-        if (user) {
-            adminPanel.style.display = 'block';
-            logoutBtn.style.display = 'block';
-            authBtn.style.display = 'none';
-        } else {
-            adminPanel.style.display = 'none';
-            logoutBtn.style.display = 'none';
-            authBtn.style.display = 'block';
-        }
-        renderGallery(user); // Re-render gallery to show/hide delete buttons
+        document.getElementById('adminControls').style.display = user ? 'block' : 'none';
+        document.getElementById('logoutBtn').style.display = user ? 'block' : 'none';
+        document.getElementById('authBtn').style.display = user ? 'none' : 'block';
+        renderGallery(user);
     });
 
-    // --- Gallery Logic ---
+    // Gallery Render
     function renderGallery(isAdmin) {
         onValue(galleryRef, (snapshot) => {
             const galleryDiv = document.getElementById("gallery");
             galleryDiv.innerHTML = "";
             const data = snapshot.val();
-            
             if (data) {
                 Object.keys(data).reverse().forEach(key => {
                     const item = data[key];
                     const card = document.createElement("div");
                     card.className = "card";
                     
-                    // Render Image or Video
-                    if (item.type === "video") {
-                        card.innerHTML = `<video src="${item.url}" controls></video>`;
-                    } else {
-                        card.innerHTML = `<img src="${item.url}" loading="lazy">`;
-                    }
+                    const isLocked = item.password && item.password !== "";
                     
-                    // Add Delete Button if Admin
+                    const mediaHtml = item.type === "video" ? 
+                        `<video src="${item.url}" class="${isLocked ? 'locked-blur' : ''}"></video>` : 
+                        `<img src="${item.url}" class="${isLocked ? 'locked-blur' : ''}">`;
+                    
+                    card.innerHTML = mediaHtml;
+
+                    if (isLocked) {
+                        const overlay = document.createElement("div");
+                        overlay.className = "lock-overlay";
+                        overlay.innerHTML = `<span class="lock-icon">🔒</span><p style="font-size:12px; font-weight:bold;">LOCKED</p>`;
+                        card.appendChild(overlay);
+                        
+                        card.onclick = () => {
+                            const modal = document.getElementById('unlockModal');
+                            modal.style.display = 'flex';
+                            document.getElementById('confirmUnlock').onclick = () => {
+                                if (document.getElementById('unlockPassInput').value === item.password) {
+                                    card.querySelector('.locked-blur').classList.remove('locked-blur');
+                                    overlay.remove();
+                                    modal.style.display = 'none';
+                                    document.getElementById('unlockPassInput').value = "";
+                                } else { alert("Wrong Password!"); }
+                            };
+                        };
+                    }
+
                     if (isAdmin) {
                         const delBtn = document.createElement("button");
                         delBtn.className = "delete-btn";
-                        delBtn.innerHTML = "×";
-                        delBtn.onclick = () => {
-                            if(confirm("Delete this file forever?")) remove(ref(db, `my_gallery/${key}`));
+                        delBtn.innerHTML = "✕";
+                        delBtn.onclick = (e) => { 
+                            e.stopPropagation(); 
+                            if(confirm("Delete this permanently?")) remove(ref(db, `my_gallery/${key}`)); 
                         };
                         card.appendChild(delBtn);
                     }
@@ -234,22 +222,24 @@
         });
     }
 
-    // --- Cloudinary Upload Logic ---
+    // Professional Upload Logic
     async function uploadFile(file) {
-        if(!file || !auth.currentUser) return;
-        
-        const progressBar = document.getElementById("progressBar");
+        if(!file) return;
+        const pContainer = document.getElementById("pContainer");
+        const pBar = document.getElementById("progressBar");
+        const pass = document.getElementById("filePass").value;
+
+        pContainer.style.display = "block";
+
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", uploadPreset);
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`);
-
+        
         xhr.upload.onprogress = (e) => {
-            if(e.lengthComputable) {
-                progressBar.style.width = (e.loaded / e.total * 100) + "%";
-            }
+            if(e.lengthComputable) pBar.style.width = (e.loaded / e.total * 100) + "%";
         };
 
         xhr.onload = () => {
@@ -258,17 +248,18 @@
                 push(galleryRef, {
                     url: res.secure_url,
                     type: res.resource_type,
+                    password: pass,
                     timestamp: Date.now()
                 });
+                document.getElementById("filePass").value = "";
             } else { alert("Upload Failed!"); }
-            progressBar.style.width = "0%";
+            pContainer.style.display = "none";
+            pBar.style.width = "0%";
         };
-        
-        xhr.onerror = () => alert("Network Error!");
         xhr.send(formData);
     }
 
-    document.getElementById("fileInput").addEventListener("change", (e) => uploadFile(e.target.files[0]));
+    document.getElementById("fileInput").addEventListener("change", e => uploadFile(e.target.files[0]));
 </script>
 </body>
 </html>
