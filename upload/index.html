@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Cloud Gallery</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{
+  background:#0f0f0f;
+  color:white;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+header{
+  padding:20px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  background:#141414;
+  letter-spacing:1px;
+}
+.upload-area{
+  margin:20px;
+  padding:30px;
+  border:2px dashed #444;
+  border-radius:15px;
+  text-align:center;
+  transition:.3s;
+}
+.upload-area.dragover{
+  background:#1f1f1f;
+  border-color:#00ffcc;
+}
+input{display:none}
+button{
+  padding:10px 20px;
+  background:#00ffcc;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-top:10px;
+}
+.progress{
+  width:100%;
+  height:6px;
+  background:#222;
+  margin-top:10px;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#00ffcc;
+  transition:.3s;
+}
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:15px;
+  padding:20px;
+  flex:1;
+}
+.card{
+  position:relative;
+}
+.card img{
+  width:100%;
+  border-radius:12px;
+}
+.delete{
+  position:absolute;
+  top:5px;
+  right:5px;
+  background:red;
+  border:none;
+  color:white;
+  border-radius:50%;
+  width:25px;
+  height:25px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>Professional Cloud Gallery</header>
+
+<div class="upload-area" id="dropArea">
+  <p>Drag & Drop Image Here</p>
+  <button onclick="fileInput.click()">Select Image</button>
+  <input type="file" id="fileInput" accept="image/*">
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+/* ====== Config ====== */
+const cloudName = "dx7aankx2";          // Your Cloud Name
+const uploadPreset = "github_unsigned"; // Your Unsigned Upload Preset
+
+/* ====== DOM Elements ====== */
+const fileInput = document.getElementById("fileInput");
+const gallery = document.getElementById("gallery");
+const dropArea = document.getElementById("dropArea");
+const progressBar = document.getElementById("progressBar");
+
+/* ====== Gallery Storage ====== */
+let images = JSON.parse(localStorage.getItem("galleryImages")) || [];
+
+function saveImages(){ localStorage.setItem("galleryImages", JSON.stringify(images)); }
+
+function renderGallery(){
+  gallery.innerHTML="";
+  images.forEach((url,index)=>{
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`<img src="${url}"><button class="delete" onclick="deleteImage(${index})">×</button>`;
+    gallery.appendChild(div);
+  });
+}
+
+function deleteImage(index){
+  images.splice(index,1);
+  saveImages();
+  renderGallery();
+}
+
+/* ====== Cloudinary Upload ====== */
+async function uploadImage(file){
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
+
+  xhr.upload.onprogress = function(e){
+    if(e.lengthComputable){
+      let percent = (e.loaded / e.total) * 100;
+      progressBar.style.width = percent + "%";
+    }
+  };
+
+  xhr.onload = function(){
+    const data = JSON.parse(xhr.responseText);
+    images.unshift(data.secure_url);  // Add to gallery
+    saveImages();
+    renderGallery();
+    progressBar.style.width = "0%";
+  };
+
+  xhr.send(formData);
+}
+
+/* ====== Event Listeners ====== */
+fileInput.addEventListener("change", function(){ uploadImage(this.files[0]); });
+
+dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.classList.add("dragover"); });
+dropArea.addEventListener("dragleave", ()=>{ dropArea.classList.remove("dragover"); });
+dropArea.addEventListener("drop", e => {
+  e.preventDefault(); dropArea.classList.remove("dragover");
+  uploadImage(e.dataTransfer.files[0]);
+});
+
+/* ====== Initialize ====== */
+renderGallery();
+</script>
+
+</body>
+</html>
