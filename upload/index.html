@@ -3,64 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Pro Gallery | Csm Mohasin Alam</title>
+    <title>CSM Pro Gallery | Analytics & Lightbox</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
-        body { background: #0f0f0f; color: white; min-height: 100vh; -webkit-touch-callout: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0a; color: white; min-height: 100vh; user-select: none; }
         
         header { 
-            padding: 15px 30px; background: #141414; border-bottom: 1px solid #222; 
+            padding: 15px 30px; background: #111; border-bottom: 1px solid #222; 
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
-        .logo { font-size: 20px; font-weight: bold; color: #00ffcc; }
+        .logo { font-size: 20px; font-weight: bold; color: #00ffcc; text-transform: uppercase; }
 
-        /* Admin Dashboard */
-        #adminControls { display: none; margin: 20px auto; max-width: 600px; padding: 25px; border: 1px solid #333; border-radius: 15px; text-align: center; background: #141414; }
-        .upload-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .custom-upload-btn { background: #00ffcc; color: #000; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; }
-        input[type="file"], input[type="text"] { margin-bottom: 10px; }
-        .pass-input { padding: 8px; border-radius: 5px; border: 1px solid #333; background: #222; color: #fff; width: 220px; }
+        /* Admin Analytics & Controls */
+        #adminPanel { display: none; margin: 20px auto; max-width: 900px; padding: 20px; }
+        .analytics-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; margin-bottom: 20px; 
+        }
+        .stat-card { background: #1a1a1a; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #333; }
+        .stat-card h4 { color: #888; font-size: 12px; margin-bottom: 5px; }
+        .stat-card p { font-size: 20px; font-weight: bold; color: #00ffcc; }
+
+        .upload-box { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px dashed #444; text-align: center; }
+        .custom-btn { background: #00ffcc; color: #000; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; border:none; transition: 0.3s; }
+        .custom-btn:hover { transform: scale(1.05); }
+        .pass-input { padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; width: 200px; margin-right: 10px; outline: none; }
 
         /* Gallery Grid */
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding: 20px; }
-        .card { position: relative; background: #1a1a1a; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; }
-        .card img, .card video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
+        .card { position: relative; background: #1a1a1a; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; cursor: zoom-in; }
+        .card img, .card video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Transparent Overlay - To block direct interaction */
-        .overlay-protector { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: rgba(0,0,0,0); }
+        /* Protection Layer for Users */
+        .user-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: transparent; }
 
-        .locked-blur { filter: blur(30px); }
-        .lock-status { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6; text-align: center; }
+        .locked-blur { filter: blur(35px); }
+        .lock-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; text-align: center; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 50%; }
 
-        /* Buttons */
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 20; }
-        .download-admin-btn { position: absolute; bottom: 10px; right: 10px; background: #00ffcc; color: #000; border: none; padding: 5px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; z-index: 20; text-decoration: none; }
+        /* Admin Controls on Card */
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .delete-btn:hover { background: red; }
 
         /* Modal */
         #loginModal, #unlockModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 320px; text-align: center; border: 1px solid #333; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #333; }
+        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #333; outline: none; }
         
-        #progressBar { height: 5px; background: #00ffcc; width: 0%; transition: 0.3s; margin-top: 10px; border-radius: 5px; }
+        #progressContainer { width: 100%; height: 4px; background: #222; margin-top: 15px; border-radius: 10px; overflow: hidden; display: none; }
+        #progressBar { height: 100%; width: 0%; background: #00ffcc; transition: 0.3s; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <header>
-    <div class="logo">CSM GALLERY</div>
+    <div class="logo">CSM PRO GALLERY</div>
     <div class="auth-box">
-        <button id="authBtn" style="background:#00ffcc; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;" onclick="document.getElementById('loginModal').style.display='flex'">Login</button>
-        <button id="logoutBtn" style="background:red; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; display:none;">Logout</button>
+        <button id="authBtn" class="custom-btn" onclick="document.getElementById('loginModal').style.display='flex'">Admin Login</button>
+        <button id="logoutBtn" class="custom-btn" style="background:red; color:white; display:none;">Logout</button>
     </div>
 </header>
 
-<div id="adminControls">
-    <div class="upload-container">
+<div id="adminPanel">
+    <div class="analytics-grid">
+        <div class="stat-card"><h4>Total Items</h4><p id="statTotal">0</p></div>
+        <div class="stat-card"><h4>Images</h4><p id="statImages">0</p></div>
+        <div class="stat-card"><h4>Videos</h4><p id="statVideos">0</p></div>
+        <div class="stat-card"><h4>Locked</h4><p id="statLocked">0</p></div>
+    </div>
+    
+    <div class="upload-box">
         <input type="text" id="filePass" class="pass-input" placeholder="Set Password (Optional)">
-        <label for="fileInput" class="custom-upload-btn">+ Choose & Upload</label>
+        <label for="fileInput" class="custom-btn">+ Upload Content</label>
         <input type="file" id="fileInput" style="display:none">
-        <div style="width:100%; background:#222; border-radius:5px;"><div id="progressBar"></div></div>
+        <div id="progressContainer"><div id="progressBar"></div></div>
     </div>
 </div>
 
@@ -69,21 +88,23 @@
 <div id="loginModal">
     <div class="modal-content">
         <h3>Admin Access</h3>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="doLogin" style="width:100%; background:#00ffcc; padding:10px; border:none; border-radius:5px; font-weight:bold;">Login</button>
-        <button style="background:none; color:#777; margin-top:10px; border:none;" onclick="this.parentElement.parentElement.style.display='none'">Cancel</button>
+        <input type="email" id="loginEmail" class="modal-input" placeholder="Email">
+        <input type="password" id="loginPass" class="modal-input" placeholder="Password">
+        <button id="doLogin" class="custom-btn" style="width:100%">Sign In</button>
+        <button style="background:none; color:#555; margin-top:10px; border:none; cursor:pointer;" onclick="this.parentElement.parentElement.style.display='none'">Cancel</button>
     </div>
 </div>
 
 <div id="unlockModal">
     <div class="modal-content">
         <h3>Locked Content</h3>
-        <input type="password" id="unlockPassInput" placeholder="Enter Password">
-        <button id="confirmUnlock" style="width:100%; background:#00ffcc; padding:10px; border:none; border-radius:5px; font-weight:bold;">Unlock</button>
+        <p style="font-size:12px; color:#888; margin:5px 0 15px;">Please enter the password to view this file.</p>
+        <input type="password" id="unlockPassInput" class="modal-input" placeholder="Enter Password">
+        <button id="confirmUnlock" class="custom-btn" style="width:100%">Unlock Now</button>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -104,100 +125,151 @@
     const db = getDatabase(app);
     const galleryRef = ref(db, 'my_gallery');
 
-    // --- Security: Disable Shortcuts ---
-    document.addEventListener('keydown', e => {
-        if (e.ctrlKey && (e.key==='s' || e.key==='u' || e.key==='S' || e.key==='U')) e.preventDefault();
-        if (e.key === 'F12') e.preventDefault();
+    // Fancybox Init
+    Fancybox.bind("[data-fancybox]", {
+        infinite: false,
+        dragToClose: false,
+        Toolbar: { display: { left: ["infobar"], middle: [], right: ["iterateZoom", "slideshow", "fullscreen", "download", "close"] } }
     });
 
-    // --- Auth Logic ---
-    document.getElementById('doLogin').addEventListener('click', async () => {
+    // Auth Logic
+    document.getElementById('doLogin').onclick = async () => {
         try {
-            await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
             document.getElementById('loginModal').style.display = 'none';
-        } catch (err) { alert("Failed!"); }
-    });
+        } catch (err) { alert("Access Denied!"); }
+    };
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
     onAuthStateChanged(auth, user => {
-        document.getElementById('adminControls').style.display = user ? 'block' : 'none';
+        document.getElementById('adminPanel').style.display = user ? 'block' : 'none';
         document.getElementById('logoutBtn').style.display = user ? 'block' : 'none';
         document.getElementById('authBtn').style.display = user ? 'none' : 'block';
         loadGallery(user);
     });
 
-    // --- Gallery Logic ---
+    // Gallery Logic
     function loadGallery(isAdmin) {
         onValue(galleryRef, snap => {
             const div = document.getElementById('gallery');
             div.innerHTML = "";
             const data = snap.val();
+            
+            // Analytics Logic
+            let total = 0, imgs = 0, vids = 0, locks = 0;
+
             if (data) {
                 Object.keys(data).reverse().forEach(key => {
                     const item = data[key];
+                    total++;
+                    item.type === "video" ? vids++ : imgs++;
+                    if(item.password) locks++;
+
                     const card = document.createElement('div');
                     card.className = 'card';
                     
-                    // Watermark Logic
-                    // ইউজার দেখবে ওয়াটারমার্কসহ, অ্যাডমিন দেখবে অরিজিনাল
-                    let displayUrl = item.url;
+                    // Watermark Logic for Users
+                    let thumbUrl = item.url;
                     if (!isAdmin && item.type === "image") {
-                        // Cloudinary dynamic watermark: Text overlay at south (bottom)
-                        displayUrl = item.url.replace("/upload/", "/upload/c_scale,w_800/g_south,l_text:Arial_25_bold:Photo%20by%3A%20Csm%20Mohasin%20Alam,co_rgb:FFFFFF,o_60,y_15/");
+                        thumbUrl = item.url.replace("/upload/", "/upload/c_scale,w_600/g_south,l_text:Arial_20_bold:Photo%20by%3A%20Csm%20Mohasin%20Alam,co_rgb:FFFFFF,o_60,y_10/");
                     }
 
-                    card.innerHTML = `<div class="overlay-protector"></div>`;
+                    // Content HTML
+                    const isLocked = item.password && item.password !== "";
+                    let contentHtml = "";
+
                     if (item.type === "video") {
-                        card.innerHTML += `<video src="${item.url}" class="${item.password ? 'locked-blur' : ''}" ${!item.password ? 'controls' : ''} controlsList="nodownload"></video>`;
+                        contentHtml = `<video src="${item.url}" class="${isLocked ? 'locked-blur' : ''}"></video>`;
                     } else {
-                        card.innerHTML += `<img src="${displayUrl}" class="${item.password ? 'locked-blur' : ''}">`;
+                        contentHtml = `<img src="${thumbUrl}" class="${isLocked ? 'locked-blur' : ''}">`;
                     }
 
-                    if (item.password) {
-                        card.innerHTML += `<div class="lock-status">🔒 Private</div>`;
-                        card.onclick = () => unlockItem(item.password, card);
-                    }
+                    // Overlay Logic (Admins don't get protective overlay)
+                    const overlayHtml = isAdmin ? "" : `<div class="user-overlay"></div>`;
+                    const lockHtml = isLocked ? `<div class="lock-tag">🔒</div>` : "";
+                    
+                    card.innerHTML = overlayHtml + contentHtml + lockHtml;
 
+                    // Click Logic
+                    card.onclick = () => {
+                        if (isLocked) {
+                            openUnlockModal(item.password, card, item.url, item.type);
+                        } else {
+                            Fancybox.show([{ src: item.url, type: item.type === "video" ? "video" : "image" }]);
+                        }
+                    };
+
+                    // Admin Controls (No Overlay here, so button works)
                     if (isAdmin) {
-                        card.innerHTML += `<button class="delete-btn" onclick="event.stopPropagation(); remove(ref(getDatabase(), 'my_gallery/${key}'))">✕</button>`;
-                        card.innerHTML += `<a href="${item.url}" target="_blank" download class="download-admin-btn" onclick="event.stopPropagation();">Download Orig</a>`;
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'delete-btn';
+                        delBtn.innerHTML = '✕';
+                        delBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            if(confirm("Delete permanently?")) remove(ref(db, `my_gallery/${key}`));
+                        };
+                        card.appendChild(delBtn);
                     }
+
                     div.appendChild(card);
                 });
             }
+            // Update Analytics Display
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statImages').innerText = imgs;
+            document.getElementById('statVideos').innerText = vids;
+            document.getElementById('statLocked').innerText = locks;
         });
     }
 
-    function unlockItem(correctPass, cardElement) {
+    function openUnlockModal(correctPass, card, url, type) {
         const modal = document.getElementById('unlockModal');
         modal.style.display = 'flex';
         document.getElementById('confirmUnlock').onclick = () => {
             if (document.getElementById('unlockPassInput').value === correctPass) {
-                cardElement.querySelectorAll('.locked-blur').forEach(el => el.classList.remove('locked-blur'));
-                cardElement.querySelector('.lock-status').remove();
                 modal.style.display = 'none';
-            } else { alert("Wrong!"); }
+                document.getElementById('unlockPassInput').value = "";
+                Fancybox.show([{ src: url, type: type === "video" ? "video" : "image" }]);
+            } else { alert("Wrong Password!"); }
         };
     }
 
-    // --- Upload Logic ---
+    // Upload Logic
     document.getElementById('fileInput').onchange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || !auth.currentUser) return;
+        
+        const pCont = document.getElementById('progressContainer');
+        const pBar = document.getElementById('progressBar');
+        pCont.style.display = 'block';
+
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", "github_unsigned");
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
-        xhr.upload.onprogress = ev => document.getElementById('progressBar').style.width = (ev.loaded/ev.total*100) + "%";
+        xhr.upload.onprogress = ev => pBar.style.width = (ev.loaded/ev.total*100) + "%";
         xhr.onload = () => {
             const res = JSON.parse(xhr.responseText);
-            push(galleryRef, { url: res.secure_url, type: res.resource_type, password: document.getElementById('filePass').value, timestamp: Date.now() });
-            document.getElementById('progressBar').style.width = "0%";
+            push(galleryRef, { 
+                url: res.secure_url, 
+                type: res.resource_type, 
+                password: document.getElementById('filePass').value, 
+                timestamp: Date.now() 
+            });
+            pCont.style.display = 'none';
+            pBar.style.width = "0%";
+            document.getElementById('filePass').value = "";
         };
         xhr.send(formData);
     };
+
+    // Keyboard Protection
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && ['s','u','S','U'].includes(e.key)) e.preventDefault();
+        if (e.key === 'F12') e.preventDefault();
+    });
 </script>
 </body>
 </html>
