@@ -2,263 +2,2247 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSM Cloud OS | Auto-Category Fixed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CSM DRIVE | ULTRA PRO</title>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --accent: #00ffcc; --bg: #0a0a0a; --card: #161616; --border: #333; --star: #ffd700; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #eee; min-height: 100vh; user-select: none; overflow-x: hidden; }
-        #loginOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
-        .card-ui { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; }
-        #mainContent { display: none; }
-        header { padding: 15px 30px; background: #111; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .manager-tools { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .tab { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #888; transition: 0.3s; white-space: nowrap; }
-        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px rgba(0,255,204,0.3); }
-        .tab-trash { border-color: #ff4444; color: #ff4444; }
-        .upload-area { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 1px dashed var(--border); }
-        .input-text { padding: 12px; background: #222; border: 1px solid var(--border); border-radius: 10px; color: white; width: 100%; text-align: center; margin-bottom: 15px; outline: none; }
-        .btn-main { background: var(--accent); color: #000; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; display: inline-block; width: 100%; max-width: 250px; }
-        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
-        .preview-area { height: 140px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
-        .preview-area img, .preview-area video { width: 100%; height: 100%; object-fit: cover; }
-        .file-info { padding: 10px; border-top: 1px solid #222; }
-        .file-name { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .star-btn { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; z-index: 5; }
-        .star-btn.starred { color: var(--star); }
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px; background: #1a1a1a; }
-        .act-btn { padding: 6px; font-size: 9px; font-weight: bold; border-radius: 4px; border: none; background: #333; color: #ccc; cursor: pointer; }
-        #progressWrap { display: none; margin-top: 15px; }
-        .p-bar { height: 6px; background: #222; border-radius: 10px; overflow: hidden; }
-        #p-fill { height: 100%; width: 0%; background: var(--accent); transition: 0.3s; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 6000; }
+        :root {
+            --neon: #00ffcc;
+            --neon2: #00d4ff;
+            --neon3: #a855f7;
+            --neon4: #ff00ff;
+            --neon-glow: 0 0 15px rgba(0, 255, 204, 0.4);
+            --neon-glow2: 0 0 20px rgba(0, 212, 255, 0.3);
+            --neon-glow3: 0 0 20px rgba(168, 85, 247, 0.3);
+            --bg-dark: #030308;
+            --bg-card: rgba(12, 12, 20, 0.85);
+            --glass-bg: rgba(15, 15, 25, 0.75);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.06);
+            --glass-border-hover: 1px solid rgba(0, 255, 204, 0.3);
+            --text-main: #e0e0e0;
+            --text-muted: #666;
+            --danger: #ff3355;
+            --warning: #ffaa00;
+            --success: #00ff88;
+            --surface: rgba(20, 20, 35, 0.9);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        *::-webkit-scrollbar { width: 4px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background: rgba(0,255,204,0.2); border-radius: 10px; }
+
+        body { 
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(0, 255, 204, 0.03), transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(168, 85, 247, 0.03), transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.02), transparent 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(0,255,204,0.3); } 50% { box-shadow: 0 0 20px rgba(0,255,204,0.6), 0 0 40px rgba(0,255,204,0.2); } }
+        @keyframes borderGlow { 0%, 100% { border-color: rgba(0,255,204,0.2); } 50% { border-color: rgba(0,255,204,0.6); } }
+        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes rotateGlow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+        @keyframes typeIn { from { width: 0; } to { width: 100%; } }
+        @keyframes neonPulse {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(0,255,204,0.4), 0 0 10px rgba(0,255,204,0.2), 0 0 20px rgba(0,255,204,0.1);
+                border-color: rgba(0,255,204,0.6);
+            }
+            25% { 
+                box-shadow: 0 0 5px rgba(0,212,255,0.4), 0 0 15px rgba(0,212,255,0.3), 0 0 30px rgba(0,212,255,0.15);
+                border-color: rgba(0,212,255,0.6);
+            }
+            50% { 
+                box-shadow: 0 0 5px rgba(168,85,247,0.4), 0 0 15px rgba(168,85,247,0.3), 0 0 30px rgba(168,85,247,0.15);
+                border-color: rgba(168,85,247,0.6);
+            }
+            75% { 
+                box-shadow: 0 0 5px rgba(255,0,255,0.4), 0 0 15px rgba(255,0,255,0.3), 0 0 30px rgba(255,0,255,0.15);
+                border-color: rgba(255,0,255,0.6);
+            }
+        }
+        @keyframes neonBarGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 4px rgba(0,255,204,0.8)) drop-shadow(0 0 8px rgba(0,255,204,0.4));
+            }
+            33% { 
+                filter: drop-shadow(0 0 6px rgba(0,212,255,0.8)) drop-shadow(0 0 12px rgba(0,212,255,0.4));
+            }
+            66% { 
+                filter: drop-shadow(0 0 6px rgba(168,85,247,0.8)) drop-shadow(0 0 12px rgba(168,85,247,0.4));
+            }
+        }
+        @keyframes progressStripes {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 0; }
+        }
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes successBounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.15); }
+            50% { transform: scale(0.95); }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #particles {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        }
+
+        #loginSection {
+            position: fixed; inset: 0; z-index: 5000;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(3,3,8,0.97);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+        }
+        .login-card {
+            background: var(--surface);
+            border: 1px solid rgba(0,255,204,0.15);
+            padding: 40px 30px; border-radius: 24px; width: 100%; max-width: 420px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 100px rgba(0,255,204,0.05);
+            position: relative; overflow: hidden;
+        }
+        .login-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(0,255,204,0.05), transparent, rgba(168,85,247,0.05), transparent);
+            animation: rotateGlow 8s linear infinite;
+            z-index: -1;
+        }
+        .login-logo {
+            width: 70px; height: 70px; margin: 0 auto 15px;
+            background: linear-gradient(135deg, rgba(0,255,204,0.15), rgba(168,85,247,0.15));
+            border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--neon);
+            border: 1px solid rgba(0,255,204,0.2);
+            animation: glow 3s ease-in-out infinite;
+        }
+        .login-title { font-family: 'Orbitron', sans-serif; color: var(--neon); font-size: 1.5rem; margin-bottom: 6px; letter-spacing: 3px; text-shadow: 0 0 30px rgba(0,255,204,0.3); }
+        .login-sub { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 30px; letter-spacing: 1px; }
+        
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        .input-group label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+        .input-group .input-icon { position: absolute; left: 14px; bottom: 13px; color: #444; font-size: 0.9rem; }
+        
+        .input-glass {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); color: white;
+            padding: 12px 15px 12px 42px; border-radius: 10px; outline: none; font-size: 0.9rem;
+            width: 100%; transition: all 0.3s;
+        }
+        .input-glass:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(0,255,204,0.15); }
+        .input-glass-simple { padding-left: 15px; }
+
+        .btn-neon {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--neon), #00d4aa);
+            color: #000; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.3s; letter-spacing: 1px;
+            text-transform: uppercase; font-family: 'Orbitron', sans-serif;
+        }
+        .btn-neon:hover { box-shadow: 0 0 30px rgba(0,255,204,0.4); transform: translateY(-2px); }
+        .btn-neon:active { transform: scale(0.98); }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #cc2244);
+            color: white;
+        }
+        .btn-outline {
+            background: transparent; border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-main);
+        }
+        .btn-outline:hover { border-color: var(--neon); color: var(--neon); box-shadow: var(--neon-glow); }
+
+        #passcodeSection {
+            position: fixed; inset: 0; z-index: 6000;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(3,3,8,0.98);
+            backdrop-filter: blur(30px);
+            padding: 20px;
+        }
+        .passcode-card {
+            text-align: center; width: 100%; max-width: 360px;
+        }
+        .passcode-dots {
+            display: flex; gap: 15px; justify-content: center; margin: 30px 0;
+        }
+        .passcode-dot {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid rgba(0,255,204,0.4);
+            transition: all 0.3s;
+        }
+        .passcode-dot.filled {
+            background: var(--neon);
+            box-shadow: 0 0 10px rgba(0,255,204,0.5);
+        }
+        .passcode-dot.error {
+            border-color: var(--danger);
+            background: var(--danger);
+            box-shadow: 0 0 10px rgba(255,51,85,0.5);
+        }
+        .keypad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; max-width: 260px; margin: 0 auto;
+        }
+        .key-btn {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            color: white; font-size: 1.4rem; font-family: 'Orbitron', sans-serif;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto;
+        }
+        .key-btn:hover { background: rgba(0,255,204,0.1); border-color: var(--neon); }
+        .key-btn:active { transform: scale(0.9); background: rgba(0,255,204,0.2); }
+        .key-btn.action { background: transparent; border-color: transparent; font-size: 0.8rem; color: var(--text-muted); }
+
+        header {
+            padding: 10px 15px; background: rgba(8,8,15,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: white; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
+        .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--neon), var(--neon3)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+        .brand span { color: var(--neon); }
+
+        .header-actions { display: flex; gap: 6px; align-items: center; }
+        .header-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-muted); padding: 8px 10px; border-radius: 8px;
+            cursor: pointer; transition: all 0.3s; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .header-btn:hover { border-color: var(--neon); color: var(--neon); }
+        .header-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+        .header-btn.active-mode { border-color: var(--neon); color: var(--neon); background: rgba(0,255,204,0.08); }
+
+        .container { max-width: 1500px; margin: 0 auto; padding: 12px; position: relative; z-index: 1; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .stat-box {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.04);
+            padding: 12px; border-radius: 12px;
+            display: flex; align-items: center; gap: 10px; transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .stat-box::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,255,204,0.3), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .stat-box:hover::after { opacity: 1; }
+        .stat-box:hover { border-color: rgba(0,255,204,0.15); transform: translateY(-2px); }
+        .stat-icon {
+            font-size: 1rem; color: var(--neon); width: 36px; height: 36px;
+            background: rgba(0,255,204,0.08); display: flex; align-items: center;
+            justify-content: center; border-radius: 8px; flex-shrink: 0;
+        }
+        .stat-val { font-size: 1.2rem; font-weight: 800; color: white; font-family: 'Orbitron', sans-serif; }
+        .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-bar { height: 2px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 4px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon), var(--neon2)); border-radius: 10px; transition: width 1s; }
+
+        .controls {
+            background: var(--bg-card); padding: 10px 12px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 15px;
+        }
+        .tabs { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+        .tabs::-webkit-scrollbar { height: 0; }
+        .tab-btn {
+            background: transparent; border: 1px solid transparent; color: #555;
+            padding: 7px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            transition: all 0.3s; white-space: nowrap; font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .tab-btn:hover { color: #999; }
+        .tab-btn.active { 
+            background: rgba(0,255,204,0.08); color: var(--neon);
+            border-color: rgba(0,255,204,0.2);
+            box-shadow: 0 0 15px rgba(0,255,204,0.1);
+        }
+
+        .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 0; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.8rem; }
+        .search-box input {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+            color: white; padding: 9px 15px 9px 35px; border-radius: 8px; outline: none;
+            font-size: 0.85rem; width: 100%; transition: all 0.3s;
+        }
+        .search-box input:focus { border-color: var(--neon); }
+
+        .view-toggle { display: flex; gap: 2px; }
+        .view-btn {
+            width: 34px; height: 34px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+            color: #555; border-radius: 6px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.3s; flex-shrink: 0;
+        }
+        .view-btn.active { color: var(--neon); border-color: rgba(0,255,204,0.3); }
+
+        .sort-select-wrap {
+            flex-shrink: 0;
+        }
+
+        .folder-bar { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+        .folder-bar::-webkit-scrollbar { height: 0; }
+        .folder-pill {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+            padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; color: var(--text-muted);
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 5px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .folder-pill:hover { border-color: var(--neon); color: var(--neon); }
+        .folder-pill.active { background: rgba(0,255,204,0.1); border-color: var(--neon); color: var(--neon); }
+        .folder-pill .count { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 10px; font-size: 0.65rem; }
+        .add-folder { border-style: dashed; border-color: rgba(255,255,255,0.1); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding-bottom: 80px; }
+        .grid.list-view { grid-template-columns: 1fr; gap: 6px; }
+        .grid.list-view .card { display: flex; flex-direction: row; height: 65px; }
+        .grid.list-view .preview { width: 65px; height: 65px; min-width: 65px; }
+        .grid.list-view .meta { display: flex; align-items: center; flex: 1; padding: 0 12px; min-width: 0; }
+        .grid.list-view .filename { margin: 0; }
+        .grid.list-view .fileinfo { margin-left: auto; }
+        .grid.list-view .card-actions { position: static; opacity: 1; padding: 0 8px; display: flex; align-items: center; }
+
+        .card {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px; overflow: hidden; position: relative;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            animation: slideUp 0.5s ease-out backwards;
+        }
+        .card:hover { transform: translateY(-3px); border-color: rgba(0,255,204,0.2); box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,255,204,0.05); }
+        .card.selected { border-color: var(--neon); box-shadow: 0 0 20px rgba(0,255,204,0.2); }
+        .card.locked::after {
+            content: '🔒'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 1.8rem; z-index: 5;
+        }
+        .card.locked .preview { filter: blur(20px); }
+
+        .preview { height: 140px; background: #080810; position: relative; cursor: pointer; overflow: hidden; }
+        .preview img, .preview video { width: 100%; height: 100%; object-fit: cover; transition: all 0.5s; }
+        .card:hover .preview img, .card:hover .preview video { transform: scale(1.05); }
+        .preview-overlay {
+            position: absolute; inset: 0; background: linear-gradient(transparent 60%, rgba(0,0,0,0.8));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .card:hover .preview-overlay { opacity: 1; }
+
+        .file-badge {
+            position: absolute; top: 6px; left: 6px; padding: 2px 6px;
+            border-radius: 5px; font-size: 0.6rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; z-index: 3;
+        }
+        .badge-img { background: rgba(0,255,204,0.2); color: var(--neon); }
+        .badge-vid { background: rgba(168,85,247,0.2); color: var(--neon3); }
+
+        .star-badge {
+            position: absolute; top: 6px; right: 6px; color: #ffd700;
+            font-size: 0.8rem; z-index: 3; text-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+        .lock-badge {
+            position: absolute; bottom: 6px; right: 6px; color: var(--warning);
+            font-size: 0.7rem; z-index: 3;
+        }
+
+        .select-check {
+            position: absolute; top: 6px; left: 6px; width: 22px; height: 22px;
+            border-radius: 6px; border: 2px solid rgba(255,255,255,0.2);
+            cursor: pointer; z-index: 10; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5);
+        }
+        .select-check:hover { border-color: var(--neon); }
+        .select-check.checked { background: var(--neon); border-color: var(--neon); }
+        .select-check.checked::after { content: '✓'; color: #000; font-size: 0.7rem; font-weight: 900; }
+
+        .meta { padding: 10px 10px; }
+        .filename { font-size: 0.75rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; font-weight: 500; }
+        .fileinfo { display: flex; justify-content: space-between; font-size: 0.65rem; color: #555; }
+        .folder-tag { font-size: 0.6rem; color: var(--neon2); background: rgba(0,212,255,0.1); padding: 1px 6px; border-radius: 4px; display: inline-block; margin-top: 3px; }
+
+        .card-actions {
+            position: absolute; bottom: 55px; right: 6px;
+            display: flex; flex-direction: column; gap: 3px;
+            opacity: 0; transition: opacity 0.3s; z-index: 10;
+        }
+        .card:hover .card-actions { opacity: 1; }
+        .action-btn {
+            width: 30px; height: 30px; border-radius: 7px;
+            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 0.7rem;
+            backdrop-filter: blur(10px);
+        }
+        .action-btn:hover { background: var(--neon); color: #000; border-color: var(--neon); }
+        .action-btn.danger:hover { background: var(--danger); border-color: var(--danger); color: white; }
+
+        .dots {
+            position: absolute; top: 6px; right: 6px; width: 28px; height: 28px;
+            background: rgba(0,0,0,0.7); color: white; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; opacity: 0; transition: 0.2s;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card:hover .dots { opacity: 1; }
+        /* Mobile: always show dots */
+        @media (hover: none) {
+            .dots { opacity: 1 !important; }
+        }
+        
+        .dropdown {
+            position: absolute; top: 38px; right: 6px; width: 190px;
+            background: rgba(15,15,25,0.98); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; z-index: 20; display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px); overflow: hidden;
+        }
+        .dropdown.active { display: block; animation: fadeIn 0.2s; }
+        .dd-header { padding: 8px 12px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dd-item {
+            padding: 9px 12px; font-size: 0.78rem; color: #bbb; cursor: pointer;
+            display: flex; gap: 8px; align-items: center; transition: all 0.2s;
+        }
+        .dd-item:hover { background: rgba(0,255,204,0.08); color: var(--neon); }
+        .dd-item.danger { color: #ff6b6b; }
+        .dd-item.danger:hover { background: rgba(255,51,85,0.1); color: var(--danger); }
+        .dd-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 3px 0; }
+
+        .multi-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(15,15,25,0.98); border: 1px solid rgba(0,255,204,0.2);
+            padding: 10px 15px; border-radius: 14px; z-index: 200;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 30px rgba(0,255,204,0.1);
+            backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            max-width: calc(100% - 30px);
+            flex-wrap: wrap; justify-content: center;
+        }
+        .multi-bar.active { transform: translateX(-50%) translateY(0); }
+        .multi-count { color: var(--neon); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; }
+        .multi-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #bbb; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+            font-size: 0.75rem; transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+        }
+        .multi-btn:hover { border-color: var(--neon); color: var(--neon); }
+        .multi-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+        .multi-btn.restore:hover { border-color: var(--success); color: var(--success); }
+
+        .fab-group { position: fixed; bottom: 20px; right: 15px; z-index: 1000; }
+        .fab {
+            width: 52px; height: 52px; background: linear-gradient(135deg, var(--neon), #00d4aa);
+            color: black; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(0,255,204,0.3); border: none;
+        }
+        .fab:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,255,204,0.5); }
+        .fab:active { transform: scale(0.95); }
+
+        /* ===== UPLOAD BOX - Enhanced ===== */
+        #uploadBox {
+            position: fixed; bottom: 80px; right: 15px; width: calc(100% - 30px); max-width: 400px;
+            background: var(--surface); padding: 20px; border-radius: 18px;
+            border: 1px solid rgba(0,255,204,0.1);
+            display: none; z-index: 999;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 40px rgba(0,255,204,0.05);
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        #uploadBox.active { display: block; animation: slideUp 0.3s; }
+
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.1); border-radius: 12px;
+            padding: 25px 15px; text-align: center; cursor: pointer; transition: all 0.3s;
+            background: rgba(0,0,0,0.2);
+        }
+        .upload-zone:hover { border-color: var(--neon); background: rgba(0,255,204,0.03); }
+        .upload-zone.dragover { border-color: var(--neon); background: rgba(0,255,204,0.08); animation: neonPulse 1s infinite; }
+        .upload-icon { font-size: 2rem; color: #333; margin-bottom: 8px; }
+        .upload-text { color: #555; font-size: 0.8rem; }
+        .upload-text span { color: var(--neon); }
+        .upload-hint { color: #444; font-size: 0.68rem; margin-top: 6px; }
+
+        /* ===== NEON PROGRESS BAR STYLES ===== */
+        .neon-progress-container {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(0,255,204,0.1);
+        }
+
+        .neon-progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        .neon-progress-title {
+            font-size: 0.8rem; color: var(--neon); font-weight: 600;
+            font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0,255,204,0.5);
+        }
+        .neon-progress-pct {
+            font-size: 1.4rem; font-weight: 900; font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--neon), var(--neon2), var(--neon3));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 10px rgba(0,255,204,0.4));
+            animation: countUp 0.3s ease-out;
+        }
+        .neon-progress-sub {
+            font-size: 0.65rem; color: var(--text-muted); margin-top: 2px;
+        }
+
+        .neon-progress-track {
+            width: 100%; height: 8px; background: rgba(255,255,255,0.03);
+            border-radius: 10px; overflow: hidden; position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .neon-progress-fill {
+            height: 100%; width: 0%; border-radius: 10px;
+            background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3), var(--neon4));
+            background-size: 300% 100%;
+            animation: shimmer 2s linear infinite, neonBarGlow 2s ease-in-out infinite;
+            transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+        .neon-progress-fill::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 5px,
+                rgba(255,255,255,0.1) 5px,
+                rgba(255,255,255,0.1) 10px
+            );
+            background-size: 30px 100%;
+            animation: progressStripes 0.6s linear infinite;
+        }
+        .neon-progress-fill.complete {
+            background: linear-gradient(90deg, var(--success), #00ffcc);
+            animation: successBounce 0.5s ease-out, neonBarGlow 2s ease-in-out infinite;
+        }
+
+        .neon-progress-stats {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 0.65rem; color: var(--text-muted);
+        }
+        .neon-progress-stats .speed {
+            color: var(--neon2);
+        }
+
+        /* Individual file progress in queue */
+        .upload-queue-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; border-radius: 8px;
+            background: rgba(0,0,0,0.25); margin-bottom: 5px;
+            font-size: 0.72rem; color: #888;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+        .upload-queue-item.active {
+            border-color: rgba(0,255,204,0.2);
+            background: rgba(0,255,204,0.03);
+        }
+        .upload-queue-item.done {
+            border-color: rgba(0,255,136,0.15);
+            background: rgba(0,255,136,0.03);
+        }
+        .upload-queue-item.error {
+            border-color: rgba(255,51,85,0.15);
+            background: rgba(255,51,85,0.03);
+        }
+        .upload-queue-item .uq-icon {
+            width: 28px; height: 28px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; flex-shrink: 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .upload-queue-item .uq-name {
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            min-width: 0;
+        }
+        .upload-queue-item .uq-pct {
+            font-family: 'Orbitron', sans-serif; font-size: 0.65rem;
+            font-weight: 700; min-width: 36px; text-align: right;
+            color: var(--neon);
+        }
+        .upload-queue-item .uq-status-icon {
+            font-size: 0.75rem; width: 18px; text-align: center; flex-shrink: 0;
+        }
+        .upload-queue-item .uq-status-icon.queued { color: #555; }
+        .upload-queue-item .uq-status-icon.uploading { color: var(--neon2); animation: pulse 1s infinite; }
+        .upload-queue-item .uq-status-icon.done { color: var(--success); }
+        .upload-queue-item .uq-status-icon.error { color: var(--danger); }
+        
+        .uq-progress-bar {
+            width: 100%; height: 3px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; overflow: hidden; margin-top: 4px;
+        }
+        .uq-progress-fill {
+            height: 100%; width: 0%; border-radius: 10px;
+            background: linear-gradient(90deg, var(--neon), var(--neon2));
+            transition: width 0.3s;
+            filter: drop-shadow(0 0 3px rgba(0,255,204,0.5));
+        }
+        .uq-progress-fill.complete {
+            background: linear-gradient(90deg, var(--success), #00ffcc);
+        }
+        .uq-progress-fill.error {
+            background: var(--danger);
+        }
+
+        .upload-speed-info {
+            display: flex; justify-content: space-between;
+            font-size: 0.6rem; color: #555; margin-top: 2px;
+        }
+
+        .selected-files-preview {
+            margin-top: 10px; padding: 8px 10px; background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .selected-files-text {
+            font-size: 0.72rem; color: var(--neon2);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .upload-form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .upload-form-row .input-glass-simple { flex: 1; }
+        .upload-select {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);
+            color: white; padding: 9px; border-radius: 8px; font-size: 0.8rem; outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px); z-index: 3000;
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+        .modal {
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px; padding: 25px; width: 100%; max-width: 420px;
+            animation: slideUp 0.3s; position: relative;
+            max-height: calc(100vh - 40px); overflow-y: auto;
+        }
+        .modal-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: white; margin-bottom: 8px; }
+        .modal-desc { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 20px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+        .modal-actions button {
+            padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer;
+            font-size: 0.82rem; border: none; transition: all 0.3s;
+        }
+        .modal-cancel { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1) !important; }
+        .modal-cancel:hover { border-color: rgba(255,255,255,0.3) !important; color: white; }
+        .modal-confirm { background: var(--neon); color: black; }
+        .modal-confirm:hover { box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        .modal-confirm.danger { background: var(--danger); color: white; }
+        .modal-confirm.danger:hover { box-shadow: 0 0 20px rgba(255,51,85,0.4); }
+
+        .modal-input {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);
+            color: white; padding: 12px 15px; border-radius: 10px; outline: none; font-size: 0.9rem;
+            margin-bottom: 15px; transition: border-color 0.3s;
+        }
+        .modal-input:focus { border-color: var(--neon); }
+
+        .folder-list-modal { max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
+        .folder-option {
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; color: var(--text-main);
+            transition: all 0.2s; margin-bottom: 4px;
+        }
+        .folder-option:hover { background: rgba(0,255,204,0.08); }
+        .folder-option.selected { background: rgba(0,255,204,0.12); border: 1px solid rgba(0,255,204,0.3); }
+        .folder-option i { color: var(--neon); }
+
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--surface); color: var(--neon); padding: 12px 24px; border-radius: 12px;
+            font-weight: 600; transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); z-index: 4000;
+            border: 1px solid rgba(0,255,204,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.82rem; max-width: calc(100% - 30px);
+        }
+        #toast.active { transform: translateX(-50%) translateY(0); }
+        #toast .toast-icon { font-size: 1rem; }
+
+        .info-panel {
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh;
+            background: var(--surface); border-left: 1px solid rgba(255,255,255,0.06);
+            z-index: 2500; transition: right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow-y: auto; padding: 20px;
+        }
+        .info-panel.active { right: 0; }
+        .info-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .info-preview { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; background: #000; }
+        .info-preview img, .info-preview video { width: 100%; height: 100%; object-fit: cover; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .info-label { color: var(--text-muted); font-size: 0.75rem; }
+        .info-value { color: white; font-size: 0.8rem; font-weight: 500; text-align: right; max-width: 60%; word-break: break-all; }
+
+        .empty-state {
+            grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+        }
+        .empty-icon { font-size: 3rem; color: #1a1a2e; margin-bottom: 15px; }
+        .empty-title { font-family: 'Orbitron', sans-serif; color: #333; font-size: 1rem; margin-bottom: 6px; }
+        .empty-desc { color: #444; font-size: 0.8rem; }
+
+        .storage-info {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.04);
+            padding: 12px 15px; border-radius: 12px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .storage-bar-wrap { flex: 1; min-width: 0; }
+        .storage-bar-bg { height: 5px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .storage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3)); border-radius: 10px; transition: width 1s; }
+        .storage-text { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
+        .storage-label { font-size: 0.75rem; color: white; font-weight: 600; white-space: nowrap; }
+
+        .context-menu {
+            position: fixed; width: 200px; background: rgba(15,15,25,0.98);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            z-index: 3000; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px); overflow: hidden; padding: 5px;
+        }
+        .context-menu.active { display: block; animation: fadeIn 0.15s; }
+        .ctx-item {
+            padding: 8px 12px; font-size: 0.78rem; color: #bbb; cursor: pointer;
+            display: flex; gap: 8px; align-items: center; border-radius: 6px; transition: all 0.15s;
+        }
+        .ctx-item:hover { background: rgba(0,255,204,0.08); color: var(--neon); }
+        .ctx-item.danger { color: #ff6b6b; }
+        .ctx-item.danger:hover { background: rgba(255,51,85,0.1); color: var(--danger); }
+        .ctx-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 3px 0; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (min-width: 769px) {
+            .container { padding: 20px; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+            .controls { flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 15px; }
+            .filters { flex: 1; justify-content: flex-end; }
+            .search-box { flex: 0 1 200px; }
+            .search-box input:focus { width: 250px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+            .preview { height: 160px; }
+            .stat-icon { width: 50px; height: 50px; font-size: 1.3rem; }
+            .stat-val { font-size: 1.6rem; }
+            .stat-label { font-size: 0.75rem; }
+            header { padding: 12px 25px; }
+            .brand { font-size: 1.2rem; }
+            #uploadBox { right: 30px; bottom: 100px; width: 400px; max-width: 400px; }
+            .fab-group { bottom: 30px; right: 30px; }
+            .multi-bar { bottom: 30px; }
+            .info-panel { width: 380px; right: -400px; }
+            .info-panel.active { right: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .stat-box { padding: 10px 8px; gap: 8px; }
+            .stat-icon { width: 30px; height: 30px; font-size: 0.85rem; border-radius: 6px; }
+            .stat-val { font-size: 1rem; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .preview { height: 120px; }
+            .header-btn span { display: none; }
+            .brand { font-size: 0.9rem; gap: 6px; }
+            .brand-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+            .multi-btn span { display: none; }
+            .multi-bar { gap: 6px; padding: 8px 10px; }
+            .multi-count { font-size: 0.7rem; }
+            .login-card { padding: 30px 20px; }
+            .login-title { font-size: 1.3rem; }
+            .key-btn { width: 60px; height: 60px; font-size: 1.2rem; }
+            .keypad { gap: 8px; }
+            .tab-btn { padding: 6px 10px; font-size: 0.7rem; }
+            .neon-progress-pct { font-size: 1.1rem; }
+        }
+
+        @media (max-width: 360px) {
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .preview { height: 100px; }
+            .meta { padding: 6px 8px; }
+            .filename { font-size: 0.68rem; }
+            .fileinfo { font-size: 0.58rem; }
+        }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="card-ui">
-        <h2 style="color:var(--accent); margin-bottom:20px;">CSM DRIVE LOGIN</h2>
-        <input type="email" id="loginEmail" class="input-text" placeholder="Admin Email">
-        <input type="password" id="loginPass" class="input-text" placeholder="Password">
-        <button id="doLogin" class="btn-main">Unlock Drive</button>
+<canvas id="particles"></canvas>
+<div id="toast"><span class="toast-icon">✓</span> Action Successful</div>
+
+<!-- Passcode Screen -->
+<div id="passcodeSection" class="hidden">
+    <div class="passcode-card">
+        <div class="login-logo" style="margin-bottom:20px;"><i class="fas fa-shield-halved"></i></div>
+        <div class="login-title" style="font-size:1.2rem; margin-bottom:5px;">ENTER PASSCODE</div>
+        <div class="login-sub" id="passcodeMessage">Enter your 4-digit access code</div>
+        <div class="passcode-dots" id="passcodeDots">
+            <div class="passcode-dot"></div>
+            <div class="passcode-dot"></div>
+            <div class="passcode-dot"></div>
+            <div class="passcode-dot"></div>
+        </div>
+        <div class="keypad" id="keypad">
+            <button class="key-btn" onclick="window.enterPasscode('1')">1</button>
+            <button class="key-btn" onclick="window.enterPasscode('2')">2</button>
+            <button class="key-btn" onclick="window.enterPasscode('3')">3</button>
+            <button class="key-btn" onclick="window.enterPasscode('4')">4</button>
+            <button class="key-btn" onclick="window.enterPasscode('5')">5</button>
+            <button class="key-btn" onclick="window.enterPasscode('6')">6</button>
+            <button class="key-btn" onclick="window.enterPasscode('7')">7</button>
+            <button class="key-btn" onclick="window.enterPasscode('8')">8</button>
+            <button class="key-btn" onclick="window.enterPasscode('9')">9</button>
+            <button class="key-btn action" onclick="window.clearPasscode()"><i class="fas fa-arrow-left"></i></button>
+            <button class="key-btn" onclick="window.enterPasscode('0')">0</button>
+            <button class="key-btn action" onclick="window.cancelPasscode()"><i class="fas fa-xmark"></i></button>
+        </div>
     </div>
 </div>
 
-<div id="mainContent">
+<!-- Login -->
+<div id="loginSection">
+    <div class="login-card">
+        <div class="login-logo"><i class="fas fa-cloud"></i></div>
+        <div class="login-title">CSM DRIVE</div>
+        <div class="login-sub">Secure Cloud File Manager</div>
+        <div class="input-group">
+            <label>Email Address</label>
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="loginEmail" class="input-glass" placeholder="you@example.com">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="loginPass" class="input-glass" placeholder="••••••••">
+        </div>
+        <button id="doLogin" class="btn-neon" style="margin-top:10px;">
+            <i class="fas fa-fingerprint"></i>&nbsp; UNLOCK SYSTEM
+        </button>
+        <div style="margin-top:15px; font-size:0.7rem; color:#333;">Secured with Firebase Auth</div>
+    </div>
+</div>
+
+<!-- Main UI -->
+<div id="mainContent" class="hidden">
     <header>
-        <div style="font-weight: 800; color: var(--accent);">CSM DRIVE v3.1</div>
-        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; cursor:pointer; font-weight:bold;">Logout</button>
+        <div class="brand">
+            <div class="brand-icon"><i class="fas fa-cloud"></i></div>
+            CSM <span>DRIVE</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="selectModeBtn" onclick="window.toggleSelectMode()">
+                <i class="fas fa-check-double"></i> <span>Select</span>
+            </button>
+            <button class="header-btn" onclick="window.showSettings()">
+                <i class="fas fa-gear"></i>
+            </button>
+            <button class="header-btn danger" onclick="window.confirmLogout()">
+                <i class="fas fa-right-from-bracket"></i> <span>Logout</span>
+            </button>
+        </div>
     </header>
 
-    <div class="manager-tools">
-        <div class="tab-bar">
-            <div class="tab active" onclick="setTab('image', this)">Images</div>
-            <div class="tab" onclick="setTab('video', this)">Videos</div>
-            <div class="tab" onclick="setTab('audio', this)">Audio</div>
-            <div class="tab" onclick="setTab('raw', this)">Docs</div>
-            <div class="tab" onclick="setTab('starred', this)" style="color:var(--star)">★ Starred</div>
-            <div class="tab tab-trash" onclick="openTrashTab(this)">🗑 Trash</div>
-        </div>
-
-        <div class="upload-area">
-            <input type="text" id="filePass" class="input-text" style="max-width:300px" placeholder="Optional File Password">
-            <br>
-            <label for="fileInput" class="btn-main">+ Upload New File</label>
-            <input type="file" id="fileInput" style="display:none">
-            <div id="progressWrap">
-                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;"><span id="p-status">Uploading...</span><span id="p-percent">0%</span></div>
-                <div class="p-bar"><div id="p-fill"></div></div>
+    <div class="container">
+        <!-- Storage -->
+        <div class="storage-info">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="stat-icon" style="width:36px;height:36px;font-size:0.9rem;"><i class="fas fa-hard-drive"></i></div>
+                <div class="storage-label">Storage</div>
+            </div>
+            <div class="storage-bar-wrap">
+                <div class="storage-bar-bg"><div class="storage-bar-fill" id="storageFill" style="width:0%"></div></div>
+                <div class="storage-text" id="storageText">Calculating...</div>
             </div>
         </div>
 
-        <div class="file-grid" id="fileGrid"></div>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countAll">0</div>
+                    <div class="stat-label">Total Files</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:100%"></div></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon"><i class="fas fa-image"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countImg">0</div>
+                    <div class="stat-label">Photos</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="imgBar" style="width:0%"></div></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="color:var(--neon3); background:rgba(168,85,247,0.1);"><i class="fas fa-video"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countVid">0</div>
+                    <div class="stat-label">Videos</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="vidBar" style="width:0%; background:linear-gradient(90deg, var(--neon3), #c084fc);"></div></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="color:var(--warning); background:rgba(255,170,0,0.1);"><i class="fas fa-star"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countStar">0</div>
+                    <div class="stat-label">Starred</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="starBar" style="width:0%; background:linear-gradient(90deg, var(--warning), #ffd700);"></div></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="color:var(--danger); background:rgba(255,51,85,0.1);"><i class="fas fa-trash"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countTrash">0</div>
+                    <div class="stat-label">Trash</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="trashBar" style="width:0%; background:linear-gradient(90deg, var(--danger), #ff6b6b);"></div></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="color:var(--neon2); background:rgba(0,212,255,0.1);"><i class="fas fa-folder"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="stat-val" id="countFolders">0</div>
+                    <div class="stat-label">Folders</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="folderBar" style="width:0%; background:linear-gradient(90deg, var(--neon2), #38bdf8);"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="controls">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="window.setTab('all', this)"><i class="fas fa-border-all"></i>&nbsp;All</button>
+                <button class="tab-btn" onclick="window.setTab('image', this)"><i class="fas fa-image"></i>&nbsp;Photos</button>
+                <button class="tab-btn" onclick="window.setTab('video', this)"><i class="fas fa-video"></i>&nbsp;Videos</button>
+                <button class="tab-btn" onclick="window.setTab('starred', this)" style="color:#ffd700"><i class="fas fa-star"></i>&nbsp;Starred</button>
+                <button class="tab-btn" onclick="window.setTab('locked', this)" style="color:var(--warning)"><i class="fas fa-lock"></i>&nbsp;Protected</button>
+                <button class="tab-btn" onclick="window.setTab('trash', this)" style="color:var(--danger)"><i class="fas fa-trash"></i>&nbsp;Trash</button>
+            </div>
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search files..." onkeyup="window.handleSearch()">
+                </div>
+                <div class="sort-select-wrap">
+                    <select id="sortSelect" class="upload-select" onchange="window.handleSort()" style="font-size:0.75rem; padding:8px;">
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
+                        <option value="largest">Largest</option>
+                        <option value="smallest">Smallest</option>
+                    </select>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" id="gridViewBtn" onclick="window.setView('grid')"><i class="fas fa-grid-2"></i></button>
+                    <button class="view-btn" id="listViewBtn" onclick="window.setView('list')"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folders -->
+        <div class="folder-bar" id="folderBar">
+            <div class="folder-pill active" onclick="window.setFolder('all', this)">
+                <i class="fas fa-folder"></i> All Files <span class="count" id="folderAllCount">0</span>
+            </div>
+        </div>
+
+        <!-- Trash Actions -->
+        <div id="trashActions" class="hidden" style="display:flex; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
+            <button class="multi-btn" onclick="window.restoreAll()" style="border-color:rgba(0,255,204,0.2); color:var(--neon);">
+                <i class="fas fa-rotate-left"></i> <span>Restore All</span>
+            </button>
+            <button class="multi-btn danger" onclick="window.emptyTrash()" style="border-color:rgba(255,51,85,0.2); color:var(--danger);">
+                <i class="fas fa-fire"></i> <span>Empty Trash</span>
+            </button>
+            <span style="color:var(--text-muted); font-size:0.7rem; display:flex; align-items:center; gap:4px; margin-left:auto;">
+                <i class="fas fa-info-circle"></i> 30 day retention
+            </span>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid" id="fileGrid"></div>
+    </div>
+
+    <!-- Multi Select Bar -->
+    <div class="multi-bar" id="multiBar">
+        <div class="multi-count"><span id="selectCount">0</span> selected</div>
+        <div id="multiBarActions"></div>
+        <button class="multi-btn" onclick="window.selectAllVisible()" title="Select All"><i class="fas fa-check-double"></i> <span>All</span></button>
+        <button class="multi-btn" onclick="window.clearSelection()" style="color:#888;" title="Clear"><i class="fas fa-xmark"></i></button>
+    </div>
+
+    <!-- Upload FAB -->
+    <div class="fab-group">
+        <button class="fab" onclick="window.toggleUpload()"><i class="fas fa-plus"></i></button>
+    </div>
+
+    <!-- Upload Box -->
+    <div id="uploadBox">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="color:white; font-family:'Orbitron',sans-serif; font-size:0.9rem; letter-spacing:1px;">Upload Files</h3>
+            <button onclick="document.getElementById('uploadBox').classList.remove('active')" style="background:none; border:none; color:#555; cursor:pointer; font-size:1.1rem; padding:5px;"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="upload-form-row">
+            <input type="text" id="customName" class="input-glass input-glass-simple" placeholder="Custom Name (single file)" style="font-size:0.8rem; padding:10px 12px;">
+        </div>
+        <div class="upload-form-row">
+            <select id="uploadFolder" class="upload-select" style="flex:1; font-size:0.8rem;">
+                <option value="">No Folder</option>
+            </select>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-muted); font-size:0.75rem; white-space:nowrap;">
+                <input type="checkbox" id="uploadLocked"> <i class="fas fa-lock"></i> Protect
+            </label>
+        </div>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+            <div class="upload-text">Drop files here or <span>browse</span></div>
+            <div class="upload-hint"><i class="fas fa-layer-group"></i> Select multiple files</div>
+            <input type="file" id="fileInput" hidden multiple accept="image/*,video/*">
+        </div>
+        <div id="selectedFilesPreview" class="hidden"></div>
+
+        <!-- Neon Progress Section -->
+        <div id="neonProgressSection" class="hidden neon-progress-container">
+            <div class="neon-progress-header">
+                <div>
+                    <div class="neon-progress-title" id="neonProgressTitle">UPLOADING</div>
+                    <div class="neon-progress-sub" id="neonProgressSub">Preparing files...</div>
+                </div>
+                <div class="neon-progress-pct" id="neonProgressPct">0%</div>
+            </div>
+            <div class="neon-progress-track">
+                <div class="neon-progress-fill" id="neonProgressFill"></div>
+            </div>
+            <div class="neon-progress-stats">
+                <span id="neonProgressFiles">0 / 0 files</span>
+                <span class="speed" id="neonProgressSpeed">-- MB/s</span>
+                <span id="neonProgressEta">ETA: --</span>
+            </div>
+        </div>
+
+        <div id="uploadQueue" style="margin-top:10px; max-height: 180px; overflow-y:auto;"></div>
+        <div id="uploadStartBtnWrap" class="hidden" style="margin-top:10px;">
+            <button class="btn-neon" id="uploadStartBtn" onclick="window.startUpload()" style="font-family:'Inter'; font-size:0.82rem; padding:12px;">
+                <i class="fas fa-cloud-arrow-up"></i>&nbsp; Upload Files
+            </button>
+        </div>
     </div>
 </div>
 
-<div id="trashAuthModal" class="modal">
-    <div class="card-ui">
-        <h3 style="color:#ff4444; margin-bottom:15px;">Trash Security</h3>
-        <input type="password" id="trashSecretPass" class="input-text" placeholder="Enter Trash Secret">
-        <button id="confirmTrashAuth" class="btn-main" style="background:#ff4444; color:white;">Unlock Trash</button>
-        <button onclick="document.getElementById('trashAuthModal').style.display='none'" style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer;">Cancel</button>
+<!-- Context Menu -->
+<div class="context-menu" id="contextMenu"></div>
+
+<!-- Info Panel -->
+<div class="info-panel" id="infoPanel">
+    <div class="info-panel-header">
+        <h3 style="font-family:'Orbitron',sans-serif; font-size:0.95rem; color:white;">File Details</h3>
+        <button onclick="window.closeInfoPanel()" style="background:none; border:none; color:#555; cursor:pointer; font-size:1.2rem; padding:5px;"><i class="fas fa-xmark"></i></button>
     </div>
+    <div class="info-preview" id="infoPanelPreview"></div>
+    <div id="infoPanelContent"></div>
 </div>
+
+<!-- Modals Container -->
+<div id="modalContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBtmUmV1KxQDB0jN9gUQnh-eYWKllMPav0",
         authDomain: "photos-58c8e.firebaseapp.com",
         projectId: "photos-58c8e",
-        storageBucket: "photos-58c8e.firebasestorage.app",
-        messagingSenderId: "1014680212942",
-        appId: "1:1014680212942:web:2319c936cdcac09dcac79f",
         databaseURL: "https://photos-58c8e-default-rtdb.firebaseio.com"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    
-    // গুরুত্বপূর্ণ: আপনার পুরনো ফাইলের ডাটাবেস পাথটি এখানে দিন (যেমন 'my_gallery')
-    const DB_PATH = 'my_gallery'; 
-    const driveRef = ref(db, DB_PATH);
-    const TRASH_PASSWORD = "123";
+    const DB_PATH = 'my_gallery';
+    const FOLDERS_PATH = 'folders';
+    const SETTINGS_PATH = 'settings';
 
-    let activeTab = 'image';
-    let allData = [];
-    let isTrashUnlocked = false;
+    let allFiles = [];
+    let folders = [];
+    let currentTab = 'all';
+    let currentFolder = 'all';
+    let searchText = "";
+    let sortMode = "newest";
+    let viewMode = "grid";
+    let selectMode = false;
+    let selectedIds = new Set();
+    let contextTarget = null;
+    let appPasscode = '2240';
+    let passcodeEnabled = true;
+    let passcodeCallback = null;
+    let passcodeInput = '';
+    let sessionUnlocked = false;
+    let pendingUploadFiles = [];
+    let uploadInProgress = false;
 
-    // Authentication
-    document.getElementById('doLogin').onclick = async () => {
-        try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); }
-        catch (err) { alert("Access Denied!"); }
-    };
+    // Particle Background
+    function initParticles() {
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        const count = window.innerWidth < 768 ? 25 : 60;
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.3 + 0.05
+            });
+        }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 255, 204, ${p.opacity})`; ctx.fill();
+            });
+            const maxDist = window.innerWidth < 768 ? 80 : 120;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < maxDist) {
+                        ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 255, 204, ${0.03 * (1 - dist/maxDist)})`; ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    }
+    initParticles();
 
+    // AUTH
     onAuthStateChanged(auth, user => {
-        document.getElementById('loginOverlay').style.display = user ? 'none' : 'flex';
-        document.getElementById('mainContent').style.display = user ? 'block' : 'none';
-        if(user) loadFiles();
+        if (user) {
+            document.getElementById('loginSection').classList.add('hidden');
+            if (passcodeEnabled && !sessionUnlocked) {
+                showPasscodeScreen(() => {
+                    sessionUnlocked = true;
+                    document.getElementById('passcodeSection').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    document.getElementById('mainContent').classList.add('fade-in');
+                    loadData(); loadFolders(); loadSettings();
+                });
+            } else {
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('fade-in');
+                loadData(); loadFolders(); loadSettings();
+            }
+        } else {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('passcodeSection').classList.add('hidden');
+            sessionUnlocked = false;
+        }
     });
 
-    window.setTab = (t, el) => {
-        activeTab = t;
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        el.classList.add('active');
-        renderFiles();
-    };
-
-    window.openTrashTab = (el) => {
-        if(isTrashUnlocked) { setTab('trash', el); } 
-        else {
-            document.getElementById('trashAuthModal').style.display = 'flex';
-            document.getElementById('confirmTrashAuth').onclick = () => {
-                if(document.getElementById('trashSecretPass').value === TRASH_PASSWORD) {
-                    isTrashUnlocked = true;
-                    document.getElementById('trashAuthModal').style.display = 'none';
-                    setTab('trash', el);
-                } else { alert("Wrong Secret!"); }
-            };
+    document.getElementById('doLogin').onclick = async () => {
+        const btn = document.getElementById('doLogin');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; AUTHENTICATING...';
+        btn.disabled = true;
+        try {
+            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
+        } catch (e) {
+            showToast("Authentication Failed", "error");
+            btn.innerHTML = '<i class="fas fa-fingerprint"></i>&nbsp; UNLOCK SYSTEM';
+            btn.disabled = false;
         }
     };
+    document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('doLogin').click(); });
 
-    // --- AUTO CATEGORY & DATA FIX LOGIC ---
-    function loadFiles() {
-        onValue(driveRef, snap => {
-            allData = [];
+    // PASSCODE
+    function showPasscodeScreen(callback) {
+        passcodeCallback = callback; passcodeInput = '';
+        document.getElementById('passcodeSection').classList.remove('hidden');
+        document.getElementById('passcodeMessage').textContent = 'Enter your 4-digit access code';
+        updatePasscodeDots();
+    }
+    window.enterPasscode = (num) => {
+        if (passcodeInput.length >= 4) return;
+        passcodeInput += num; updatePasscodeDots();
+        if (passcodeInput.length === 4) {
+            setTimeout(() => {
+                if (passcodeInput === appPasscode) { if (passcodeCallback) passcodeCallback(); passcodeCallback = null; }
+                else {
+                    document.querySelectorAll('.passcode-dot').forEach(d => d.classList.add('error'));
+                    document.getElementById('passcodeMessage').textContent = 'Incorrect passcode. Try again.';
+                    setTimeout(() => { passcodeInput = ''; document.querySelectorAll('.passcode-dot').forEach(d => d.classList.remove('error')); updatePasscodeDots(); }, 800);
+                }
+            }, 200);
+        }
+    };
+    window.clearPasscode = () => { passcodeInput = passcodeInput.slice(0, -1); updatePasscodeDots(); };
+    window.cancelPasscode = () => {
+        passcodeInput = ''; updatePasscodeDots();
+        if (!sessionUnlocked) signOut(auth);
+        document.getElementById('passcodeSection').classList.add('hidden'); passcodeCallback = null;
+    };
+    function updatePasscodeDots() {
+        document.querySelectorAll('#passcodeDots .passcode-dot').forEach((d, i) => d.classList.toggle('filled', i < passcodeInput.length));
+    }
+
+    window.confirmLogout = () => {
+        showModal({
+            icon: 'fas fa-right-from-bracket', title: 'Confirm Logout',
+            desc: 'Are you sure you want to sign out?',
+            confirmText: 'Logout', confirmClass: 'danger',
+            onConfirm: () => { sessionUnlocked = false; signOut(auth); showToast("Logged out successfully", "info"); }
+        });
+    };
+
+    // DATA
+    function loadData() {
+        onValue(ref(db, DB_PATH), snap => {
+            allFiles = [];
             const data = snap.val();
-            if(data) {
-                Object.keys(data).forEach(id => {
-                    let item = data[id];
-                    const url = (item.url || "").toLowerCase();
-
-                    // যদি ক্যাটাগরি না থাকে, ব্রাউজার নিজে ফাইল চিনে নেবে
+            if (data) {
+                Object.keys(data).forEach(k => {
+                    let item = data[k];
                     if(!item.cat) {
-                        if(url.match(/\.(jpg|jpeg|png|gif|webp|svg)/)) item.cat = 'image';
-                        else if(url.match(/\.(mp4|webm|mov|avi)/)) item.cat = 'video';
-                        else if(url.match(/\.(mp3|wav|m4a|ogg)/)) item.cat = 'audio';
-                        else item.cat = 'raw';
+                        const url = item.url || '';
+                        const ext = url.split('.').pop().split('?')[0].toLowerCase();
+                        item.cat = ['mp4','mov','avi','mkv','webm'].includes(ext) ? 'video' : 'image';
                     }
-
-                    // পুরনো ফাইলের জন্য ডিফল্ট ভ্যালু
-                    item.trash = item.trash || false;
-                    item.starred = item.starred || false;
-                    item.name = item.name || "File_" + id.substring(0,4);
-                    
-                    allData.push({id, ...item});
+                    if(!item.time) item.time = 0;
+                    allFiles.push({ id: k, ...item });
                 });
             }
-            renderFiles();
+            updateStats(); render();
+        });
+    }
+    function loadFolders() {
+        onValue(ref(db, FOLDERS_PATH), snap => {
+            folders = [];
+            const data = snap.val();
+            if (data) Object.keys(data).forEach(k => folders.push({ id: k, ...data[k] }));
+            renderFolders(); updateFolderSelect();
+        });
+    }
+    function loadSettings() {
+        onValue(ref(db, SETTINGS_PATH), snap => {
+            const data = snap.val();
+            if (data) {
+                if (data.passcode) appPasscode = data.passcode;
+                if (data.passcodeEnabled !== undefined) passcodeEnabled = data.passcodeEnabled;
+            }
         });
     }
 
-    function renderFiles() {
+    function updateStats() {
+        const active = allFiles.filter(f => !f.trash);
+        const imgs = active.filter(f => f.cat === 'image').length;
+        const vids = active.filter(f => f.cat === 'video').length;
+        const stars = active.filter(f => f.starred).length;
+        const trashed = allFiles.filter(f => f.trash).length;
+        const total = active.length;
+        document.getElementById('countAll').innerText = total;
+        document.getElementById('countImg').innerText = imgs;
+        document.getElementById('countVid').innerText = vids;
+        document.getElementById('countStar').innerText = stars;
+        document.getElementById('countTrash').innerText = trashed;
+        document.getElementById('countFolders').innerText = folders.length;
+        const max = Math.max(total, 1);
+        document.getElementById('imgBar').style.width = (imgs/max*100) + '%';
+        document.getElementById('vidBar').style.width = (vids/max*100) + '%';
+        document.getElementById('starBar').style.width = (stars/max*100) + '%';
+        document.getElementById('trashBar').style.width = (trashed/Math.max(trashed+total,1)*100) + '%';
+        document.getElementById('folderBar').style.width = Math.min(folders.length * 20, 100) + '%';
+        let totalSize = 0;
+        allFiles.forEach(f => { if (f.size) totalSize += parseFloat(f.size); });
+        const storageCap = 1024;
+        document.getElementById('storageFill').style.width = Math.min((totalSize/storageCap)*100, 100) + '%';
+        document.getElementById('storageText').innerText = `${totalSize.toFixed(1)} MB / ${storageCap} MB (${allFiles.length} files)`;
+    }
+
+    function renderFolders() {
+        const bar = document.getElementById('folderBar');
+        bar.innerHTML = `<div class="folder-pill ${currentFolder==='all'?'active':''}" onclick="window.setFolder('all', this)">
+            <i class="fas fa-folder"></i> All <span class="count" id="folderAllCount">${allFiles.filter(f=>!f.trash).length}</span>
+        </div>`;
+        folders.forEach(f => {
+            const count = allFiles.filter(file => file.folder === f.id && !file.trash).length;
+            bar.innerHTML += `<div class="folder-pill ${currentFolder===f.id?'active':''}" onclick="window.setFolder('${f.id}', this)" oncontextmenu="window.folderContext(event, '${f.id}')">
+                <i class="fas fa-folder" style="color:${f.color||'var(--neon)'}"></i> ${f.name} <span class="count">${count}</span>
+            </div>`;
+        });
+        bar.innerHTML += `<div class="folder-pill add-folder" onclick="window.createFolder()"><i class="fas fa-plus"></i> New</div>`;
+    }
+
+    function updateFolderSelect() {
+        const sel = document.getElementById('uploadFolder');
+        sel.innerHTML = '<option value="">No Folder</option>';
+        folders.forEach(f => sel.innerHTML += `<option value="${f.id}">${f.name}</option>`);
+    }
+
+    function getVisibleFiles() {
+        let list = allFiles.filter(f => {
+            if (currentTab === 'trash') return f.trash;
+            if (currentTab === 'starred') return f.starred && !f.trash;
+            if (currentTab === 'locked') return f.locked && !f.trash;
+            if (currentTab === 'all') return !f.trash;
+            return f.cat === currentTab && !f.trash;
+        });
+        if (currentFolder !== 'all' && currentTab !== 'trash') list = list.filter(f => f.folder === currentFolder);
+        if (searchText) list = list.filter(f => (f.name||'').toLowerCase().includes(searchText.toLowerCase()));
+        return list;
+    }
+
+    function render() {
         const grid = document.getElementById('fileGrid');
         grid.innerHTML = "";
-        
-        let filtered = allData.filter(item => {
-            if (activeTab === 'trash') return item.trash === true;
-            if (activeTab === 'starred') return item.starred === true && !item.trash;
-            return item.cat === activeTab && !item.trash;
+        grid.className = viewMode === 'list' ? 'grid list-view' : 'grid';
+
+        const trashActions = document.getElementById('trashActions');
+        if (currentTab === 'trash') { trashActions.classList.remove('hidden'); trashActions.style.display = 'flex'; }
+        else { trashActions.classList.add('hidden'); }
+
+        let list = getVisibleFiles();
+
+        list.sort((a, b) => {
+            if (sortMode === 'newest') return (b.time||0) - (a.time||0);
+            if (sortMode === 'oldest') return (a.time||0) - (b.time||0);
+            if (sortMode === 'az') return (a.name||'').localeCompare(b.name||'');
+            if (sortMode === 'za') return (b.name||'').localeCompare(a.name||'');
+            if (sortMode === 'largest') return parseFloat(b.size||0) - parseFloat(a.size||0);
+            if (sortMode === 'smallest') return parseFloat(a.size||0) - parseFloat(b.size||0);
+            return 0;
         });
 
-        if(filtered.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#444;">No files found in ${activeTab}</div>`;
+        if(list.length === 0) {
+            grid.innerHTML = `<div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-${currentTab==='trash'?'trash-can':'ghost'}"></i></div>
+                <div class="empty-title">${currentTab==='trash'?'Trash is Empty':'No Files Found'}</div>
+                <div class="empty-desc">${currentTab==='trash'?'Deleted files will appear here':'Upload files or change your filter'}</div>
+            </div>`;
             return;
         }
 
-        filtered.reverse().forEach(file => {
+        list.forEach((file, idx) => {
+            let thumb = file.url;
+            if(file.url && file.url.includes('/upload/')) thumb = file.url.replace('/upload/', '/upload/w_400,q_auto,f_auto/');
+            const isVid = file.cat === 'video';
+            const date = file.time ? new Date(file.time).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : '—';
+            const folderObj = folders.find(f => f.id === file.folder);
+            const isLocked = file.locked && !file._unlocked;
+
             const card = document.createElement('div');
-            card.className = 'file-card';
-            
-            let preview = `<span>📄</span>`;
-            if(file.cat === 'image') preview = `<img src="${file.url}" data-fancybox="gallery">`;
-            if(file.cat === 'video') preview = `<video src="${file.url}"></video>`;
-            if(file.cat === 'audio') preview = `<div style="font-size:30px">🎵</div>`;
+            card.className = `card ${selectedIds.has(file.id)?'selected':''} ${isLocked?'locked':''}`;
+            card.style.animationDelay = `${idx * 0.03}s`;
+            card.setAttribute('data-id', file.id);
+            card.oncontextmenu = (e) => { e.preventDefault(); window.showContextMenu(e, file.id); };
+
+            if (selectMode) {
+                card.onclick = (e) => {
+                    if (e.target.closest('.dots') || e.target.closest('.dropdown') || e.target.closest('.select-check')) return;
+                    window.toggleSelect(file.id);
+                };
+            }
+
+            let previewHTML;
+            if (isLocked) {
+                previewHTML = `<div style="width:100%;height:100%;background:#0a0a15;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-lock" style="font-size:2rem;color:rgba(255,170,0,0.3);"></i></div>`;
+            } else if (isVid) {
+                previewHTML = `<video src="${thumb}#t=0.1" muted preload="metadata" playsinline></video>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.2);">
+                    <i class="fas fa-play" style="color:white;font-size:0.7rem;margin-left:2px;"></i></div>`;
+            } else {
+                previewHTML = `<img src="${thumb}" loading="lazy" alt="${file.name}">`;
+            }
+
+            const trashMenuHTML = `
+                <div class="dd-header">Trash Actions</div>
+                <div class="dd-item" onclick="window.restoreFile('${file.id}')"><i class="fas fa-rotate-left"></i> Restore</div>
+                <div class="dd-item danger" onclick="window.permanentDelete('${file.id}')"><i class="fas fa-fire"></i> Delete Forever</div>`;
+
+            const normalMenuHTML = `
+                <div class="dd-header">File Actions</div>
+                <div class="dd-item" onclick="window.openPreview('${file.id}')"><i class="fas fa-external-link"></i> Open</div>
+                <div class="dd-item" onclick="window.showFileInfo('${file.id}')"><i class="fas fa-circle-info"></i> Details</div>
+                <div class="dd-divider"></div>
+                <div class="dd-item" onclick="window.renameFile('${file.id}')"><i class="fas fa-pen"></i> Rename</div>
+                <div class="dd-item" onclick="window.copyToFolder('${file.id}')"><i class="fas fa-copy"></i> Copy</div>
+                <div class="dd-item" onclick="window.moveToFolder('${file.id}')"><i class="fas fa-folder-open"></i> Move</div>
+                <div class="dd-divider"></div>
+                <div class="dd-item" onclick="window.star('${file.id}', ${!!file.starred})"><i class="fas fa-star"></i> ${file.starred?'Unstar':'Star'}</div>
+                <div class="dd-item" onclick="window.toggleLock('${file.id}')"><i class="fas fa-${file.locked?'unlock':'lock'}"></i> ${file.locked?'Unlock':'Lock'}</div>
+                <div class="dd-item" onclick="window.copyLink('${file.url}')"><i class="fas fa-link"></i> Copy Link</div>
+                <div class="dd-item" onclick="window.downloadFile('${file.url}', '${file.name}')"><i class="fas fa-download"></i> Download</div>
+                <div class="dd-divider"></div>
+                <div class="dd-item danger" onclick="window.trashFile('${file.id}')"><i class="fas fa-trash"></i> Trash</div>`;
+
+            const selectCheckHTML = selectMode ? `<div class="select-check ${selectedIds.has(file.id)?'checked':''}" onclick="event.stopPropagation(); window.toggleSelect('${file.id}')"></div>` : '';
+
+            const fancyboxAttr = (!isLocked && !selectMode) ? `data-fancybox="gallery" data-src="${file.url}" data-caption="${file.name}"` : '';
+            const previewClick = isLocked ? `onclick="window.unlockFile('${file.id}')"` : (selectMode ? '' : '');
 
             card.innerHTML = `
-                <button class="star-btn ${file.starred ? 'starred' : ''}" onclick="toggleStar('${file.id}', ${file.starred})">★</button>
-                <div class="preview-area">${preview}</div>
-                <div class="file-info">
-                    <div class="file-name">${file.name}</div>
+                ${selectCheckHTML}
+                <div class="dots" onclick="event.stopPropagation(); window.toggleMenu(event, '${file.id}')"><i class="fas fa-ellipsis-v"></i></div>
+                <div id="menu-${file.id}" class="dropdown">
+                    ${currentTab === 'trash' ? trashMenuHTML : normalMenuHTML}
                 </div>
-                <div class="action-grid">
-                    ${activeTab === 'trash' ? 
-                        `<button class="act-btn" onclick="restoreFile('${file.id}')">Restore</button>
-                         <button class="act-btn" style="color:#ff4444" onclick="permDelete('${file.id}')">Delete</button>` :
-                        `<button class="act-btn" onclick="window.open('${file.url}')">View</button>
-                         <button class="act-btn" onclick="moveToTrash('${file.id}')">Trash</button>`
-                    }
+                ${file.starred && !isLocked ? '<div class="star-badge"><i class="fas fa-star"></i></div>' : ''}
+                ${file.locked ? '<div class="lock-badge"><i class="fas fa-shield-halved"></i></div>' : ''}
+                <div class="preview" ${fancyboxAttr} ${previewClick}>
+                    <span class="file-badge ${isVid?'badge-vid':'badge-img'}">${isVid?'Vid':'Img'}</span>
+                    ${previewHTML}
+                    <div class="preview-overlay"></div>
                 </div>
-            `;
+                <div class="meta">
+                    <div class="filename" title="${file.name}">${file.name || 'Untitled'}</div>
+                    <div class="fileinfo"><span>${file.size || '—'}</span><span>${date}</span></div>
+                    ${folderObj ? `<div class="folder-tag"><i class="fas fa-folder" style="font-size:0.55rem;"></i> ${folderObj.name}</div>` : ''}
+                </div>`;
             grid.appendChild(card);
         });
+
+        if (!selectMode) {
+            try { Fancybox.destroy(); } catch(e) {}
+            Fancybox.bind("[data-fancybox]", {
+                Toolbar: { display: { left: [], middle: ["prev", "counter", "next"], right: ["slideshow", "fullscreen", "thumbs", "close"] } }
+            });
+        }
+
+        updateMultiBarActions();
     }
 
-    // Handlers
-    window.toggleStar = (id, cur) => update(ref(db, `${DB_PATH}/${id}`), { starred: !cur });
-    window.moveToTrash = (id) => update(ref(db, `${DB_PATH}/${id}`), { trash: true });
-    window.restoreFile = (id) => update(ref(db, `${DB_PATH}/${id}`), { trash: false });
-    window.permDelete = (id) => { if(confirm("Permanently delete?")) remove(ref(db, `${DB_PATH}/${id}`)); };
+    function updateMultiBarActions() {
+        const actionsDiv = document.getElementById('multiBarActions');
+        if (currentTab === 'trash') {
+            actionsDiv.innerHTML = `
+                <button class="multi-btn restore" onclick="window.multiRestore()"><i class="fas fa-rotate-left"></i> <span>Restore</span></button>
+                <button class="multi-btn danger" onclick="window.multiPermanentDelete()"><i class="fas fa-fire"></i> <span>Delete</span></button>
+            `;
+        } else {
+            actionsDiv.innerHTML = `
+                <button class="multi-btn" onclick="window.multiCopy()"><i class="fas fa-copy"></i> <span>Copy</span></button>
+                <button class="multi-btn" onclick="window.multiStar()"><i class="fas fa-star"></i> <span>Star</span></button>
+                <button class="multi-btn" onclick="window.multiDownload()"><i class="fas fa-download"></i></button>
+                <button class="multi-btn danger" onclick="window.multiTrash()"><i class="fas fa-trash"></i></button>
+            `;
+        }
+    }
 
-    // Upload
-    document.getElementById('fileInput').onchange = async (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const wrap = document.getElementById('progressWrap');
-        const fill = document.getElementById('p-fill');
-        const pTxt = document.getElementById('p-percent');
-        wrap.style.display = 'block';
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "github_unsigned");
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
-        xhr.upload.onprogress = ev => {
-            const p = Math.round((ev.loaded/ev.total)*100);
-            fill.style.width = p+"%"; pTxt.innerText = p+"%";
-        };
-        xhr.onload = () => {
-            const res = JSON.parse(xhr.responseText);
-            push(driveRef, {
-                url: res.secure_url, name: file.name, timestamp: Date.now(),
-                starred: false, trash: false
-                // cat লজিক অটোমেটিক loadFiles এ হ্যান্ডেল হবে
-            });
-            wrap.style.display = 'none';
-        };
-        xhr.send(formData);
+    // TABS
+    window.setTab = (t, el) => {
+        currentTab = t;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        selectedIds.clear();
+        updateMultiBar();
+        render();
     };
+    window.setFolder = (fid, el) => {
+        currentFolder = fid;
+        document.querySelectorAll('.folder-pill').forEach(p => p.classList.remove('active'));
+        if (el) el.classList.add('active');
+        render();
+    };
+    window.handleSearch = () => { searchText = document.getElementById('searchInput').value.trim(); render(); };
+    window.handleSort = () => { sortMode = document.getElementById('sortSelect').value; render(); };
+    window.setView = (mode) => {
+        viewMode = mode;
+        document.getElementById('gridViewBtn').classList.toggle('active', mode==='grid');
+        document.getElementById('listViewBtn').classList.toggle('active', mode==='list');
+        render();
+    };
+
+    // MENUS
+    window.toggleMenu = (e, id) => {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown').forEach(d => { if(d.id !== `menu-${id}`) d.classList.remove('active'); });
+        document.getElementById(`menu-${id}`).classList.toggle('active');
+    };
+
+    window.showContextMenu = (e, id) => {
+        contextTarget = id;
+        const menu = document.getElementById('contextMenu');
+        const file = allFiles.find(f => f.id === id);
+        if (file && file.trash) {
+            menu.innerHTML = `
+                <div class="ctx-item" onclick="window.ctxAction('restore')"><i class="fas fa-rotate-left"></i> Restore</div>
+                <div class="ctx-divider"></div>
+                <div class="ctx-item danger" onclick="window.ctxAction('permDelete')"><i class="fas fa-fire"></i> Delete Forever</div>`;
+        } else {
+            menu.innerHTML = `
+                <div class="ctx-item" onclick="window.ctxAction('open')"><i class="fas fa-external-link"></i> Open</div>
+                <div class="ctx-item" onclick="window.ctxAction('info')"><i class="fas fa-circle-info"></i> Info</div>
+                <div class="ctx-divider"></div>
+                <div class="ctx-item" onclick="window.ctxAction('rename')"><i class="fas fa-pen"></i> Rename</div>
+                <div class="ctx-item" onclick="window.ctxAction('copy')"><i class="fas fa-copy"></i> Copy</div>
+                <div class="ctx-item" onclick="window.ctxAction('star')"><i class="fas fa-star"></i> Star</div>
+                <div class="ctx-item" onclick="window.ctxAction('lock')"><i class="fas fa-lock"></i> Lock</div>
+                <div class="ctx-item" onclick="window.ctxAction('link')"><i class="fas fa-link"></i> Link</div>
+                <div class="ctx-item" onclick="window.ctxAction('download')"><i class="fas fa-download"></i> Download</div>
+                <div class="ctx-divider"></div>
+                <div class="ctx-item danger" onclick="window.ctxAction('trash')"><i class="fas fa-trash"></i> Trash</div>`;
+        }
+        menu.style.left = Math.min(e.clientX, window.innerWidth - 210) + 'px';
+        menu.style.top = Math.min(e.clientY, window.innerHeight - 300) + 'px';
+        menu.classList.add('active');
+    };
+
+    window.ctxAction = (action) => {
+        document.getElementById('contextMenu').classList.remove('active');
+        const id = contextTarget; if (!id) return;
+        const file = allFiles.find(f => f.id === id); if (!file) return;
+        switch(action) {
+            case 'open': window.openPreview(id); break;
+            case 'info': window.showFileInfo(id); break;
+            case 'rename': window.renameFile(id); break;
+            case 'copy': window.copyToFolder(id); break;
+            case 'star': window.star(id, !!file.starred); break;
+            case 'lock': window.toggleLock(id); break;
+            case 'link': window.copyLink(file.url); break;
+            case 'download': window.downloadFile(file.url, file.name); break;
+            case 'trash': window.trashFile(id); break;
+            case 'restore': window.restoreFile(id); break;
+            case 'permDelete': window.permanentDelete(id); break;
+        }
+    };
+
+    // FILE ACTIONS
+    window.copyLink = (url) => { navigator.clipboard.writeText(url); showToast("Link copied", "success"); };
+    window.star = (id, cur) => { update(ref(db, `${DB_PATH}/${id}`), { starred: !cur }); showToast(cur ? "Star removed" : "File starred", "success"); };
+    window.toggleLock = (id) => {
+        const file = allFiles.find(f => f.id === id); if (!file) return;
+        if (file.locked) {
+            showPasscodeScreen(() => {
+                document.getElementById('passcodeSection').classList.add('hidden');
+                update(ref(db, `${DB_PATH}/${id}`), { locked: false });
+                showToast("Protection removed", "info");
+            });
+        } else {
+            update(ref(db, `${DB_PATH}/${id}`), { locked: true });
+            showToast("File protected", "success");
+        }
+    };
+    window.unlockFile = (id) => {
+        showPasscodeScreen(() => {
+            document.getElementById('passcodeSection').classList.add('hidden');
+            const file = allFiles.find(f => f.id === id);
+            if (file) { file._unlocked = true; render(); showToast("Unlocked temporarily", "success"); }
+        });
+    };
+    window.openPreview = (id) => {
+        const file = allFiles.find(f => f.id === id);
+        if (file) { if (file.locked) window.unlockFile(id); else window.open(file.url, '_blank'); }
+    };
+    window.renameFile = (id) => {
+        const file = allFiles.find(f => f.id === id); if (!file) return;
+        showModal({
+            title: 'Rename File', desc: 'Enter a new name.',
+            inputValue: file.name, inputPlaceholder: 'New file name', confirmText: 'Rename',
+            onConfirm: (val) => { if (val && val.trim()) { update(ref(db, `${DB_PATH}/${id}`), { name: val.trim() }); showToast("Renamed", "success"); } }
+        });
+    };
+    window.copyToFolder = (id) => {
+        if (folders.length === 0) { showToast("Create a folder first", "warning"); return; }
+        showFolderPickerModal('Copy to Folder', (folderId) => {
+            const file = allFiles.find(f => f.id === id);
+            if (file && folderId) {
+                const newRef = push(ref(db, DB_PATH));
+                const { id: _, ...fileData } = file;
+                set(newRef, { ...fileData, folder: folderId, time: Date.now() });
+                showToast("File copied", "success");
+            }
+        });
+    };
+    window.moveToFolder = (id) => {
+        if (folders.length === 0) { showToast("Create a folder first", "warning"); return; }
+        showFolderPickerModal('Move to Folder', (folderId) => {
+            if (folderId) { update(ref(db, `${DB_PATH}/${id}`), { folder: folderId }); showToast("File moved", "success"); }
+        });
+    };
+    window.trashFile = (id) => {
+        showModal({
+            title: 'Move to Trash', desc: 'Move to trash? Restore within 30 days.',
+            confirmText: 'Trash', confirmClass: 'danger', icon: 'fas fa-trash',
+            onConfirm: () => { update(ref(db, `${DB_PATH}/${id}`), { trash: true, trashedAt: Date.now() }); showToast("Trashed", "info"); }
+        });
+    };
+    window.restoreFile = (id) => { update(ref(db, `${DB_PATH}/${id}`), { trash: false, trashedAt: null }); showToast("Restored", "success"); };
+    window.permanentDelete = (id) => {
+        showModal({
+            title: 'Delete Permanently', desc: '⚠️ Cannot be undone!',
+            confirmText: 'Delete Forever', confirmClass: 'danger', icon: 'fas fa-exclamation-triangle',
+            onConfirm: () => { remove(ref(db, `${DB_PATH}/${id}`)); showToast("Permanently deleted", "error"); }
+        });
+    };
+    window.restoreAll = () => {
+        const trashed = allFiles.filter(f => f.trash); if (trashed.length === 0) return;
+        showModal({
+            title: 'Restore All', desc: `Restore ${trashed.length} file(s)?`, confirmText: 'Restore All',
+            onConfirm: () => { trashed.forEach(f => update(ref(db, `${DB_PATH}/${f.id}`), { trash: false, trashedAt: null })); showToast(`${trashed.length} restored`, "success"); }
+        });
+    };
+    window.emptyTrash = () => {
+        const trashed = allFiles.filter(f => f.trash); if (trashed.length === 0) return;
+        showModal({
+            title: 'Empty Trash', desc: `⚠️ Delete ${trashed.length} file(s) forever?`,
+            confirmText: 'Delete All', confirmClass: 'danger', icon: 'fas fa-fire',
+            onConfirm: () => { trashed.forEach(f => remove(ref(db, `${DB_PATH}/${f.id}`))); showToast("Trash emptied", "error"); }
+        });
+    };
+    window.downloadFile = (url, name) => {
+        const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.download = name || 'file';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        showToast("Download started", "success");
+    };
+
+    // FILE INFO
+    window.showFileInfo = (id) => {
+        const file = allFiles.find(f => f.id === id); if (!file) return;
+        const panel = document.getElementById('infoPanel');
+        const preview = document.getElementById('infoPanelPreview');
+        const content = document.getElementById('infoPanelContent');
+        const isVid = file.cat === 'video';
+        preview.innerHTML = isVid ? `<video src="${file.url}" controls playsinline style="width:100%;height:100%;object-fit:cover;"></video>` : `<img src="${file.url}" alt="${file.name}">`;
+        const date = file.time ? new Date(file.time).toLocaleString() : 'Unknown';
+        const folderObj = folders.find(f => f.id === file.folder);
+        content.innerHTML = `
+            <div class="info-row"><span class="info-label">Name</span><span class="info-value">${file.name || 'Untitled'}</span></div>
+            <div class="info-row"><span class="info-label">Type</span><span class="info-value">${file.cat === 'video' ? 'Video' : 'Image'}</span></div>
+            <div class="info-row"><span class="info-label">Size</span><span class="info-value">${file.size || 'Unknown'}</span></div>
+            <div class="info-row"><span class="info-label">Uploaded</span><span class="info-value">${date}</span></div>
+            <div class="info-row"><span class="info-label">Folder</span><span class="info-value">${folderObj ? folderObj.name : 'None'}</span></div>
+            <div class="info-row"><span class="info-label">Starred</span><span class="info-value">${file.starred ? '⭐ Yes' : 'No'}</span></div>
+            <div class="info-row"><span class="info-label">Protected</span><span class="info-value">${file.locked ? '🔒 Yes' : 'No'}</span></div>
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value">${file.trash ? '🗑️ Trash' : '✅ Active'}</span></div>
+            <div style="margin-top:15px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn-neon" style="flex:1; padding:10px; font-size:0.75rem; font-family:'Inter';" onclick="window.copyLink('${file.url}')"><i class="fas fa-link"></i> Link</button>
+                <button class="btn-neon btn-outline" style="flex:1; padding:10px; font-size:0.75rem; font-family:'Inter';" onclick="window.downloadFile('${file.url}', '${file.name}')"><i class="fas fa-download"></i> Download</button>
+            </div>`;
+        panel.classList.add('active');
+    };
+    window.closeInfoPanel = () => document.getElementById('infoPanel').classList.remove('active');
+
+    // FOLDERS
+    window.createFolder = () => {
+        showModal({
+            title: 'New Folder', desc: 'Enter a name.',
+            inputPlaceholder: 'Folder name', confirmText: 'Create',
+            onConfirm: (val) => {
+                if (val && val.trim()) {
+                    const colors = ['#00ffcc','#00d4ff','#a855f7','#ff6b6b','#ffd700','#00ff88'];
+                    push(ref(db, FOLDERS_PATH), { name: val.trim(), color: colors[Math.floor(Math.random()*colors.length)], created: Date.now() });
+                    showToast("Folder created", "success");
+                }
+            }
+        });
+    };
+    window.folderContext = (e, fid) => {
+        e.preventDefault(); e.stopPropagation();
+        showModal({
+            title: 'Folder Options', desc: 'Choose an action.',
+            customActions: `
+                <button class="modal-cancel" onclick="window.renameFolder('${fid}')"><i class="fas fa-pen"></i> Rename</button>
+                <button class="modal-confirm danger" onclick="window.deleteFolder('${fid}')"><i class="fas fa-trash"></i> Delete</button>`
+        });
+    };
+    window.renameFolder = (fid) => {
+        closeModal();
+        const folder = folders.find(f => f.id === fid);
+        showModal({
+            title: 'Rename Folder', inputValue: folder ? folder.name : '', inputPlaceholder: 'New name', confirmText: 'Rename',
+            onConfirm: (val) => { if (val && val.trim()) { update(ref(db, `${FOLDERS_PATH}/${fid}`), { name: val.trim() }); showToast("Renamed", "success"); } }
+        });
+    };
+    window.deleteFolder = (fid) => {
+        closeModal();
+        showModal({
+            title: 'Delete Folder', desc: 'Files will be unassigned.',
+            confirmText: 'Delete', confirmClass: 'danger',
+            onConfirm: () => {
+                allFiles.filter(f => f.folder === fid).forEach(f => update(ref(db, `${DB_PATH}/${f.id}`), { folder: null }));
+                remove(ref(db, `${FOLDERS_PATH}/${fid}`));
+                if (currentFolder === fid) currentFolder = 'all';
+                showToast("Folder deleted", "success");
+            }
+        });
+    };
+
+    // SELECT MODE
+    window.toggleSelectMode = () => {
+        selectMode = !selectMode;
+        selectedIds.clear();
+        updateMultiBar();
+        document.getElementById('selectModeBtn').classList.toggle('active-mode', selectMode);
+        render();
+        showToast(selectMode ? "Selection mode ON" : "Selection mode off", "info");
+    };
+
+    window.toggleSelect = (id) => {
+        if (selectedIds.has(id)) selectedIds.delete(id);
+        else selectedIds.add(id);
+        updateMultiBar();
+        render();
+    };
+
+    window.selectAllVisible = () => {
+        const visible = getVisibleFiles();
+        if (selectedIds.size === visible.length) selectedIds.clear();
+        else visible.forEach(f => selectedIds.add(f.id));
+        updateMultiBar();
+        render();
+    };
+
+    window.clearSelection = () => {
+        selectedIds.clear();
+        selectMode = false;
+        document.getElementById('selectModeBtn').classList.remove('active-mode');
+        updateMultiBar();
+        render();
+    };
+
+    function updateMultiBar() {
+        const bar = document.getElementById('multiBar');
+        document.getElementById('selectCount').textContent = selectedIds.size;
+        bar.classList.toggle('active', selectedIds.size > 0);
+        updateMultiBarActions();
+    }
+
+    // MULTI ACTIONS
+    window.multiCopy = () => {
+        if (folders.length === 0) { showToast("Create a folder first", "warning"); return; }
+        showFolderPickerModal('Copy Selected', (folderId) => {
+            selectedIds.forEach(id => {
+                const file = allFiles.find(f => f.id === id);
+                if (file && folderId) {
+                    const newRef = push(ref(db, DB_PATH));
+                    const { id: _, ...fileData } = file;
+                    set(newRef, { ...fileData, folder: folderId, time: Date.now() });
+                }
+            });
+            showToast(`${selectedIds.size} copied`, "success");
+            window.clearSelection();
+        });
+    };
+    window.multiStar = () => {
+        selectedIds.forEach(id => update(ref(db, `${DB_PATH}/${id}`), { starred: true }));
+        showToast(`${selectedIds.size} starred`, "success");
+        window.clearSelection();
+    };
+    window.multiTrash = () => {
+        const count = selectedIds.size;
+        showModal({
+            title: 'Trash Selected', desc: `Move ${count} file(s) to trash?`,
+            confirmText: 'Trash', confirmClass: 'danger', icon: 'fas fa-trash',
+            onConfirm: () => {
+                selectedIds.forEach(id => update(ref(db, `${DB_PATH}/${id}`), { trash: true, trashedAt: Date.now() }));
+                showToast(`${count} trashed`, "info");
+                window.clearSelection();
+            }
+        });
+    };
+    window.multiDownload = () => {
+        selectedIds.forEach(id => { const file = allFiles.find(f => f.id === id); if (file) window.downloadFile(file.url, file.name); });
+        showToast("Downloads started", "success");
+    };
+    window.multiRestore = () => {
+        const count = selectedIds.size;
+        showModal({
+            title: 'Restore Selected', desc: `Restore ${count} file(s)?`,
+            confirmText: 'Restore', icon: 'fas fa-rotate-left',
+            onConfirm: () => {
+                selectedIds.forEach(id => update(ref(db, `${DB_PATH}/${id}`), { trash: false, trashedAt: null }));
+                showToast(`${count} restored`, "success");
+                window.clearSelection();
+            }
+        });
+    };
+    window.multiPermanentDelete = () => {
+        const count = selectedIds.size;
+        showModal({
+            title: 'Delete Forever', desc: `⚠️ Delete ${count} file(s) permanently?`,
+            confirmText: 'Delete', confirmClass: 'danger', icon: 'fas fa-exclamation-triangle',
+            onConfirm: () => {
+                selectedIds.forEach(id => remove(ref(db, `${DB_PATH}/${id}`)));
+                showToast(`${count} deleted`, "error");
+                window.clearSelection();
+            }
+        });
+    };
+
+    // SETTINGS
+    window.showSettings = () => {
+        showModal({
+            title: 'Settings', desc: '',
+            customContent: `
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div><div style="color:white; font-size:0.85rem; font-weight:500;">Passcode Lock</div>
+                        <div style="color:#555; font-size:0.7rem;">Require on app open</div></div>
+                        <label style="position:relative; width:44px; height:24px; cursor:pointer;">
+                            <input type="checkbox" id="settPassEnabled" ${passcodeEnabled?'checked':''} style="opacity:0; width:0; height:0;" onchange="window.togglePasscodeEnabled(this.checked)">
+                            <span style="position:absolute;inset:0;background:${passcodeEnabled?'var(--neon)':'#333'};border-radius:12px;transition:0.3s;"></span>
+                            <span style="position:absolute;top:3px;left:${passcodeEnabled?'23px':'3px'};width:18px;height:18px;background:${passcodeEnabled?'#000':'#666'};border-radius:50%;transition:0.3s;"></span>
+                        </label>
+                    </div>
+                    <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="window.changePasscode()">
+                        <div style="color:white; font-size:0.85rem; font-weight:500;">Change Passcode</div>
+                        <div style="color:#555; font-size:0.7rem;">Update 4-digit code</div>
+                    </div>
+                    <div style="padding:10px 0;">
+                        <div style="color:white; font-size:0.85rem; font-weight:500;">Version</div>
+                        <div style="color:var(--neon); font-size:0.7rem; font-family:'JetBrains Mono';">CSM DRIVE Ultra Pro v3.2</div>
+                    </div>
+                </div>`,
+            confirmText: 'Close', hideCancel: true, onConfirm: () => {}
+        });
+    };
+    window.togglePasscodeEnabled = (enabled) => {
+        passcodeEnabled = enabled;
+        set(ref(db, SETTINGS_PATH), { passcode: appPasscode, passcodeEnabled });
+        showToast(enabled ? "Passcode enabled" : "Passcode disabled", "info");
+    };
+    window.changePasscode = () => {
+        closeModal();
+        showModal({
+            title: 'Change Passcode', desc: 'Enter new 4-digit code.',
+            inputPlaceholder: '4-digit passcode', inputType: 'password', confirmText: 'Update',
+            onConfirm: (val) => {
+                if (val && val.length === 4 && /^\d{4}$/.test(val)) {
+                    appPasscode = val;
+                    set(ref(db, SETTINGS_PATH), { passcode: appPasscode, passcodeEnabled });
+                    showToast("Passcode updated", "success");
+                } else showToast("Use 4 digits", "error");
+            }
+        });
+    };
+
+    // ===== UPLOAD - ENHANCED WITH NEON PROGRESS =====
+    window.toggleUpload = () => {
+        const box = document.getElementById('uploadBox');
+        box.classList.toggle('active');
+        if (!box.classList.contains('active')) resetUploadUI();
+    };
+
+    function resetUploadUI() {
+        pendingUploadFiles = [];
+        uploadInProgress = false;
+        document.getElementById('fileInput').value = '';
+        document.getElementById('customName').value = '';
+        document.getElementById('uploadQueue').innerHTML = '';
+        document.getElementById('selectedFilesPreview').classList.add('hidden');
+        document.getElementById('neonProgressSection').classList.add('hidden');
+        document.getElementById('uploadStartBtnWrap').classList.add('hidden');
+        document.getElementById('neonProgressFill').style.width = '0%';
+        document.getElementById('neonProgressFill').classList.remove('complete');
+    }
+
+    // Drag and Drop
+    const uploadZone = document.getElementById('uploadZone');
+    uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault(); uploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) stageFiles(e.dataTransfer.files);
+    });
+
+    document.getElementById('fileInput').onchange = (e) => {
+        if (e.target.files.length) stageFiles(e.target.files);
+    };
+
+    function stageFiles(fileList) {
+        pendingUploadFiles = Array.from(fileList);
+        const preview = document.getElementById('selectedFilesPreview');
+        const queue = document.getElementById('uploadQueue');
+        const startWrap = document.getElementById('uploadStartBtnWrap');
+
+        const count = pendingUploadFiles.length;
+        const totalSize = pendingUploadFiles.reduce((s, f) => s + f.size, 0);
+        const totalSizeMB = (totalSize / (1024*1024)).toFixed(2);
+
+        preview.classList.remove('hidden');
+        preview.innerHTML = `<div class="selected-files-preview">
+            <div class="selected-files-text">
+                <i class="fas fa-paperclip"></i>
+                <strong>${count} file${count > 1 ? 's' : ''}</strong> (${totalSizeMB} MB)
+                <span style="margin-left:auto; cursor:pointer; color:var(--danger);" onclick="window.clearStagedFiles()" title="Clear"><i class="fas fa-xmark"></i></span>
+            </div>
+        </div>`;
+
+        queue.innerHTML = '';
+        pendingUploadFiles.forEach((file, idx) => {
+            const sizeMB = (file.size / (1024*1024)).toFixed(1);
+            const isVid = isVideoFile(file.name);
+            queue.innerHTML += `<div class="upload-queue-item" id="uqi-${idx}">
+                <div class="uq-icon"><i class="fas fa-${isVid ? 'video' : 'image'}" style="color:${isVid ? 'var(--neon3)' : 'var(--neon)'};"></i></div>
+                <div style="flex:1; min-width:0;">
+                    <div class="uq-name" title="${file.name}">${file.name}</div>
+                    <div class="uq-progress-bar"><div class="uq-progress-fill" id="uqp-${idx}"></div></div>
+                    <div class="upload-speed-info">
+                        <span id="uq-size-${idx}">${sizeMB} MB</span>
+                        <span id="uq-speed-${idx}"></span>
+                    </div>
+                </div>
+                <div class="uq-pct" id="uq-pct-${idx}">—</div>
+                <div class="uq-status-icon queued" id="uqs-${idx}"><i class="fas fa-clock"></i></div>
+            </div>`;
+        });
+
+        startWrap.classList.remove('hidden');
+        document.getElementById('uploadStartBtn').disabled = false;
+        document.getElementById('uploadStartBtn').innerHTML = `<i class="fas fa-cloud-arrow-up"></i>&nbsp; Upload ${count} File${count > 1 ? 's' : ''}`;
+    }
+
+    function isVideoFile(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        return ['mp4','mov','avi','mkv','webm'].includes(ext);
+    }
+
+    window.clearStagedFiles = () => { resetUploadUI(); };
+
+    window.startUpload = () => {
+        if (uploadInProgress || pendingUploadFiles.length === 0) return;
+        uploadInProgress = true;
+
+        const files = pendingUploadFiles;
+        const folder = document.getElementById('uploadFolder').value;
+        const isLocked = document.getElementById('uploadLocked').checked;
+        const customName = document.getElementById('customName').value.trim();
+
+        // Show neon progress
+        const neonSection = document.getElementById('neonProgressSection');
+        neonSection.classList.remove('hidden');
+        document.getElementById('uploadStartBtnWrap').classList.add('hidden');
+
+        let completed = 0;
+        const total = files.length;
+        let totalBytesAll = files.reduce((s, f) => s + f.size, 0);
+        let uploadedBytesAll = 0;
+        let uploadStartTime = Date.now();
+
+        function updateOverallNeon() {
+            const overallPct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const progressFill = document.getElementById('neonProgressFill');
+            progressFill.style.width = overallPct + '%';
+
+            if (completed === total) {
+                progressFill.classList.add('complete');
+                document.getElementById('neonProgressTitle').textContent = 'COMPLETE';
+                document.getElementById('neonProgressPct').textContent = '100%';
+                document.getElementById('neonProgressSub').textContent = `All ${total} files uploaded successfully!`;
+                document.getElementById('neonProgressFiles').textContent = `${total} / ${total} files`;
+                document.getElementById('neonProgressSpeed').textContent = '';
+                document.getElementById('neonProgressEta').textContent = '✓ Done';
+            } else {
+                document.getElementById('neonProgressTitle').textContent = 'UPLOADING';
+                document.getElementById('neonProgressPct').textContent = overallPct + '%';
+                document.getElementById('neonProgressSub').textContent = `Processing file ${completed + 1} of ${total}`;
+                document.getElementById('neonProgressFiles').textContent = `${completed} / ${total} files`;
+
+                // Calculate speed and ETA
+                const elapsed = (Date.now() - uploadStartTime) / 1000;
+                if (elapsed > 0 && uploadedBytesAll > 0) {
+                    const speed = uploadedBytesAll / elapsed;
+                    const remaining = totalBytesAll - uploadedBytesAll;
+                    const eta = remaining / speed;
+                    document.getElementById('neonProgressSpeed').textContent = formatSpeed(speed);
+                    document.getElementById('neonProgressEta').textContent = 'ETA: ' + formatTime(eta);
+                }
+            }
+        }
+        updateOverallNeon();
+
+        function uploadFile(idx) {
+            if (idx >= total) {
+                showToast(`${total} file${total > 1 ? 's' : ''} uploaded!`, "success");
+                setTimeout(() => {
+                    document.getElementById('uploadBox').classList.remove('active');
+                    resetUploadUI();
+                }, 2000);
+                return;
+            }
+
+            const file = files[idx];
+            const ext = file.name.split('.').pop().toLowerCase();
+            const cat = ['mp4','mov','avi','mkv','webm'].includes(ext) ? 'video' : 'image';
+            const size = (file.size / (1024*1024)).toFixed(2) + " MB";
+            const displayName = (total === 1 && customName) ? customName : file.name;
+
+            // Update queue item
+            const itemEl = document.getElementById(`uqi-${idx}`);
+            const statusEl = document.getElementById(`uqs-${idx}`);
+            const pctEl = document.getElementById(`uq-pct-${idx}`);
+            const progressEl = document.getElementById(`uqp-${idx}`);
+            const speedEl = document.getElementById(`uq-speed-${idx}`);
+
+            if (itemEl) { itemEl.classList.add('active'); itemEl.classList.remove('done', 'error'); }
+            if (statusEl) { statusEl.className = 'uq-status-icon uploading'; statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+            if (pctEl) pctEl.textContent = '0%';
+
+            // Scroll to active item
+            const queueContainer = document.getElementById('uploadQueue');
+            if (itemEl && queueContainer) {
+                itemEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            const form = new FormData();
+            form.append("file", file);
+            form.append("upload_preset", "github_unsigned");
+
+            const fileStartTime = Date.now();
+            let lastLoaded = 0;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
+
+            xhr.upload.onprogress = ev => {
+                if (ev.lengthComputable) {
+                    const pc = Math.round((ev.loaded / ev.total) * 100);
+                    if (progressEl) progressEl.style.width = pc + '%';
+                    if (pctEl) pctEl.textContent = pc + '%';
+
+                    // Per-file speed
+                    const fileElapsed = (Date.now() - fileStartTime) / 1000;
+                    if (fileElapsed > 0.5) {
+                        const fileSpeed = ev.loaded / fileElapsed;
+                        if (speedEl) speedEl.textContent = formatSpeed(fileSpeed);
+                    }
+
+                    // Update overall bytes
+                    const delta = ev.loaded - lastLoaded;
+                    lastLoaded = ev.loaded;
+                    uploadedBytesAll += delta;
+                    
+                    // Update overall progress with real bytes
+                    const realOverallPct = Math.round((uploadedBytesAll / totalBytesAll) * 100);
+                    const fillEl = document.getElementById('neonProgressFill');
+                    fillEl.style.width = Math.min(realOverallPct, 99) + '%';
+                    document.getElementById('neonProgressPct').textContent = Math.min(realOverallPct, 99) + '%';
+
+                    const totalElapsed = (Date.now() - uploadStartTime) / 1000;
+                    if (totalElapsed > 0.5) {
+                        const overallSpeed = uploadedBytesAll / totalElapsed;
+                        const remaining = totalBytesAll - uploadedBytesAll;
+                        const eta = remaining / overallSpeed;
+                        document.getElementById('neonProgressSpeed').textContent = formatSpeed(overallSpeed);
+                        document.getElementById('neonProgressEta').textContent = 'ETA: ' + formatTime(eta);
+                    }
+                }
+            };
+
+            xhr.onload = () => {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if(res.secure_url) {
+                        push(ref(db, DB_PATH), {
+                            url: res.secure_url, name: displayName, cat, size,
+                            time: Date.now(), trash: false, starred: false,
+                            locked: isLocked, folder: folder || null
+                        });
+                        if (statusEl) { statusEl.className = 'uq-status-icon done'; statusEl.innerHTML = '<i class="fas fa-check"></i>'; }
+                        if (progressEl) { progressEl.style.width = '100%'; progressEl.classList.add('complete'); }
+                        if (pctEl) pctEl.textContent = '100%';
+                        if (itemEl) { itemEl.classList.remove('active'); itemEl.classList.add('done'); }
+                    } else {
+                        markError(idx);
+                    }
+                } catch(err) {
+                    markError(idx);
+                }
+                completed++;
+                updateOverallNeon();
+                uploadFile(idx + 1);
+            };
+
+            xhr.onerror = () => {
+                markError(idx);
+                completed++;
+                updateOverallNeon();
+                uploadFile(idx + 1);
+            };
+
+            xhr.send(form);
+        }
+
+        function markError(idx) {
+            const statusEl = document.getElementById(`uqs-${idx}`);
+            const pctEl = document.getElementById(`uq-pct-${idx}`);
+            const progressEl = document.getElementById(`uqp-${idx}`);
+            const itemEl = document.getElementById(`uqi-${idx}`);
+            if (statusEl) { statusEl.className = 'uq-status-icon error'; statusEl.innerHTML = '<i class="fas fa-xmark"></i>'; }
+            if (pctEl) pctEl.textContent = 'ERR';
+            if (progressEl) { progressEl.classList.add('error'); }
+            if (itemEl) { itemEl.classList.remove('active'); itemEl.classList.add('error'); }
+        }
+
+        uploadFile(0);
+    };
+
+    function formatSpeed(bytesPerSec) {
+        if (bytesPerSec > 1024 * 1024) return (bytesPerSec / (1024*1024)).toFixed(1) + ' MB/s';
+        if (bytesPerSec > 1024) return (bytesPerSec / 1024).toFixed(0) + ' KB/s';
+        return bytesPerSec.toFixed(0) + ' B/s';
+    }
+
+    function formatTime(seconds) {
+        if (seconds < 0 || !isFinite(seconds)) return '--';
+        if (seconds < 60) return Math.ceil(seconds) + 's';
+        const m = Math.floor(seconds / 60);
+        const s = Math.ceil(seconds % 60);
+        return `${m}m ${s}s`;
+    }
+
+    // MODALS
+    function showModal(opts) {
+        const container = document.getElementById('modalContainer');
+        container.innerHTML = `
+            <div class="modal-overlay" onclick="if(event.target===this) window.closeModal()">
+                <div class="modal">
+                    ${opts.icon ? `<div style="width:45px; height:45px; border-radius:12px; background:rgba(255,51,85,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--danger); font-size:1.1rem;"><i class="${opts.icon}"></i></div>` : ''}
+                    <div class="modal-title">${opts.title || ''}</div>
+                    <div class="modal-desc">${opts.desc || ''}</div>
+                    ${opts.customContent || ''}
+                    ${opts.inputPlaceholder !== undefined ? `<input type="${opts.inputType||'text'}" class="modal-input" id="modalInput" placeholder="${opts.inputPlaceholder}" value="${opts.inputValue||''}" maxlength="${opts.inputType==='password'?4:100}" autofocus>` : ''}
+                    ${opts.customActions ? `<div class="modal-actions">${opts.customActions}</div>` : `
+                    <div class="modal-actions">
+                        ${opts.hideCancel ? '' : `<button class="modal-cancel" onclick="window.closeModal()">Cancel</button>`}
+                        <button class="modal-confirm ${opts.confirmClass||''}" onclick="window.confirmModal()">${opts.confirmText||'Confirm'}</button>
+                    </div>`}
+                </div>
+            </div>`;
+        window._modalOnConfirm = opts.onConfirm;
+        const input = document.getElementById('modalInput');
+        if (input) {
+            setTimeout(() => input.focus(), 100);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.confirmModal(); });
+        }
+    }
+    window.confirmModal = () => {
+        const input = document.getElementById('modalInput');
+        const val = input ? input.value : null;
+        if (window._modalOnConfirm) window._modalOnConfirm(val);
+        closeModal();
+    };
+    window.closeModal = () => { document.getElementById('modalContainer').innerHTML = ''; window._modalOnConfirm = null; };
+    function closeModal() { window.closeModal(); }
+
+    function showFolderPickerModal(title, callback) {
+        const container = document.getElementById('modalContainer');
+        let folderHTML = folders.map(f =>
+            `<div class="folder-option" onclick="this.parentElement.querySelectorAll('.folder-option').forEach(x=>x.classList.remove('selected')); this.classList.add('selected'); this.parentElement.dataset.selected='${f.id}'">
+                <i class="fas fa-folder" style="color:${f.color||'var(--neon)'}"></i>
+                <span>${f.name}</span>
+                <span style="margin-left:auto; font-size:0.65rem; color:#555;">${allFiles.filter(file=>file.folder===f.id&&!file.trash).length}</span>
+            </div>`).join('');
+        container.innerHTML = `
+            <div class="modal-overlay" onclick="if(event.target===this) window.closeModal()">
+                <div class="modal">
+                    <div class="modal-title">${title}</div>
+                    <div class="modal-desc">Select destination.</div>
+                    <div class="folder-list-modal" id="folderPickerList" data-selected="">${folderHTML}</div>
+                    <div class="modal-actions">
+                        <button class="modal-cancel" onclick="window.closeModal()">Cancel</button>
+                        <button class="modal-confirm" onclick="window.confirmFolderPick()">Confirm</button>
+                    </div>
+                </div>
+            </div>`;
+        window._folderPickCallback = callback;
+    }
+    window.confirmFolderPick = () => {
+        const list = document.getElementById('folderPickerList');
+        const selected = list ? list.dataset.selected : '';
+        if (selected && window._folderPickCallback) window._folderPickCallback(selected);
+        else { showToast("Select a folder", "warning"); return; }
+        closeModal();
+    };
+
+    // TOAST
+    function showToast(msg, type="success") {
+        const t = document.getElementById('toast');
+        const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+        const colors = {
+            success: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,204,0.15))',
+            error: 'linear-gradient(135deg, rgba(255,51,85,0.15), rgba(255,100,100,0.15))',
+            warning: 'linear-gradient(135deg, rgba(255,170,0,0.15), rgba(255,200,50,0.15))',
+            info: 'linear-gradient(135deg, rgba(0,212,255,0.15), rgba(100,180,255,0.15))'
+        };
+        const textColors = { success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)', info: 'var(--neon2)' };
+        const borderColors = { success: 'rgba(0,255,136,0.3)', error: 'rgba(255,51,85,0.3)', warning: 'rgba(255,170,0,0.3)', info: 'rgba(0,212,255,0.3)' };
+        t.innerHTML = `<span class="toast-icon">${icons[type]||'✓'}</span> ${msg}`;
+        t.style.background = colors[type] || colors.success;
+        t.style.color = textColors[type] || textColors.success;
+        t.style.borderColor = borderColors[type] || borderColors.success;
+        t.classList.add('active');
+        setTimeout(() => t.classList.remove('active'), 3000);
+    }
+
+    // Close menus on click
+    document.addEventListener('click', (e) => {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+        document.getElementById('contextMenu').classList.remove('active');
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal(); window.closeInfoPanel();
+            document.getElementById('uploadBox').classList.remove('active');
+            document.getElementById('contextMenu').classList.remove('active');
+            if (selectMode) window.clearSelection();
+        }
+        if (e.ctrlKey && e.key === 'a' && selectMode) {
+            e.preventDefault();
+            window.selectAllVisible();
+        }
+    });
+
+    // Prevent body scroll when upload box or info panel is open on mobile
+    document.addEventListener('touchmove', (e) => {
+        const uploadBox = document.getElementById('uploadBox');
+        const infoPanel = document.getElementById('infoPanel');
+        if ((uploadBox.classList.contains('active') && uploadBox.contains(e.target)) ||
+            (infoPanel.classList.contains('active') && infoPanel.contains(e.target))) {
+            // Allow scroll inside these containers
+        }
+    }, { passive: true });
 </script>
 </body>
 </html>
