@@ -123,7 +123,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const driveRef = ref(db, 'csm_v3_drive');
+    const driveRef = ref(db, 'my_gallery');
     const TRASH_PASSWORD = "123"; // আপনার ট্র্যাশ সিক্রেট পাসওয়ার্ড এখানে দিন
 
     let activeTab = 'image';
