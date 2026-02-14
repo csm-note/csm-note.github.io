@@ -3,105 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSM Cloud OS | Advanced File Manager</title>
+    <title>CSM Cloud OS | Secure Trash & Star</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
     
     <style>
-        :root { --accent: #00ffcc; --bg: #0a0a0a; --card: #161616; --border: #333; --text: #eee; }
+        :root { --accent: #00ffcc; --bg: #0a0a0a; --card: #161616; --border: #333; --star: #ffd700; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; user-select: none; }
+        body { background: var(--bg); color: #eee; min-height: 100vh; user-select: none; }
         
         #loginOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; }
+        .card-ui { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; }
 
         #mainContent { display: none; }
-
         header { padding: 15px 30px; background: #111; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
-
-        .manager-tools { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .search-box { width: 100%; padding: 12px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 20px; outline: none; }
-
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab { padding: 10px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: 600; color: #888; }
-        .tab.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0,255,204,0.3); }
-
-        .upload-area { background: var(--card); padding: 25px; border-radius: 15px; border: 2px dashed var(--border); text-align: center; margin-bottom: 30px; }
-        .btn-main { background: var(--accent); color: #000; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; }
-        .input-text { padding: 10px; background: #222; border: 1px solid var(--border); border-radius: 8px; color: white; width: 250px; text-align: center; margin-bottom: 10px; }
-
-        /* Glowing Progress Bar */
-        #progressWrap { margin-top: 20px; display: none; }
-        .p-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        #p-bar-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: 0.3s; }
-
-        /* File Grid */
-        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
-        .file-card:hover { border-color: var(--accent); transform: translateY(-3px); }
         
-        .preview-area { height: 140px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .manager-tools { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #888; transition: 0.3s; }
+        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .tab-trash { border-color: #ff4444; color: #ff4444; }
+
+        /* File Cards */
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
+        .preview-area { height: 130px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
         .preview-area img, .preview-area video { width: 100%; height: 100%; object-fit: cover; }
-        .file-icon { font-size: 40px; }
-
+        
         .file-info { padding: 12px; }
-        .file-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--accent); cursor: pointer; }
-        .file-meta { font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+        .file-name { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 5px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Star & Action Buttons */
+        .star-btn { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; z-index: 10; font-size: 18px; line-height: 30px; }
+        .star-btn.starred { color: var(--star); text-shadow: 0 0 10px var(--star); }
+        .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.6); color: #fff; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; z-index: 10; }
 
-        /* Advanced Action Menu */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #1a1a1a; border-top: 1px solid var(--border); }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #1a1a1a; }
         .act-btn { padding: 8px; font-size: 10px; font-weight: bold; border-radius: 5px; border: none; background: #333; color: #ccc; cursor: pointer; }
         .act-btn:hover { background: var(--accent); color: #000; }
-        .btn-move { background: #254b45; color: var(--accent); }
-        .btn-del { background: #4b2525; color: #ff4444; }
 
-        .locked-blur { filter: blur(40px); }
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 6000; }
+        .input-text { padding: 12px; background: #222; border: 1px solid var(--border); border-radius: 10px; color: white; width: 100%; text-align: center; margin-bottom: 15px; outline: none; }
+        .btn-main { background: var(--accent); color: #000; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; width: 100%; }
+
+        #progressWrap { display: none; margin: 20px 0; }
+        .p-bar { height: 8px; background: #222; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        #p-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: 0.3s; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div id="loginOverlay">
-    <div class="login-card">
-        <h2 style="color:var(--accent); margin-bottom:25px;">CSM PRIVATE DRIVE</h2>
-        <input type="email" id="loginEmail" class="input-text" style="width:100%" placeholder="Admin Email">
-        <input type="password" id="loginPass" class="input-text" style="width:100%" placeholder="Password">
-        <button id="doLogin" class="btn-main" style="width:100%">Access Storage</button>
+    <div class="card-ui">
+        <h2 style="color:var(--accent); margin-bottom:20px;">CSM CLOUD OS</h2>
+        <input type="email" id="loginEmail" class="input-text" placeholder="Admin Email">
+        <input type="password" id="loginPass" class="input-text" placeholder="Password">
+        <button id="doLogin" class="btn-main">Unlock Drive</button>
     </div>
 </div>
 
 <div id="mainContent">
     <header>
-        <div class="logo">CSM DRIVE v2.0</div>
-        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; font-weight:bold; cursor:pointer;">Sign Out</button>
+        <div style="font-weight: 800; color: var(--accent);">CSM DRIVE v3.0</div>
+        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; cursor:pointer;">Logout</button>
     </header>
 
     <div class="manager-tools">
-        <input type="text" id="searchBox" class="search-box" placeholder="Search for files or documents...">
-
         <div class="tab-bar">
-            <div class="tab active" data-cat="image" onclick="setTab('image', this)">📸 Images</div>
-            <div class="tab" data-cat="video" onclick="setTab('video', this)">🎥 Videos</div>
-            <div class="tab" data-cat="audio" onclick="setTab('audio', this)">🎵 Audio</div>
-            <div class="tab" data-cat="raw" onclick="setTab('raw', this)">📁 Documents</div>
+            <div class="tab active" onclick="setTab('image', this)">Images</div>
+            <div class="tab" onclick="setTab('video', this)">Videos</div>
+            <div class="tab" onclick="setTab('audio', this)">Audio</div>
+            <div class="tab" onclick="setTab('raw', this)">Docs</div>
+            <div class="tab" onclick="setTab('starred', this)" style="color:var(--star)">★ Starred</div>
+            <div class="tab tab-trash" onclick="openTrashTab(this)">🗑 Trash</div>
         </div>
 
-        <div class="upload-area">
-            <input type="text" id="filePass" class="input-text" placeholder="Protection Key (Optional)">
+        <div style="background:var(--card); padding:20px; border-radius:15px; text-align:center; margin-bottom:25px; border:1px dashed var(--border);">
+            <input type="text" id="filePass" class="input-text" style="max-width:300px" placeholder="File Password (Optional)">
             <br>
-            <label for="fileInput" class="btn-main">Select & Upload</label>
+            <label for="fileInput" class="btn-main" style="max-width:200px">+ Upload File</label>
             <input type="file" id="fileInput" style="display:none">
-            
             <div id="progressWrap">
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--accent);">
-                    <span id="p-status">Uploading...</span>
-                    <span id="p-percent">0%</span>
-                </div>
-                <div class="p-bar-bg"><div id="p-bar-fill"></div></div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--accent);"><span>Uploading...</span><span id="p-percent">0%</span></div>
+                <div class="p-bar"><div id="p-fill"></div></div>
             </div>
         </div>
 
         <div class="file-grid" id="fileGrid"></div>
+    </div>
+</div>
+
+<div id="trashAuthModal" class="modal">
+    <div class="card-ui">
+        <h3 style="color:#ff4444; margin-bottom:15px;">Secret Trash Access</h3>
+        <p style="font-size:12px; color:#888; margin-bottom:15px;">Enter Trash Secret Password</p>
+        <input type="password" id="trashSecretPass" class="input-text" placeholder="Secret Key">
+        <button id="confirmTrashAuth" class="btn-main" style="background:#ff4444; color:white;">Unlock Trash</button>
+        <button onclick="closeModal('trashAuthModal')" style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer;">Cancel</button>
     </div>
 </div>
 
@@ -124,16 +123,17 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const galleryRef = ref(db, 'csm_file_manager_v2');
+    const driveRef = ref(db, 'csm_v3_drive');
+    const TRASH_PASSWORD = "123"; // আপনার ট্র্যাশ সিক্রেট পাসওয়ার্ড এখানে দিন
 
     let activeTab = 'image';
     let allData = [];
+    let isTrashUnlocked = false;
 
-    // Auth & Persistence
+    // Auth
     document.getElementById('doLogin').onclick = async () => {
-        try {
-            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
-        } catch (err) { alert("Denied!"); }
+        try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } 
+        catch (err) { alert("Denied!"); }
     };
 
     onAuthStateChanged(auth, user => {
@@ -149,105 +149,97 @@
         renderFiles();
     };
 
+    window.openTrashTab = (el) => {
+        if(isTrashUnlocked) {
+            setTab('trash', el);
+        } else {
+            document.getElementById('trashAuthModal').style.display = 'flex';
+            document.getElementById('confirmTrashAuth').onclick = () => {
+                if(document.getElementById('trashSecretPass').value === TRASH_PASSWORD) {
+                    isTrashUnlocked = true;
+                    document.getElementById('trashAuthModal').style.display = 'none';
+                    setTab('trash', el);
+                } else { alert("Wrong Secret Password!"); }
+            };
+        }
+    };
+
     function loadFiles() {
-        onValue(galleryRef, snap => {
+        onValue(driveRef, snap => {
             allData = [];
             const data = snap.val();
-            if(data) {
-                Object.keys(data).forEach(id => allData.push({id, ...data[id]}));
-                allData.reverse();
-            }
+            if(data) Object.keys(data).forEach(id => allData.push({id, ...data[id]}));
             renderFiles();
         });
     }
 
-    // --- Core Advanced Functions ---
-
-    window.renameFile = (id, currentName) => {
-        const newName = prompt("Enter new filename:", currentName);
-        if(newName && newName !== currentName) {
-            update(ref(db, `csm_file_manager_v2/${id}`), { name: newName });
-        }
+    // Advanced Logic
+    window.toggleStar = (id, currentStatus) => {
+        update(ref(db, `csm_v3_drive/${id}`), { starred: !currentStatus });
     };
 
-    window.moveFile = (id, currentCat) => {
-        const categories = ['image', 'video', 'audio', 'raw'];
-        const newCat = prompt(`Move to folder? (Choices: ${categories.join(', ')})`, currentCat);
-        if(newCat && categories.includes(newCat) && newCat !== currentCat) {
-            update(ref(db, `csm_file_manager_v2/${id}`), { cat: newCat });
-        }
+    window.moveToTrash = (id) => {
+        if(confirm("Move to Trash?")) update(ref(db, `csm_v3_drive/${id}`), { trash: true });
     };
 
-    window.deleteFile = (id) => {
-        if(confirm("Permanently delete this item?")) remove(ref(db, `csm_file_manager_v2/${id}`));
+    window.restoreFile = (id) => {
+        update(ref(db, `csm_v3_drive/${id}`), { trash: false });
     };
 
-    window.copyLink = (link) => {
-        navigator.clipboard.writeText(link).then(() => alert("Direct link copied!"));
+    window.permanentDelete = (id) => {
+        if(confirm("Delete forever? This cannot be undone.")) remove(ref(db, `csm_v3_drive/${id}`));
     };
 
-    // --- Rendering Engine ---
-    function renderFiles(filter = "") {
+    function renderFiles() {
         const grid = document.getElementById('fileGrid');
         grid.innerHTML = "";
-        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
         
-        const filtered = allData.filter(item => 
-            item.cat === activeTab && 
-            (item.name || "").toLowerCase().includes(searchTerm)
-        );
+        let filtered = allData.filter(item => {
+            if (activeTab === 'trash') return item.trash === true;
+            if (activeTab === 'starred') return item.starred === true && !item.trash;
+            return item.cat === activeTab && !item.trash;
+        });
 
-        filtered.forEach(file => {
+        if(filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#555; padding:50px;">Folder is empty.</p>`;
+            return;
+        }
+
+        filtered.reverse().forEach(file => {
             const card = document.createElement('div');
             card.className = 'file-card';
-            const isLocked = !!file.password;
-
-            let previewHtml = `<div class="file-icon">${getIcon(file.cat)}</div>`;
-            if(file.cat === 'image') previewHtml = `<img src="${file.url}" class="${isLocked ? 'locked-blur' : ''}" data-fancybox="gallery">`;
-            if(file.cat === 'video') previewHtml = `<video src="${file.url}" class="${isLocked ? 'locked-blur' : ''}"></video>`;
+            
+            let preview = `<span>${file.cat === 'audio' ? '🎵' : '📄'}</span>`;
+            if(file.cat === 'image') preview = `<img src="${file.url}" data-fancybox="gallery">`;
+            if(file.cat === 'video') preview = `<video src="${file.url}"></video>`;
 
             card.innerHTML = `
-                <div class="preview-area" onclick="${isLocked ? '' : `window.open('${file.url}')`}">
-                    ${previewHtml}
-                    ${isLocked ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">🔒</div>' : ''}
-                </div>
+                <button class="star-btn ${file.starred ? 'starred' : ''}" onclick="toggleStar('${file.id}', ${file.starred || false})">★</button>
+                <div class="preview-area">${preview}</div>
                 <div class="file-info">
-                    <div class="file-name" onclick="renameFile('${file.id}', '${file.name}')" title="Click to rename">${file.name || 'Untitled'} ✎</div>
-                    <div class="file-meta">
-                        <span>${file.size || '0 MB'}</span>
-                        <span>${new Date(file.timestamp).toLocaleDateString()}</span>
-                    </div>
+                    <div class="file-name">${file.name || 'Untitled'}</div>
+                    <div style="font-size:10px; color:#555;">${file.size} | ${new Date(file.timestamp).toLocaleDateString()}</div>
                 </div>
                 <div class="action-grid">
-                    <button class="act-btn" onclick="copyLink('${file.url}')">Link</button>
-                    <a href="${file.url}" download class="act-btn" style="text-decoration:none; text-align:center;">Save</a>
-                    <button class="act-btn btn-move" onclick="moveFile('${file.id}', '${file.cat}')">Move</button>
-                    <button class="act-btn btn-del" onclick="deleteFile('${file.id}')">Delete</button>
+                    ${activeTab === 'trash' ? 
+                        `<button class="act-btn" onclick="restoreFile('${file.id}')">Restore</button>
+                         <button class="act-btn" style="color:red" onclick="permanentDelete('${file.id}')">Delete</button>` :
+                        `<button class="act-btn" onclick="window.open('${file.url}')">Open</button>
+                         <button class="act-btn" style="color:#ff4444" onclick="moveToTrash('${file.id}')">Trash</button>`
+                    }
                 </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    function getIcon(cat) {
-        if(cat === 'audio') return '🎵';
-        if(cat === 'raw') return '📄';
-        return '📁';
-    }
-
-    // --- Advanced Upload Handler ---
+    // Upload Logic
     document.getElementById('fileInput').onchange = async (e) => {
         const file = e.target.files[0];
         if(!file) return;
-
-        let cat = 'raw';
-        if(file.type.startsWith('image')) cat = 'image';
-        else if(file.type.startsWith('video')) cat = 'video';
-        else if(file.type.startsWith('audio')) cat = 'audio';
-
         const wrap = document.getElementById('progressWrap');
-        const fill = document.getElementById('p-bar-fill');
-        const text = document.getElementById('p-percent');
+        const fill = document.getElementById('p-fill');
+        const pcent = document.getElementById('p-percent');
         wrap.style.display = 'block';
 
         const formData = new FormData();
@@ -256,22 +248,21 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
-        
         xhr.upload.onprogress = ev => {
-            const p = Math.round((ev.loaded / ev.total) * 100);
-            fill.style.width = p + "%";
-            text.innerText = p + "%";
+            const p = Math.round((ev.loaded/ev.total)*100);
+            fill.style.width = p + "%"; pcent.innerText = p + "%";
         };
-
         xhr.onload = () => {
             const res = JSON.parse(xhr.responseText);
-            push(galleryRef, {
-                url: res.secure_url,
-                name: file.name,
-                size: (file.size / (1024*1024)).toFixed(2) + " MB",
-                cat: cat,
-                password: document.getElementById('filePass').value,
-                timestamp: Date.now()
+            let cat = 'raw';
+            if(file.type.startsWith('image')) cat = 'image';
+            if(file.type.startsWith('video')) cat = 'video';
+            if(file.type.startsWith('audio')) cat = 'audio';
+
+            push(driveRef, {
+                url: res.secure_url, name: file.name, size: (file.size/1024/1024).toFixed(2)+"MB",
+                cat: cat, starred: false, trash: false, timestamp: Date.now(),
+                password: document.getElementById('filePass').value
             });
             wrap.style.display = 'none';
             document.getElementById('filePass').value = "";
@@ -279,7 +270,7 @@
         xhr.send(formData);
     };
 
-    document.getElementById('searchBox').oninput = () => renderFiles();
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 </script>
 </body>
 </html>
