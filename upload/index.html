@@ -3,107 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Admin Gallery | CSM</title>
+    <title>CSM Cloud OS | Advanced File Manager</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"/>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0a0a0a; color: white; min-height: 100vh; user-select: none; overflow-x: hidden; }
+        :root { --accent: #00ffcc; --bg: #0a0a0a; --card: #161616; --border: #333; --text: #eee; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; user-select: none; }
         
-        /* Login Screen (Default view) */
-        #loginOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0a0a0a; display: flex; justify-content: center; align-items: center; z-index: 2000;
-        }
-        .login-card {
-            background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid #333;
-            width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        #loginOverlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
+        .login-card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; }
 
-        /* Private Content (Hidden by default) */
         #mainContent { display: none; }
 
-        header { 
-            padding: 15px 30px; background: #111; border-bottom: 1px solid #222; 
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
-        }
-        .logo { font-size: 20px; font-weight: bold; color: #00ffcc; text-transform: uppercase; }
+        header { padding: 15px 30px; background: #111; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
 
-        /* Admin Analytics */
-        #adminPanel { margin: 20px auto; max-width: 900px; padding: 20px; }
-        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #1a1a1a; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #333; }
-        .stat-card h4 { color: #888; font-size: 11px; margin-bottom: 5px; }
-        .stat-card p { font-size: 18px; font-weight: bold; color: #00ffcc; }
+        .manager-tools { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .search-box { width: 100%; padding: 12px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 20px; outline: none; }
 
-        .upload-box { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px dashed #444; text-align: center; }
-        .custom-btn { background: #00ffcc; color: #000; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; border:none; transition: 0.3s; }
-        .logout-btn { background: #ff4444; color: white; padding: 8px 20px; border-radius: 50px; cursor: pointer; border: none; font-weight: bold; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab { padding: 10px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: 600; color: #888; }
+        .tab.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0,255,204,0.3); }
 
-        /* Gallery Grid */
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
-        .card { position: relative; background: #1a1a1a; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; }
-        .card img, .card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .upload-area { background: var(--card); padding: 25px; border-radius: 15px; border: 2px dashed var(--border); text-align: center; margin-bottom: 30px; }
+        .btn-main { background: var(--accent); color: #000; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: 700; border:none; }
+        .input-text { padding: 10px; background: #222; border: 1px solid var(--border); border-radius: 8px; color: white; width: 250px; text-align: center; margin-bottom: 10px; }
+
+        /* Glowing Progress Bar */
+        #progressWrap { margin-top: 20px; display: none; }
+        .p-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        #p-bar-fill { height: 100%; width: 0%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: 0.3s; }
+
+        /* File Grid */
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .file-card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow: hidden; position: relative; transition: 0.3s; }
+        .file-card:hover { border-color: var(--accent); transform: translateY(-3px); }
         
-        .locked-blur { filter: blur(45px); transform: scale(1.1); }
-        .lock-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; font-size: 25px; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 50%; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.9); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; z-index: 20; }
+        .preview-area { height: 140px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .preview-area img, .preview-area video { width: 100%; height: 100%; object-fit: cover; }
+        .file-icon { font-size: 40px; }
 
-        /* Input Styles */
-        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #222; color: white; border: 1px solid #333; outline: none; }
-        .pass-input { padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; width: 200px; margin-right: 10px; outline: none; }
-        
-        #progressContainer { width: 100%; height: 4px; background: #222; margin-top: 15px; border-radius: 10px; display: none; overflow: hidden; }
-        #progressBar { height: 100%; width: 0%; background: #00ffcc; transition: 0.3s; }
+        .file-info { padding: 12px; }
+        .file-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--accent); cursor: pointer; }
+        .file-meta { font-size: 11px; color: #666; display: flex; justify-content: space-between; }
 
-        #unlockModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 3000; }
+        /* Advanced Action Menu */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; background: #1a1a1a; border-top: 1px solid var(--border); }
+        .act-btn { padding: 8px; font-size: 10px; font-weight: bold; border-radius: 5px; border: none; background: #333; color: #ccc; cursor: pointer; }
+        .act-btn:hover { background: var(--accent); color: #000; }
+        .btn-move { background: #254b45; color: var(--accent); }
+        .btn-del { background: #4b2525; color: #ff4444; }
+
+        .locked-blur { filter: blur(40px); }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2 style="color: #00ffcc; margin-bottom: 10px;">CSM PRIVATE CLOUD</h2>
-        <p style="color: #888; margin-bottom: 25px; font-size: 14px;">Please login to access the gallery</p>
-        <input type="email" id="loginEmail" class="modal-input" placeholder="Admin Email">
-        <input type="password" id="loginPass" class="modal-input" placeholder="Password">
-        <button id="doLogin" class="custom-btn" style="width: 100%; margin-top: 10px;">Authorize Access</button>
-        <p id="errorMsg" style="color: #ff4444; font-size: 12px; margin-top: 15px; display: none;">Invalid credentials!</p>
+        <h2 style="color:var(--accent); margin-bottom:25px;">CSM PRIVATE DRIVE</h2>
+        <input type="email" id="loginEmail" class="input-text" style="width:100%" placeholder="Admin Email">
+        <input type="password" id="loginPass" class="input-text" style="width:100%" placeholder="Password">
+        <button id="doLogin" class="btn-main" style="width:100%">Access Storage</button>
     </div>
 </div>
 
 <div id="mainContent">
     <header>
-        <div class="logo">CSM PRO GALLERY</div>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
+        <div class="logo">CSM DRIVE v2.0</div>
+        <button onclick="auth.signOut()" style="background:none; border:none; color:#ff4444; font-weight:bold; cursor:pointer;">Sign Out</button>
     </header>
 
-    <div id="adminPanel">
-        <div class="analytics-grid">
-            <div class="stat-card"><h4>Total Items</h4><p id="statTotal">0</p></div>
-            <div class="stat-card"><h4>Images</h4><p id="statImages">0</p></div>
-            <div class="stat-card"><h4>Videos</h4><p id="statVideos">0</p></div>
-            <div class="stat-card"><h4>Locked</h4><p id="statLocked">0</p></div>
+    <div class="manager-tools">
+        <input type="text" id="searchBox" class="search-box" placeholder="Search for files or documents...">
+
+        <div class="tab-bar">
+            <div class="tab active" data-cat="image" onclick="setTab('image', this)">📸 Images</div>
+            <div class="tab" data-cat="video" onclick="setTab('video', this)">🎥 Videos</div>
+            <div class="tab" data-cat="audio" onclick="setTab('audio', this)">🎵 Audio</div>
+            <div class="tab" data-cat="raw" onclick="setTab('raw', this)">📁 Documents</div>
         </div>
-        <div class="upload-box">
-            <input type="text" id="filePass" class="pass-input" placeholder="File Password (Optional)">
-            <label for="fileInput" class="custom-btn">+ Upload Content</label>
+
+        <div class="upload-area">
+            <input type="text" id="filePass" class="input-text" placeholder="Protection Key (Optional)">
+            <br>
+            <label for="fileInput" class="btn-main">Select & Upload</label>
             <input type="file" id="fileInput" style="display:none">
-            <div id="progressContainer"><div id="progressBar"></div></div>
+            
+            <div id="progressWrap">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--accent);">
+                    <span id="p-status">Uploading...</span>
+                    <span id="p-percent">0%</span>
+                </div>
+                <div class="p-bar-bg"><div id="p-bar-fill"></div></div>
+            </div>
         </div>
-    </div>
 
-    <div class="gallery" id="gallery"></div>
-</div>
-
-<div id="unlockModal">
-    <div class="modal-content" style="background: #1a1a1a; padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center;">
-        <h3>Unlock Content</h3>
-        <input type="password" id="unlockPassInput" class="modal-input" placeholder="Enter Password">
-        <button id="confirmUnlock" class="custom-btn" style="width: 100%;">Unlock</button>
-        <button style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer;" onclick="document.getElementById('unlockModal').style.display='none'">Close</button>
+        <div class="file-grid" id="fileGrid"></div>
     </div>
 </div>
 
@@ -111,7 +109,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBtmUmV1KxQDB0jN9gUQnh-eYWKllMPav0",
@@ -126,117 +124,131 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const galleryRef = ref(db, 'my_gallery');
+    const galleryRef = ref(db, 'csm_file_manager_v2');
 
-    // Init Fancybox
-    Fancybox.bind("[data-fancybox='gallery']", {});
+    let activeTab = 'image';
+    let allData = [];
 
-    // 1. Auth Logic: Sign In
+    // Auth & Persistence
     document.getElementById('doLogin').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPass').value;
-        const error = document.getElementById('errorMsg');
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            error.style.display = 'none';
-        } catch (err) { 
-            error.style.display = 'block';
-            error.innerText = "Access Denied: " + err.message;
-        }
+            await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
+        } catch (err) { alert("Denied!"); }
     };
 
-    // 2. Auth Logic: Logout
-    document.getElementById('logoutBtn').onclick = () => signOut(auth);
-
-    // 3. Monitor Auth State (The heart of the privacy)
     onAuthStateChanged(auth, user => {
-        const loginOverlay = document.getElementById('loginOverlay');
-        const mainContent = document.getElementById('mainContent');
-        
-        if (user) {
-            loginOverlay.style.display = 'none';
-            mainContent.style.display = 'block';
-            loadGallery(); // Load data only when logged in
-        } else {
-            loginOverlay.style.display = 'flex';
-            mainContent.style.display = 'none';
-            document.getElementById('gallery').innerHTML = ""; // Clear data
-        }
+        document.getElementById('loginOverlay').style.display = user ? 'none' : 'flex';
+        document.getElementById('mainContent').style.display = user ? 'block' : 'none';
+        if(user) loadFiles();
     });
 
-    // 4. Load Gallery Data
-    function loadGallery() {
+    window.setTab = (t, el) => {
+        activeTab = t;
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        renderFiles();
+    };
+
+    function loadFiles() {
         onValue(galleryRef, snap => {
-            const div = document.getElementById('gallery');
-            div.innerHTML = "";
+            allData = [];
             const data = snap.val();
-            let total = 0, imgs = 0, vids = 0, locks = 0;
-
-            if (data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const item = data[key];
-                    total++; item.type === "video" ? vids++ : imgs++; if(item.password) locks++;
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    const isLocked = item.password && item.password !== "";
-                    
-                    let mediaTag = "";
-                    if (item.type === "video") {
-                        mediaTag = `<video src="${item.url}" class="${isLocked ? 'locked-blur' : ''}" controls controlsList="nodownload"></video>`;
-                    } else {
-                        mediaTag = `<img src="${item.url}" class="${isLocked ? 'locked-blur' : ''}" data-fancybox="gallery" data-src="${item.url}">`;
-                    }
-
-                    const lockIcon = isLocked ? `<div class="lock-tag">🔒</div>` : "";
-                    card.innerHTML = mediaTag + lockIcon;
-
-                    if (isLocked) {
-                        card.onclick = () => handleUnlock(item.password, item.url, item.type, card);
-                    }
-
-                    // Admin Delete Button (Always show as only admin can see this page)
-                    const delBtn = document.createElement('button');
-                    delBtn.className = 'delete-btn';
-                    delBtn.innerHTML = '✕';
-                    delBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        if(confirm("Delete this?")) remove(ref(db, `my_gallery/${key}`));
-                    };
-                    card.appendChild(delBtn);
-                    div.appendChild(card);
-                });
+            if(data) {
+                Object.keys(data).forEach(id => allData.push({id, ...data[id]}));
+                allData.reverse();
             }
-            // Update Stats
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statImages').innerText = imgs;
-            document.getElementById('statVideos').innerText = vids;
-            document.getElementById('statLocked').innerText = locks;
+            renderFiles();
         });
     }
 
-    // 5. Unlock Files
-    function handleUnlock(correctPass, url, type, cardElement) {
-        const modal = document.getElementById('unlockModal');
-        modal.style.display = 'flex';
-        document.getElementById('confirmUnlock').onclick = () => {
-            if (document.getElementById('unlockPassInput').value === correctPass) {
-                modal.style.display = 'none';
-                document.getElementById('unlockPassInput').value = "";
-                cardElement.querySelectorAll('.locked-blur').forEach(el => el.classList.remove('locked-blur'));
-                cardElement.querySelector('.lock-tag')?.remove();
-                if(type === 'image') Fancybox.show([{ src: url, type: "image" }]);
-            } else { alert("Wrong Password!"); }
-        };
+    // --- Core Advanced Functions ---
+
+    window.renameFile = (id, currentName) => {
+        const newName = prompt("Enter new filename:", currentName);
+        if(newName && newName !== currentName) {
+            update(ref(db, `csm_file_manager_v2/${id}`), { name: newName });
+        }
+    };
+
+    window.moveFile = (id, currentCat) => {
+        const categories = ['image', 'video', 'audio', 'raw'];
+        const newCat = prompt(`Move to folder? (Choices: ${categories.join(', ')})`, currentCat);
+        if(newCat && categories.includes(newCat) && newCat !== currentCat) {
+            update(ref(db, `csm_file_manager_v2/${id}`), { cat: newCat });
+        }
+    };
+
+    window.deleteFile = (id) => {
+        if(confirm("Permanently delete this item?")) remove(ref(db, `csm_file_manager_v2/${id}`));
+    };
+
+    window.copyLink = (link) => {
+        navigator.clipboard.writeText(link).then(() => alert("Direct link copied!"));
+    };
+
+    // --- Rendering Engine ---
+    function renderFiles(filter = "") {
+        const grid = document.getElementById('fileGrid');
+        grid.innerHTML = "";
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        
+        const filtered = allData.filter(item => 
+            item.cat === activeTab && 
+            (item.name || "").toLowerCase().includes(searchTerm)
+        );
+
+        filtered.forEach(file => {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            const isLocked = !!file.password;
+
+            let previewHtml = `<div class="file-icon">${getIcon(file.cat)}</div>`;
+            if(file.cat === 'image') previewHtml = `<img src="${file.url}" class="${isLocked ? 'locked-blur' : ''}" data-fancybox="gallery">`;
+            if(file.cat === 'video') previewHtml = `<video src="${file.url}" class="${isLocked ? 'locked-blur' : ''}"></video>`;
+
+            card.innerHTML = `
+                <div class="preview-area" onclick="${isLocked ? '' : `window.open('${file.url}')`}">
+                    ${previewHtml}
+                    ${isLocked ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">🔒</div>' : ''}
+                </div>
+                <div class="file-info">
+                    <div class="file-name" onclick="renameFile('${file.id}', '${file.name}')" title="Click to rename">${file.name || 'Untitled'} ✎</div>
+                    <div class="file-meta">
+                        <span>${file.size || '0 MB'}</span>
+                        <span>${new Date(file.timestamp).toLocaleDateString()}</span>
+                    </div>
+                </div>
+                <div class="action-grid">
+                    <button class="act-btn" onclick="copyLink('${file.url}')">Link</button>
+                    <a href="${file.url}" download class="act-btn" style="text-decoration:none; text-align:center;">Save</a>
+                    <button class="act-btn btn-move" onclick="moveFile('${file.id}', '${file.cat}')">Move</button>
+                    <button class="act-btn btn-del" onclick="deleteFile('${file.id}')">Delete</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
     }
 
-    // 6. Upload Content
+    function getIcon(cat) {
+        if(cat === 'audio') return '🎵';
+        if(cat === 'raw') return '📄';
+        return '📁';
+    }
+
+    // --- Advanced Upload Handler ---
     document.getElementById('fileInput').onchange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-        const pCont = document.getElementById('progressContainer');
-        const pBar = document.getElementById('progressBar');
-        pCont.style.display = 'block';
+        if(!file) return;
+
+        let cat = 'raw';
+        if(file.type.startsWith('image')) cat = 'image';
+        else if(file.type.startsWith('video')) cat = 'video';
+        else if(file.type.startsWith('audio')) cat = 'audio';
+
+        const wrap = document.getElementById('progressWrap');
+        const fill = document.getElementById('p-bar-fill');
+        const text = document.getElementById('p-percent');
+        wrap.style.display = 'block';
 
         const formData = new FormData();
         formData.append("file", file);
@@ -244,22 +256,30 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `https://api.cloudinary.com/v1_1/dx7aankx2/auto/upload`);
-        xhr.upload.onprogress = ev => pBar.style.width = (ev.loaded/ev.total*100) + "%";
+        
+        xhr.upload.onprogress = ev => {
+            const p = Math.round((ev.loaded / ev.total) * 100);
+            fill.style.width = p + "%";
+            text.innerText = p + "%";
+        };
+
         xhr.onload = () => {
             const res = JSON.parse(xhr.responseText);
-            push(galleryRef, { url: res.secure_url, type: res.resource_type, password: document.getElementById('filePass').value, timestamp: Date.now() });
-            pCont.style.display = 'none';
-            pBar.style.width = "0%";
+            push(galleryRef, {
+                url: res.secure_url,
+                name: file.name,
+                size: (file.size / (1024*1024)).toFixed(2) + " MB",
+                cat: cat,
+                password: document.getElementById('filePass').value,
+                timestamp: Date.now()
+            });
+            wrap.style.display = 'none';
             document.getElementById('filePass').value = "";
         };
         xhr.send(formData);
     };
 
-    // Keyboard Protection
-    document.addEventListener('keydown', e => {
-        if (e.ctrlKey && ['s','u','S','U'].includes(e.key)) e.preventDefault();
-        if (e.key === 'F12') e.preventDefault();
-    });
+    document.getElementById('searchBox').oninput = () => renderFiles();
 </script>
 </body>
 </html>
