@@ -458,8 +458,11 @@
         if (!input) { err.textContent = '⛔ Enter passcode!'; err.style.display = 'block'; return; }
         btn.disabled = true; btn.innerText = 'CHECKING...'; err.style.display = 'none';
 
-        // Anonymous auth আগে করো যাতে Firebase write permission পাওয়া যায়
-        try { await auth.signInAnonymously(); } catch(e) {}
+        // Anonymous auth — timeout সহ যাতে offline এ hang না করে
+        try {
+            const authTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+            await Promise.race([auth.signInAnonymously(), authTimeout]);
+        } catch(e) {}
 
         // MASTER PASSCODE
         if (input === MASTER) {
