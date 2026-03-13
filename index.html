@@ -458,15 +458,22 @@
         if (!input) { err.textContent = '⛔ Enter passcode!'; err.style.display = 'block'; return; }
         btn.disabled = true; btn.innerText = 'CHECKING...'; err.style.display = 'none';
 
+        // Anonymous auth আগে করো যাতে Firebase write permission পাওয়া যায়
+        try { await auth.signInAnonymously(); } catch(e) {}
+
         // MASTER PASSCODE
         if (input === MASTER) {
             try {
-                const mSnap = await db.ref('config/master').once('value');
+                // Offline এ hang না করার জন্য 3 সেকেন্ড timeout
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+                const mSnap = await Promise.race([db.ref('config/master').once('value'), timeoutPromise]);
                 if (mSnap.exists() && mSnap.val().enabled === false) {
                     err.textContent = '⛔ Master passcode disabled!';
                     err.style.display = 'block'; btn.disabled = false; btn.innerText = 'ACCESS NOTEPAD →'; return;
                 }
-            } catch(e) {}
+            } catch(e) {
+                // Timeout বা offline হলে সরাসরি ঢুকতে দাও
+            }
             document.getElementById('user-pass').value = '';
             btn.disabled = false; btn.innerText = 'ACCESS NOTEPAD →';
             _isMaster = true; _isUser = true;
@@ -476,7 +483,8 @@
 
         // USER PASSCODE
         try {
-            const snap = await db.ref('passcodes').once('value');
+            const t2 = new Promise((_, reject) => setTimeout(() => reject(new Error('No internet connection. অনলাইনে থেকে চেষ্টা করুন।')), 5000));
+            const snap = await Promise.race([db.ref('passcodes').once('value'), t2]);
             const codes = snap.val() || {};
             const now = new Date();
             let matched = null, errMsg = '';
