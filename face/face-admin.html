@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Face Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Space+Mono:wght@400;700&family=Noto+Sans+Bengali:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #020202;
+    --bg-panel: #0d0d0d;
+    --bg-card: #0a0a0a;
+    --border: #1e1e1e;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --glow: rgba(124,58,237,0.3);
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #00f3ff;
+    --text: #e2e0f0;
+    --muted: #555570;
+    --neon: #0f0;
+    --font: 'Fira Code', monospace;
+    --font-bn: 'Noto Sans Bengali', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #2a2a3a; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── CRT effect ── */
+body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px, transparent 1px, transparent 2px);
+}
+
+/* ══════════════════════════════════
+   PASSCODE SCREEN
+══════════════════════════════════ */
+#passcode-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+}
+
+.passcode-box {
+    width: 90%; max-width: 380px;
+    padding: 40px 36px;
+    border: 1px solid #2a2a3a;
+    background: rgba(10,10,14,0.98);
+    box-shadow: 0 0 60px rgba(124,58,237,0.15);
+    text-align: center;
+}
+
+.ps-brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+}
+.ps-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px var(--glow);
+}
+.ps-title {
+    font-family: var(--font-mono);
+    font-size: 18px; font-weight: 700; letter-spacing: 3px;
+    background: linear-gradient(135deg, #c084fc, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.ps-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 28px;
+}
+
+.ps-input {
+    width: 100%; padding: 13px 16px; margin-bottom: 12px;
+    background: #0f0f14; border: 1px solid #2a2a3a;
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font); font-size: 15px;
+    letter-spacing: 3px; text-align: center;
+    transition: border-color 0.2s;
+}
+.ps-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+.ps-input.error { border-color: var(--red); animation: shake 0.4s ease; }
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+}
+
+.ps-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 8px;
+    color: #fff; font-family: var(--font); font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px var(--glow);
+}
+.ps-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--glow); }
+.ps-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.ps-err {
+    margin-top: 10px; font-size: 12px; color: var(--red);
+    display: none; font-family: var(--font-bn);
+}
+
+/* ══════════════════════════════════
+   MAIN APP
+══════════════════════════════════ */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+
+/* Header */
+.app-header {
+    height: 52px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    position: sticky; top: 0; z-index: 50;
+}
+.header-brand {
+    display: flex; align-items: center; gap: 10px;
+}
+.header-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+}
+.header-title {
+    font-family: var(--font-mono);
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    color: #c084fc;
+}
+.header-actions { display: flex; gap: 8px; }
+
+.btn {
+    padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 600;
+    border: 1px solid; transition: all 0.2s;
+}
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent; color: #fff;
+    box-shadow: 0 2px 10px var(--glow);
+}
+.btn-accent:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--glow); }
+.btn-ghost { background: transparent; border-color: #2a2a3a; color: var(--muted); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+.btn-danger { background: transparent; border-color: #500; color: var(--red); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.btn-warn { background: transparent; border-color: #554400; color: var(--yellow); }
+.btn-warn:hover { background: var(--yellow); color: #000; }
+.btn-green { background: transparent; border-color: #0a4a2a; color: var(--green); }
+.btn-green:hover { background: var(--green); color: #000; }
+
+/* Tab bar */
+.tab-bar {
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--bg-panel); padding: 0 24px;
+}
+.tab {
+    padding: 12px 20px; font-size: 12px; font-family: var(--font-mono);
+    letter-spacing: 1px; cursor: pointer; color: var(--muted);
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+}
+.tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* Content area */
+.content { flex: 1; padding: 24px; max-width: 900px; width: 100%; margin: 0 auto; }
+
+/* ── STATS CARDS ── */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+}
+.stat-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-value { font-family: var(--font-mono); font-size: 26px; font-weight: 700; }
+.stat-card.total .stat-value { color: var(--accent2); }
+.stat-card.active .stat-value { color: var(--green); }
+.stat-card.disabled .stat-value { color: var(--red); }
+
+/* ── SECTION HEADER ── */
+.section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+}
+.section-title {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+}
+
+/* ── USER CARDS ── */
+.user-list { display: flex; flex-direction: column; gap: 10px; }
+
+.user-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 16px;
+    transition: border-color 0.2s;
+}
+.user-card:hover { border-color: #2a2a3a; }
+.user-card.disabled-card { opacity: 0.55; }
+
+.user-avatar {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, #1a0a3a, #2a1a4a);
+    border: 1px solid #3a2a5a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+}
+.user-avatar.active-av { border-color: rgba(124,58,237,0.4); box-shadow: 0 0 12px rgba(124,58,237,0.2); }
+
+.user-info { flex: 1; min-width: 0; }
+.user-name {
+    font-family: var(--font-mono); font-size: 14px; font-weight: 700;
+    color: var(--text); margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.user-meta-item { font-size: 10px; color: var(--muted); }
+
+.badge {
+    font-size: 9px; padding: 2px 7px; border-radius: 4px;
+    font-family: var(--font-mono); letter-spacing: 1px; font-weight: 700;
+    border: 1px solid;
+}
+.badge-active { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.3); }
+.badge-disabled { background: rgba(239,68,68,0.1); color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+.user-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Empty state */
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-size: 13px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+
+/* ══════════════════════════════════
+   ADD FACE PANEL
+══════════════════════════════════ */
+#add-panel { display: none; }
+
+.add-form {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    max-width: 500px; margin: 0 auto;
+}
+
+.form-label {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+    display: block;
+}
+.form-input {
+    width: 100%; padding: 11px 14px; margin-bottom: 18px;
+    background: #0f0f14; border: 1px solid #2a2a3a;
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font); font-size: 14px;
+    transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent); }
+
+/* Camera section */
+.cam-section { margin-bottom: 18px; }
+.cam-wrap {
+    position: relative; width: 240px; height: 240px;
+    margin: 0 auto 14px;
+}
+.cam-ring {
+    position: absolute; inset: -5px; border-radius: 16px;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent2), transparent, transparent, var(--accent));
+    animation: ringRotate 3s linear infinite;
+    opacity: 0; transition: opacity 0.3s;
+}
+.cam-ring.active { opacity: 1; }
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+.cam-inner {
+    position: absolute; inset: 0; border-radius: 12px;
+    overflow: hidden; background: #000; z-index: 1;
+}
+#reg-video {
+    width: 240px; height: 240px;
+    object-fit: cover; transform: scaleX(-1); display: block;
+}
+#reg-canvas {
+    position: absolute; top: 0; left: 0;
+    width: 240px; height: 240px;
+    transform: scaleX(-1); pointer-events: none; z-index: 2;
+}
+.scan-beam {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    top: 0; animation: beamAnim 2s ease-in-out infinite;
+    z-index: 3; opacity: 0; transition: opacity 0.3s;
+}
+.capturing .scan-beam { opacity: 1; }
+@keyframes beamAnim { 0%,100%{top:0;} 50%{top:100%;} }
+.cam-corner { position: absolute; width: 16px; height: 16px; z-index: 4; }
+.cc-tl { top:-2px; left:-2px; border-top:2px solid var(--accent2); border-left:2px solid var(--accent2); border-radius:3px 0 0 0; }
+.cc-tr { top:-2px; right:-2px; border-top:2px solid var(--accent2); border-right:2px solid var(--accent2); border-radius:0 3px 0 0; }
+.cc-bl { bottom:-2px; left:-2px; border-bottom:2px solid var(--accent2); border-left:2px solid var(--accent2); border-radius:0 0 0 3px; }
+.cc-br { bottom:-2px; right:-2px; border-bottom:2px solid var(--accent2); border-right:2px solid var(--accent2); border-radius:0 0 3px 0; }
+
+/* Status bar */
+.cam-status {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 10px 12px; background: #0f0f14;
+    border: 1px solid #2a2a3a; border-radius: 8px;
+    margin-bottom: 14px; min-height: 40px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; margin-top: 5px; transition: all 0.3s; }
+.cam-status.scanning .status-dot { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); animation: dotBlink 1s infinite; }
+.cam-status.success .status-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.cam-status.error .status-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+@keyframes dotBlink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.status-text { font-size: 12px; color: var(--text); line-height: 1.5; font-family: var(--font-bn); }
+
+/* Progress */
+.prog-wrap { margin-bottom: 14px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 5px; }
+.prog-track { height: 3px; background: #1e1e2e; border-radius: 2px; }
+.prog-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.2s; box-shadow: 0 0 6px var(--accent); }
+
+.btn-full {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 8px;
+    color: #fff; font-family: var(--font); font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px var(--glow);
+    margin-bottom: 8px;
+}
+.btn-full:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px var(--glow); }
+.btn-full:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.btn-full-ghost {
+    width: 100%; padding: 11px;
+    background: transparent; border: 1px solid #2a2a3a;
+    border-radius: 8px; color: var(--muted);
+    font-family: var(--font); font-size: 13px;
+    cursor: pointer; transition: all 0.2s;
+}
+.btn-full-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+#toast-container {
+    position: fixed; top: 64px; right: 20px;
+    z-index: 9998; display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+    min-width: 280px; padding: 12px 16px;
+    background: rgba(10,10,14,0.95);
+    border-left: 3px solid;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    animation: toastIn 0.3s ease-out;
+}
+@keyframes toastIn { from { transform: translateX(110%); opacity: 0; } to { transform: none; opacity: 1; } }
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error   { border-color: var(--red);   color: var(--red); }
+.toast.info    { border-color: var(--accent2); color: var(--accent2); }
+
+/* ══════════════════════════════════
+   MODAL (confirm)
+══════════════════════════════════ */
+#modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 500;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.modal-box {
+    width: 90%; max-width: 380px; padding: 28px 24px;
+    background: #0a0a0e; border: 1px solid #2a2a3a;
+    border-radius: 12px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon { font-size: 36px; margin-bottom: 12px; }
+.modal-title { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.modal-msg { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; font-family: var(--font-bn); }
+.modal-actions { display: flex; gap: 10px; justify-content: center; }
+
+/* Loading overlay */
+#loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg); z-index: 9997;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px;
+}
+.spinner {
+    width: 42px; height: 42px;
+    border: 3px solid #1e1e2e;
+    border-top-color: var(--accent2); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-msg { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 2px; }
+
+@media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stats-row .stat-card:last-child { grid-column: span 2; }
+    .user-actions { flex-direction: column; }
+    .content { padding: 16px; }
+    .app-header { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-overlay" style="display:flex;">
+    <div class="spinner"></div>
+    <div class="loading-msg" id="loading-msg">INITIALIZING...</div>
+</div>
+
+<!-- Passcode Screen -->
+<div id="passcode-screen">
+    <div class="passcode-box">
+        <div class="ps-brand">
+            <div class="ps-icon">👁</div>
+            <div class="ps-title">FACE ADMIN</div>
+        </div>
+        <div class="ps-sub">Face User Management Panel</div>
+        <input type="password" id="ps-input" class="ps-input" placeholder="••••••••"
+               maxlength="30" onkeydown="if(event.key==='Enter') checkPasscode()">
+        <div class="ps-err" id="ps-err">⛔ ভুল পাসকোড!</div>
+        <button class="ps-btn" onclick="checkPasscode()">🔑 প্রবেশ করুন</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-container"></div>
+
+<!-- Confirm Modal -->
+<div id="modal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modal-icon">⚠️</div>
+        <div class="modal-title" id="modal-title">নিশ্চিত করুন</div>
+        <div class="modal-msg" id="modal-msg">আপনি কি নিশ্চিত?</div>
+        <div class="modal-actions">
+            <button class="btn btn-danger" id="modal-confirm-btn">হ্যাঁ, করুন</button>
+            <button class="btn btn-ghost" onclick="closeModal()">বাতিল</button>
+        </div>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-brand">
+            <div class="header-icon">👁</div>
+            <div class="header-title">FACE ADMIN PANEL</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-ghost" onclick="logout()" title="লগআউট">⏻ LOGOUT</button>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab active" id="tab-users" onclick="switchTab('users')">👥 USER LIST</div>
+        <div class="tab" id="tab-add" onclick="switchTab('add')">➕ ADD FACE</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- ── USERS TAB ── -->
+        <div id="users-panel">
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card total">
+                    <div class="stat-label">মোট Users</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat-card active">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="stat-active">0</div>
+                </div>
+                <div class="stat-card disabled">
+                    <div class="stat-label">Disabled</div>
+                    <div class="stat-value" id="stat-disabled">0</div>
+                </div>
+            </div>
+
+            <!-- User List -->
+            <div class="section-header">
+                <div class="section-title">Registered Faces</div>
+                <button class="btn btn-ghost" onclick="loadUsers()" title="Refresh">↺ REFRESH</button>
+            </div>
+            <div id="user-list" class="user-list">
+                <div class="empty-state">
+                    <div class="empty-icon">👤</div>
+                    <div>লোড হচ্ছে...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ADD FACE TAB ── -->
+        <div id="add-panel">
+            <div class="add-form">
+                <div class="section-title" style="margin-bottom:20px;">নতুন Face Register করুন</div>
+
+                <label class="form-label">ব্যবহারকারীর নাম</label>
+                <input type="text" id="reg-name" class="form-input" placeholder="যেমন: Samiya, Admin 1"
+                       oninput="this.value = this.value.replace(/[^a-zA-Z0-9 \u0980-\u09FF]/g,'')">
+
+                <!-- Camera -->
+                <div class="cam-section">
+                    <label class="form-label">Face Scan</label>
+                    <div class="cam-wrap" id="reg-cam-wrap">
+                        <div class="cam-ring" id="reg-cam-ring"></div>
+                        <div class="cam-inner">
+                            <video id="reg-video" autoplay muted playsinline></video>
+                            <canvas id="reg-canvas"></canvas>
+                            <div class="scan-beam"></div>
+                        </div>
+                        <div class="cam-corner cc-tl"></div>
+                        <div class="cam-corner cc-tr"></div>
+                        <div class="cam-corner cc-bl"></div>
+                        <div class="cam-corner cc-br"></div>
+                    </div>
+
+                    <div class="cam-status" id="reg-status">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="reg-status-text">ক্যামেরা প্রস্তুত হচ্ছে...</div>
+                    </div>
+
+                    <div class="prog-wrap" id="reg-prog-wrap" style="display:none;">
+                        <div class="prog-label"><span>Face Capture হচ্ছে</span><span id="reg-prog-pct">0%</span></div>
+                        <div class="prog-track"><div class="prog-fill" id="reg-prog-fill"></div></div>
+                    </div>
+                </div>
+
+                <button class="btn-full" id="reg-capture-btn" onclick="startCapture()" disabled>
+                    📸 Face Capture করুন
+                </button>
+                <button class="btn-full-ghost" onclick="resetCapture()">
+                    ↺ Reset করুন
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="./face-api.min.js" onerror="window._faceApiNeedCDN=true"></script>
+
+<script type="module">
+// ══════════════════════════════════════════════════════
+// Firebase (Firestore — facelock project)
+// ══════════════════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+    getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
+    doc, enableIndexedDbPersistence, query, orderBy
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
+    authDomain: "voice-call-demo-1201b.firebaseapp.com",
+    projectId: "voice-call-demo-1201b",
+    storageBucket: "voice-call-demo-1201b.firebasestorage.app",
+    messagingSenderId: "611354192250",
+    appId: "1:611354192250:web:bac02535d65ca6565fcec3"
+};
+
+const fbApp = initializeApp(FIREBASE_CONFIG, 'face-admin');
+const db = getFirestore(fbApp);
+try { await enableIndexedDbPersistence(db); } catch(e) {}
+
+const MASTER = 'samiya';
+const MODEL_URL = './models';
+const MODEL_CDN = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/weights';
+
+let _modelsLoaded = false;
+let _camStream = null;
+let _previewRunning = false;
+let _capturedDescriptor = null;
+let _regState = 'idle';
+let _users = [];
+
+// ── Helpers ──
+function toast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(110%)'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function showModal(icon, title, msg, confirmText, confirmClass, onConfirm) {
+    document.getElementById('modal-icon').textContent = icon;
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-msg').textContent = msg;
+    const btn = document.getElementById('modal-confirm-btn');
+    btn.textContent = confirmText;
+    btn.className = 'btn ' + confirmClass;
+    btn.onclick = () => { closeModal(); onConfirm(); };
+    document.getElementById('modal').style.display = 'flex';
+}
+window.closeModal = () => { document.getElementById('modal').style.display = 'none'; };
+
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+// Passcode
+// ══════════════════════════════════════════════════════
+window.checkPasscode = function() {
+    const val = document.getElementById('ps-input').value.trim();
+    const err = document.getElementById('ps-err');
+    const input = document.getElementById('ps-input');
+
+    if (val === MASTER) {
+        err.style.display = 'none';
+        document.getElementById('passcode-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        initApp();
+    } else {
+        err.style.display = 'block';
+        input.classList.add('error');
+        input.value = '';
+        setTimeout(() => input.classList.remove('error'), 500);
+        input.focus();
+    }
+};
+
+window.logout = function() {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('passcode-screen').style.display = 'flex';
+    document.getElementById('ps-input').value = '';
+    stopCamera();
+    _capturedDescriptor = null;
+};
+
+// ══════════════════════════════════════════════════════
+// App Init
+// ══════════════════════════════════════════════════════
+async function initApp() {
+    await loadModels();
+    await loadUsers();
+    await startCamera();
+}
+
+async function loadModels() {
+    if (_modelsLoaded) return;
+    document.getElementById('loading-overlay').style.display = 'flex';
+    document.getElementById('loading-msg').textContent = 'MODELS LOADING...';
+    try {
+        if (window._faceApiNeedCDN || typeof faceapi === 'undefined') {
+            document.getElementById('loading-msg').textContent = 'CDN থেকে লোড হচ্ছে...';
+            await new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.min.js';
+                s.onload = res; s.onerror = rej;
+                document.head.appendChild(s);
+            });
+        }
+        document.getElementById('loading-msg').textContent = 'DETECTOR...';
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+            document.getElementById('loading-msg').textContent = 'RECOGNITION...';
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        } catch(e) {
+            document.getElementById('loading-msg').textContent = 'CDN MODELS...';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_CDN);
+            await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_CDN);
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_CDN);
+        }
+        _modelsLoaded = true;
+        hideLoading();
+    } catch(e) {
+        document.getElementById('loading-msg').textContent = '❌ ' + e.message;
+        document.getElementById('loading-msg').style.color = '#ef4444';
+    }
+}
+
+// ══════════════════════════════════════════════════════
+// Firebase — User CRUD
+// ══════════════════════════════════════════════════════
+window.loadUsers = async function() {
+    try {
+        const snap = await getDocs(collection(db, 'facelock_users'));
+        _users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderUserList();
+    } catch(e) {
+        toast('Firebase error: ' + e.message, 'error');
+    }
+};
+
+function renderUserList() {
+    const list = document.getElementById('user-list');
+    const total = _users.length;
+    const active = _users.filter(u => u.enabled !== false).length;
+    const disabled = total - active;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-active').textContent = active;
+    document.getElementById('stat-disabled').textContent = disabled;
+
+    if (total === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><div>কোনো registered user নেই।<br>Add Face ট্যাব থেকে যোগ করুন।</div></div>`;
+        return;
+    }
+
+    list.innerHTML = '';
+    _users.forEach(user => {
+        const isActive = user.enabled !== false;
+        const date = user.createdAt ? new Date(user.createdAt).toLocaleDateString('bn-BD') : '—';
+
+        const card = document.createElement('div');
+        card.className = 'user-card' + (isActive ? '' : ' disabled-card');
+        card.innerHTML = `
+            <div class="user-avatar ${isActive ? 'active-av' : ''}">
+                ${isActive ? '😊' : '🚫'}
+            </div>
+            <div class="user-info">
+                <div class="user-name">${escapeHtml(user.name)}</div>
+                <div class="user-meta">
+                    <span class="badge ${isActive ? 'badge-active' : 'badge-disabled'}">${isActive ? 'ACTIVE' : 'DISABLED'}</span>
+                    <span class="user-meta-item">📅 ${date}</span>
+                </div>
+            </div>
+            <div class="user-actions">
+                ${isActive
+                    ? `<button class="btn btn-warn" onclick="toggleUser('${user.id}', false)">🚫 Disable</button>`
+                    : `<button class="btn btn-green" onclick="toggleUser('${user.id}', true)">✅ Enable</button>`
+                }
+                <button class="btn btn-danger" onclick="confirmDelete('${user.id}', '${escapeHtml(user.name)}')">🗑 Delete</button>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.toggleUser = async function(id, enable) {
+    try {
+        await updateDoc(doc(db, 'facelock_users', id), { enabled: enable });
+        const u = _users.find(u => u.id === id);
+        if (u) u.enabled = enable;
+        renderUserList();
+        toast((enable ? '✅ Enable' : '🚫 Disable') + ' করা হয়েছে', enable ? 'success' : 'info');
+    } catch(e) {
+        toast('Error: ' + e.message, 'error');
+    }
+};
+
+window.confirmDelete = function(id, name) {
+    showModal('🗑', 'Delete করবেন?', `"${name}" কে permanently delete করবেন? এটা undo করা যাবে না।`,
+        'Delete করুন', 'btn-danger', () => deleteUser(id, name));
+};
+
+async function deleteUser(id, name) {
+    try {
+        await deleteDoc(doc(db, 'facelock_users', id));
+        _users = _users.filter(u => u.id !== id);
+        renderUserList();
+        toast(`"${name}" delete করা হয়েছে`, 'success');
+    } catch(e) {
+        toast('Error: ' + e.message, 'error');
+    }
+}
+
+// ══════════════════════════════════════════════════════
+// Camera & Face Registration
+// ══════════════════════════════════════════════════════
+async function startCamera() {
+    if (_camStream) return;
+    try {
+        _camStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 240 }, height: { ideal: 240 } }
+        });
+        const video = document.getElementById('reg-video');
+        video.srcObject = _camStream;
+        await video.play();
+
+        const canvas = document.getElementById('reg-canvas');
+        canvas.width = 240; canvas.height = 240;
+
+        setRegStatus('idle', '✅ ক্যামেরা প্রস্তুত। নাম দিন এবং Capture বোতাম চাপুন।');
+        document.getElementById('reg-capture-btn').disabled = false;
+
+        _regState = 'idle';
+        if (!_previewRunning) {
+            _previewRunning = true;
+            regPreviewLoop();
+        }
+    } catch(e) {
+        setRegStatus('error', '❌ ক্যামেরা access করা যায়নি: ' + e.message);
+    }
+}
+
+function stopCamera() {
+    if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+    _previewRunning = false;
+    _regState = 'idle';
+}
+
+function setRegStatus(type, msg) {
+    const sb = document.getElementById('reg-status');
+    sb.className = 'cam-status ' + (type !== 'idle' ? type : '');
+    document.getElementById('reg-status-text').textContent = msg;
+    const wrap = document.getElementById('reg-cam-wrap');
+    const ring = document.getElementById('reg-cam-ring');
+    wrap.className = 'cam-wrap' + (type === 'scanning' ? ' capturing' : '');
+    ring.className = 'cam-ring' + (type === 'scanning' ? ' active' : '');
+}
+
+// Real-time preview loop
+async function regPreviewLoop() {
+    const video = document.getElementById('reg-video');
+    const canvas = document.getElementById('reg-canvas');
+    const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.4 });
+
+    while (_previewRunning) {
+        await new Promise(r => setTimeout(r, 100));
+        if (!_previewRunning || !video.srcObject) break;
+        try {
+            const res = await faceapi.detectSingleFace(video, opts).withFaceLandmarks(true);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 240, 240);
+            if (!res) continue;
+
+            const state = _regState;
+            const c = state === 'scanning' ? '#00d4ff'
+                    : state === 'success'  ? '#10b981'
+                    : state === 'failed'   ? '#ef4444'
+                    : '#a855f7';
+
+            const pts = res.landmarks.positions;
+            const flip = p => ({ x: 240 - p.x, y: p.y });
+            const b = res.detection.box;
+            const bx = 240 - b.x - b.width, by = b.y, bw = b.width, bh = b.height;
+            const cs = 12;
+
+            ctx.strokeStyle = c; ctx.lineWidth = 2.5;
+            ctx.shadowColor = c; ctx.shadowBlur = state === 'scanning' ? 14 : 8;
+            ctx.beginPath(); ctx.moveTo(bx,by+cs); ctx.lineTo(bx,by); ctx.lineTo(bx+cs,by); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(bx+bw-cs,by); ctx.lineTo(bx+bw,by); ctx.lineTo(bx+bw,by+cs); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+bh); ctx.lineTo(bx+cs,by+bh); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(bx+bw-cs,by+bh); ctx.lineTo(bx+bw,by+bh); ctx.lineTo(bx+bw,by+bh-cs); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            const alpha = state === 'scanning' ? 0.7 : 0.45;
+            ctx.strokeStyle = c; ctx.globalAlpha = alpha; ctx.lineWidth = 0.8;
+            ctx.shadowColor = c; ctx.shadowBlur = state === 'scanning' ? 5 : 2;
+
+            const drawLine = (arr, close = false) => {
+                ctx.beginPath();
+                arr.forEach((i, idx) => { const p = flip(pts[i]); idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+                if (close) { const p = flip(pts[arr[0]]); ctx.lineTo(p.x, p.y); }
+                ctx.stroke();
+            };
+            drawLine([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
+            drawLine([17,18,19,20,21]); drawLine([22,23,24,25,26]);
+            drawLine([36,37,38,39,40,41], true); drawLine([42,43,44,45,46,47], true);
+            drawLine([27,28,29,30]); drawLine([31,32,33,34,35]);
+            drawLine([48,49,50,51,52,53,54,55,56,57,58,59], true);
+            ctx.lineWidth = 0.5;
+            [[0,17],[17,36],[36,0],[16,26],[26,45],[45,16],[27,21],[27,22],[30,48],[30,54],[8,57],[33,51]].forEach(([a,b2]) => {
+                const pa = flip(pts[a]), pb = flip(pts[b2]);
+                ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+            });
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+            ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 3;
+            pts.forEach(pt => { const p = flip(pt); ctx.beginPath(); ctx.arc(p.x,p.y,1.3,0,Math.PI*2); ctx.fill(); });
+            ctx.shadowBlur = 0;
+        } catch(e) {}
+    }
+}
+
+window.startCapture = async function() {
+    const name = document.getElementById('reg-name').value.trim();
+    if (!name) {
+        toast('আগে নাম দিন!', 'error');
+        document.getElementById('reg-name').focus();
+        return;
+    }
+
+    const btn = document.getElementById('reg-capture-btn');
+    btn.disabled = true;
+    _regState = 'scanning';
+    setRegStatus('scanning', '🔍 মুখ scan হচ্ছে...');
+    document.getElementById('reg-prog-wrap').style.display = 'block';
+
+    const video = document.getElementById('reg-video');
+    const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.4 });
+
+    // Multiple samples নিয়ে average করব — better accuracy
+    const samples = [];
+    let tries = 0;
+
+    while (samples.length < 5 && tries < 30) {
+        tries++;
+        const pct = Math.round((tries / 30) * 100);
+        document.getElementById('reg-prog-fill').style.width = pct + '%';
+        document.getElementById('reg-prog-pct').textContent = pct + '%';
+        setRegStatus('scanning', `📸 Sample ${samples.length}/5 নেওয়া হচ্ছে... (${tries}/30)`);
+        await new Promise(r => setTimeout(r, 150));
+
+        const result = await faceapi.detectSingleFace(video, opts).withFaceLandmarks(true).withFaceDescriptor();
+        if (result) samples.push(result.descriptor);
+    }
+
+    if (samples.length < 3) {
+        _regState = 'failed';
+        setRegStatus('error', '❌ পর্যাপ্ত face sample নেওয়া যায়নি। আবার চেষ্টা করুন।');
+        document.getElementById('reg-prog-wrap').style.display = 'none';
+        btn.disabled = false;
+        setTimeout(() => { _regState = 'idle'; }, 2000);
+        return;
+    }
+
+    // Average descriptor
+    const avgDescriptor = new Float32Array(128);
+    for (let i = 0; i < 128; i++) {
+        avgDescriptor[i] = samples.reduce((sum, s) => sum + s[i], 0) / samples.length;
+    }
+
+    _capturedDescriptor = avgDescriptor;
+    _regState = 'success';
+    setRegStatus('success', `✅ ${samples.length}টি sample নেওয়া হয়েছে। Firebase এ save হচ্ছে...`);
+
+    // Firebase এ save
+    try {
+        await addDoc(collection(db, 'facelock_users'), {
+            name: name,
+            descriptor: Array.from(avgDescriptor),
+            enabled: true,
+            createdAt: Date.now(),
+            sampleCount: samples.length
+        });
+
+        document.getElementById('reg-prog-fill').style.width = '100%';
+        document.getElementById('reg-prog-pct').textContent = '100%';
+        setRegStatus('success', `🎉 "${name}" সফলভাবে register হয়েছে!`);
+        toast(`"${name}" face register সম্পন্ন!`, 'success');
+
+        await loadUsers();
+
+        // Reset করো
+        setTimeout(() => {
+            resetCapture();
+            switchTab('users');
+        }, 2000);
+
+    } catch(e) {
+        _regState = 'failed';
+        setRegStatus('error', '❌ Firebase save error: ' + e.message);
+        btn.disabled = false;
+        toast('Save failed: ' + e.message, 'error');
+    }
+};
+
+window.resetCapture = function() {
+    _capturedDescriptor = null;
+    _regState = 'idle';
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-prog-wrap').style.display = 'none';
+    document.getElementById('reg-prog-fill').style.width = '0%';
+    document.getElementById('reg-prog-pct').textContent = '0%';
+    document.getElementById('reg-capture-btn').disabled = !_camStream;
+    const canvas = document.getElementById('reg-canvas');
+    if (canvas) canvas.getContext('2d').clearRect(0,0,240,240);
+    setRegStatus('idle', '✅ ক্যামেরা প্রস্তুত। নাম দিন এবং Capture বোতাম চাপুন।');
+};
+
+// ══════════════════════════════════════════════════════
+// Tab switching
+// ══════════════════════════════════════════════════════
+window.switchTab = function(tab) {
+    document.getElementById('users-panel').style.display = tab === 'users' ? 'block' : 'none';
+    document.getElementById('add-panel').style.display = tab === 'add' ? 'block' : 'none';
+    document.getElementById('tab-users').className = 'tab' + (tab === 'users' ? ' active' : '');
+    document.getElementById('tab-add').className = 'tab' + (tab === 'add' ? ' active' : '');
+
+    if (tab === 'add' && !_camStream) startCamera();
+};
+
+// Initial hide (show only after passcode)
+document.getElementById('app').style.display = 'none';
+hideLoading();
+document.getElementById('ps-input').focus();
+
+</script>
+</body>
+</html>
