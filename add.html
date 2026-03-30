@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FACE MANAGER · CSM NOTEPAD</title>
+<meta name="theme-color" content="#020202">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Firebase v8 (same as index.html) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCDqmMlKq-KuStNUxnZv-oNFLNnKfHi5TA",
+    authDomain: "notepad-c5b98.firebaseapp.com",
+    databaseURL: "https://notepad-c5b98-default-rtdb.firebaseio.com",
+    projectId: "notepad-c5b98",
+    storageBucket: "notepad-c5b98.appspot.com",
+    messagingSenderId: "1049292781064",
+    appId: "1:1049292781064:web:79a86494f0d9e3f8ef0e4c"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+<!-- face-api.js (local, same as index.html) -->
+<script src="./face-api.min.js"></script>
+
+<style>
+:root {
+  --bg-deep: #020202;
+  --bg-panel: #0d0d0d;
+  --neon-main: #0f0;
+  --neon-dim: #004d00;
+  --neon-red: #ff003c;
+  --neon-blue: #00f3ff;
+  --neon-yellow: #fcee0a;
+  --purple: #7c3aed;
+  --purple-l: #a855f7;
+  --font: 'Fira Code', monospace;
+  --mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: #2a2a3a; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--neon-main);
+  font-family: var(--font);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:" "; display:block; position:fixed;
+  top:0; left:0; bottom:0; right:0;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%),
+              linear-gradient(90deg,rgba(255,0,0,0.04),rgba(0,255,0,0.02),rgba(0,0,255,0.04));
+  z-index:9000; background-size:100% 2px,3px 100%; pointer-events:none;
+}
+
+/* ── MODEL LOADING OVERLAY ── */
+#model-overlay {
+  position:fixed; inset:0; background:var(--bg-deep);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:8000; gap:14px;
+}
+.spinner {
+  width:40px; height:40px;
+  border:3px solid #2a2a3a; border-top-color:var(--purple-l);
+  border-radius:50%; animation:sp 0.8s linear infinite;
+}
+@keyframes sp { to{transform:rotate(360deg);} }
+.model-msg { font-family:var(--mono); font-size:0.72rem; color:#555; letter-spacing:2px; }
+
+/* ── GATE (Passcode Screen) ── */
+#gate-screen {
+  display:none; position:fixed; inset:0;
+  justify-content:center; align-items:center;
+  background:var(--bg-deep);
+}
+.gate-box {
+  width:90%; max-width:380px;
+  border:2px solid var(--neon-main);
+  background:rgba(0,10,0,0.97);
+  box-shadow:0 0 30px var(--neon-dim);
+  padding:36px 32px; text-align:center;
+}
+.gate-icon { font-size:2.2rem; margin-bottom:10px; }
+.gate-title { font-family:var(--mono); font-size:1rem; letter-spacing:3px; color:var(--neon-main); margin-bottom:4px; }
+.gate-sub { font-size:0.68rem; color:#444; letter-spacing:2px; margin-bottom:24px; }
+.gate-input {
+  width:100%; padding:12px; margin:8px 0;
+  background:black; border:1px solid var(--neon-dim);
+  color:var(--neon-main); font-family:var(--font);
+  font-size:1rem; text-align:center; letter-spacing:4px;
+}
+.gate-input:focus { border-color:var(--neon-main); box-shadow:0 0 8px var(--neon-dim); }
+.gate-err {
+  display:none; color:var(--neon-red); font-size:0.72rem;
+  margin:6px 0; padding:7px; border:1px solid #500;
+  background:rgba(255,0,60,0.05);
+}
+.gate-btn {
+  width:100%; padding:12px; margin-top:12px;
+  background:transparent; border:1px solid var(--neon-main);
+  color:var(--neon-main); font-family:var(--font); font-size:0.85rem;
+  cursor:pointer; transition:0.2s; letter-spacing:2px;
+}
+.gate-btn:hover { background:var(--neon-main); color:black; box-shadow:0 0 15px var(--neon-dim); }
+.back-link { display:block; margin-top:14px; color:var(--neon-blue); font-size:0.72rem; cursor:pointer; opacity:0.7; text-decoration:none; }
+.back-link:hover { opacity:1; }
+
+/* ── MAIN PANEL ── */
+#main-panel { display:none; padding:20px; max-width:900px; margin:0 auto; }
+
+.panel-header {
+  border-bottom:2px solid #2a2a3a;
+  padding-bottom:14px; margin-bottom:20px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.panel-logo { display:flex; align-items:center; gap:10px; }
+.logo-icon {
+  width:34px; height:34px;
+  background:linear-gradient(135deg,var(--purple),var(--purple-l));
+  border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-size:17px; box-shadow:0 0 16px rgba(124,58,237,0.4);
+}
+.logo-title { font-family:var(--mono); font-size:1rem; letter-spacing:3px; background:linear-gradient(135deg,#c084fc,var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logo-sub { font-size:0.62rem; color:#555; letter-spacing:2px; margin-top:2px; }
+.btn-back-header {
+  background:transparent; border:1px solid #2a2a3a; color:#666;
+  font-family:var(--font); font-size:0.72rem; padding:7px 14px;
+  cursor:pointer; transition:0.2s; border-radius:6px;
+}
+.btn-back-header:hover { border-color:var(--purple); color:var(--purple-l); }
+
+/* ── GRID ── */
+.panel-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:640px){ .panel-grid{ grid-template-columns:1fr; } }
+
+/* ── CARD ── */
+.card {
+  background:#0d0d12; border:1px solid #1e1e2e;
+  border-radius:12px; padding:20px;
+}
+.card-title {
+  font-family:var(--mono); font-size:0.72rem; letter-spacing:2px;
+  color:var(--purple-l); border-bottom:1px solid #1e1e2e;
+  padding-bottom:10px; margin-bottom:16px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+
+/* ── CAMERA ── */
+.cam-wrap {
+  position:relative; width:100%; max-width:260px;
+  margin:0 auto 14px; aspect-ratio:1;
+}
+.cam-ring {
+  position:absolute; inset:-4px; border-radius:14px;
+  background:conic-gradient(from 0deg,var(--purple),var(--purple-l),transparent,transparent,var(--purple));
+  animation:ring 3s linear infinite; opacity:0; transition:opacity 0.3s;
+}
+.cam-ring.on { opacity:1; }
+@keyframes ring{ to{transform:rotate(360deg);} }
+.cam-inner {
+  position:absolute; inset:0; border-radius:10px;
+  overflow:hidden; background:#000; z-index:1;
+}
+#e-video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); display:block; }
+#e-canvas { position:absolute; top:0; left:0; width:100%; height:100%; transform:scaleX(-1); pointer-events:none; z-index:2; }
+.cam-c { position:absolute; width:16px; height:16px; z-index:4; }
+.cam-c.tl{top:-1px;left:-1px;border-top:2px solid var(--purple-l);border-left:2px solid var(--purple-l);border-radius:3px 0 0 0;}
+.cam-c.tr{top:-1px;right:-1px;border-top:2px solid var(--purple-l);border-right:2px solid var(--purple-l);border-radius:0 3px 0 0;}
+.cam-c.bl{bottom:-1px;left:-1px;border-bottom:2px solid var(--purple-l);border-left:2px solid var(--purple-l);border-radius:0 0 0 3px;}
+.cam-c.br{bottom:-1px;right:-1px;border-bottom:2px solid var(--purple-l);border-right:2px solid var(--purple-l);border-radius:0 0 3px 0;}
+
+/* ── STATUS ── */
+.status-box {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:9px 12px; background:#0f0f14;
+  border:1px solid #2a2a3a; border-radius:8px;
+  margin-bottom:12px; min-height:40px; transition:all 0.3s;
+}
+.s-dot { width:7px; height:7px; border-radius:50%; background:#555; flex-shrink:0; margin-top:4px; transition:all 0.3s; }
+.status-box.scanning .s-dot { background:var(--purple-l); box-shadow:0 0 6px var(--purple-l); animation:blink 1s infinite; }
+.status-box.ok .s-dot { background:#10b981; box-shadow:0 0 6px #10b981; }
+.status-box.err .s-dot { background:var(--neon-red); box-shadow:0 0 6px var(--neon-red); }
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.s-text { font-size:11px; color:#e2e0f0; line-height:1.5; font-family:var(--font); }
+
+/* ── INPUT ── */
+.e-label { font-size:0.68rem; color:#666; letter-spacing:1px; margin-bottom:5px; display:block; margin-top:4px; }
+.e-input {
+  width:100%; padding:10px 12px; background:#080810;
+  border:1px solid #2a2a3a; border-radius:7px;
+  color:#e2e0f0; font-family:var(--font); font-size:0.85rem;
+  margin-bottom:12px; transition:border-color 0.2s;
+}
+.e-input:focus { border-color:var(--purple); box-shadow:0 0 8px rgba(124,58,237,0.2); }
+
+/* ── PROGRESS ── */
+.prog-row { display:flex; justify-content:space-between; font-size:0.62rem; color:#555; margin-bottom:4px; font-family:var(--mono); }
+.prog-track { height:3px; background:#2a2a3a; border-radius:2px; margin-bottom:10px; }
+.prog-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--purple),var(--purple-l)); width:0%; transition:width 0.3s; box-shadow:0 0 6px var(--purple); }
+
+/* ── THUMBNAILS ── */
+.thumbs { display:flex; gap:6px; flex-wrap:wrap; min-height:46px; margin-bottom:10px; }
+.thumb-img { width:40px; height:40px; border-radius:6px; border:1px solid var(--purple); object-fit:cover; opacity:0.85; }
+.thumb-empty { width:40px; height:40px; border-radius:6px; border:1px dashed #2a2a3a; background:#080810; display:flex; align-items:center; justify-content:center; font-size:9px; color:#333; }
+
+/* ── BUTTONS ── */
+.btn-purple {
+  width:100%; padding:11px; border:none; border-radius:9px;
+  font-family:var(--font); font-size:0.82rem; font-weight:600;
+  cursor:pointer; transition:all 0.2s;
+  background:linear-gradient(135deg,var(--purple),var(--purple-l));
+  color:#fff; box-shadow:0 5px 18px rgba(124,58,237,0.35);
+  margin-bottom:8px; letter-spacing:1px;
+}
+.btn-purple:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,0.45);}
+.btn-purple:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+.btn-green {
+  width:100%; padding:11px; border:none; border-radius:9px;
+  font-family:var(--font); font-size:0.82rem; font-weight:600;
+  cursor:pointer; transition:all 0.2s;
+  background:linear-gradient(135deg,#065f46,#10b981);
+  color:#fff; box-shadow:0 5px 18px rgba(16,185,129,0.3);
+  margin-bottom:8px; letter-spacing:1px;
+}
+.btn-green:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,0.4);}
+.btn-green:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+.btn-outline {
+  width:100%; padding:9px; border:1px solid #2a2a3a; border-radius:8px;
+  background:transparent; color:#666; font-family:var(--font); font-size:0.78rem;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-outline:hover:not(:disabled){border-color:var(--purple);color:var(--purple-l);}
+.btn-outline:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* ── FACE LIST ── */
+.face-empty { text-align:center; padding:30px 0; color:#444; font-size:0.78rem; }
+.face-card {
+  display:flex; align-items:center; gap:12px;
+  background:#080810; border:1px solid #1e1e2e;
+  border-radius:9px; padding:10px 14px; margin-bottom:8px;
+  transition:border-color 0.2s;
+}
+.face-card:hover{border-color:#2a2a3a;}
+.face-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--purple-l));
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.face-info{flex:1;min-width:0;}
+.face-name{font-size:0.82rem;color:#e2e0f0;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.face-sub{font-size:0.62rem;color:#555;margin-top:2px;}
+.del-btn {
+  background:transparent; border:1px solid #3a1a1a;
+  color:#844; font-size:0.72rem; padding:4px 10px;
+  border-radius:6px; cursor:pointer; font-family:var(--font);
+  transition:all 0.2s; white-space:nowrap; flex-shrink:0;
+}
+.del-btn:hover{border-color:var(--neon-red);color:var(--neon-red);background:rgba(255,0,60,0.05);}
+
+/* ── TOAST ── */
+#toast-wrap{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  min-width:250px;padding:11px 14px;
+  background:rgba(0,0,0,0.93);border-left:3px solid;
+  font-family:var(--font);font-size:0.78rem;
+  animation:tIn 0.3s ease;display:flex;align-items:center;gap:8px;
+}
+.toast.ok{border-color:var(--neon-main);color:var(--neon-main);}
+.toast.err{border-color:var(--neon-red);color:var(--neon-red);}
+.toast.info{border-color:var(--neon-blue);color:var(--neon-blue);}
+@keyframes tIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+</style>
+</head>
+<body>
+
+<!-- MODEL LOADING -->
+<div id="model-overlay">
+  <div class="spinner"></div>
+  <div class="model-msg" id="model-msg">INITIALIZING...</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- GATE SCREEN -->
+<div id="gate-screen" style="display:flex;">
+  <!-- shown first, model loads in bg -->
+</div>
+
+<!-- PASSCODE BOX (inside gate) -->
+<div id="gate-box" style="display:none;position:fixed;inset:0;justify-content:center;align-items:center;background:var(--bg-deep);">
+  <div class="gate-box">
+    <div class="gate-icon">👁</div>
+    <div class="gate-title">FACE MANAGER</div>
+    <div class="gate-sub">ENTER ACCESS PASSCODE</div>
+    <input type="password" id="gate-input" class="gate-input" placeholder="••••••" maxlength="30"
+      onkeydown="if(event.key==='Enter')checkGate()">
+    <div class="gate-err" id="gate-err">⛔ ভুল পাসকোড</div>
+    <button class="gate-btn" onclick="checkGate()">UNLOCK →</button>
+    <a href="index.html" class="back-link">← BACK TO NOTEPAD</a>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div id="main-panel">
+
+  <!-- Header -->
+  <div class="panel-header">
+    <div class="panel-logo">
+      <div class="logo-icon">👁</div>
+      <div>
+        <div class="logo-title">FACE MANAGER</div>
+        <div class="logo-sub">CSM NOTEPAD · BIOMETRIC MANAGER</div>
+      </div>
+    </div>
+    <button class="btn-back-header" onclick="window.location.href='index.html'">← BACK TO NOTEPAD</button>
+  </div>
+
+  <div class="panel-grid">
+
+    <!-- LEFT: ADD NEW FACE -->
+    <div class="card">
+      <div class="card-title">📸 NEW FACE ADD করুন</div>
+
+      <!-- Camera -->
+      <div class="cam-wrap">
+        <div class="cam-ring" id="cam-ring"></div>
+        <div class="cam-inner">
+          <video id="e-video" autoplay muted playsinline></video>
+          <canvas id="e-canvas"></canvas>
+        </div>
+        <div class="cam-c tl"></div>
+        <div class="cam-c tr"></div>
+        <div class="cam-c bl"></div>
+        <div class="cam-c br"></div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-box" id="e-status">
+        <div class="s-dot"></div>
+        <div class="s-text" id="e-status-text">ক্যামেরা চালু হচ্ছে...</div>
+      </div>
+
+      <!-- Name -->
+      <label class="e-label">PERSON NAME / ID</label>
+      <input type="text" id="e-name" class="e-input" placeholder="যেমন: Mohasin, Samiya" maxlength="40">
+
+      <!-- Progress -->
+      <div class="prog-row">
+        <span>SAMPLES</span>
+        <span id="prog-count">0 / 5</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+
+      <!-- Thumbnails -->
+      <div class="thumbs" id="thumbs-strip">
+        <div class="thumb-empty">1</div>
+        <div class="thumb-empty">2</div>
+        <div class="thumb-empty">3</div>
+        <div class="thumb-empty">4</div>
+        <div class="thumb-empty">5</div>
+      </div>
+
+      <!-- Buttons -->
+      <button class="btn-purple" id="capture-btn" onclick="captureSample()" disabled>📸 CAPTURE SAMPLE</button>
+      <button class="btn-green" id="save-btn" onclick="saveFace()" disabled>✅ SAVE FACE TO FIREBASE</button>
+      <button class="btn-outline" id="reset-btn" onclick="resetCapture()" disabled>↺ RESET</button>
+    </div>
+
+    <!-- RIGHT: SAVED FACES LIST -->
+    <div class="card">
+      <div class="card-title">
+        <span>👥 SAVED FACES</span>
+        <span id="face-count" style="font-size:0.62rem;color:#555;">লোড হচ্ছে...</span>
+      </div>
+      <div id="face-list">
+        <div class="face-empty">লোড হচ্ছে...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// PASSCODE
+// ═══════════════════════════════════
+const PASSCODE = 'samiya';
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let modelsLoaded = false;
+let camStream = null;
+let descriptors = [];
+let thumbs = [];
+let busy = false;
+const MAX = 5;
+
+const video = document.getElementById('e-video');
+const canvas = document.getElementById('e-canvas');
+const ctx = canvas.getContext('2d');
+
+// ═══════════════════════════════════
+// TOAST
+// ═══════════════════════════════════
+function toast(msg, type='info', dur=3200) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const ic = {ok:'✅',err:'⛔',info:'ℹ️'};
+  el.innerHTML = `<span>${ic[type]||'📢'}</span><span>${msg}</span>`;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(()=>el.remove(), dur);
+}
+
+// ═══════════════════════════════════
+// STATUS
+// ═══════════════════════════════════
+function setStatus(text, mode='idle') {
+  const box = document.getElementById('e-status');
+  box.className = `status-box ${mode}`;
+  document.getElementById('e-status-text').textContent = text;
+}
+
+// ═══════════════════════════════════
+// GATE
+// ═══════════════════════════════════
+function checkGate() {
+  const val = document.getElementById('gate-input').value;
+  const err = document.getElementById('gate-err');
+  if (val === PASSCODE) {
+    document.getElementById('gate-box').style.display = 'none';
+    document.getElementById('main-panel').style.display = 'block';
+    if (modelsLoaded) startCamera();
+    loadFaceList();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('gate-input').value = '';
+    setTimeout(()=>err.style.display='none', 2500);
+  }
+}
+
+// ═══════════════════════════════════
+// LOAD MODELS
+// ═══════════════════════════════════
+async function loadModels() {
+  const msg = document.getElementById('model-msg');
+  try {
+    msg.textContent = 'LOADING SSD MODEL...';
+    await faceapi.nets.ssdMobilenetv1.loadFromUri('./models');
+    msg.textContent = 'LOADING LANDMARK MODEL...';
+    await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+    msg.textContent = 'LOADING RECOGNITION MODEL...';
+    await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
+    modelsLoaded = true;
+    document.getElementById('model-overlay').style.display = 'none';
+    document.getElementById('gate-box').style.display = 'flex';
+    // if already logged in (gate passed somehow)
+    if (document.getElementById('main-panel').style.display === 'block') startCamera();
+  } catch(e) {
+    msg.textContent = 'MODEL LOAD FAILED: ' + e.message;
+  }
+}
+
+// ═══════════════════════════════════
+// CAMERA
+// ═══════════════════════════════════
+async function startCamera() {
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:'user', width:320, height:320 }
+    });
+    video.srcObject = camStream;
+    await new Promise(r => video.onloadedmetadata = r);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    document.getElementById('cam-ring').classList.add('on');
+    setStatus('মুখ ক্যামেরার দিকে রাখুন', 'scanning');
+    document.getElementById('capture-btn').disabled = false;
+    runDetection();
+  } catch(e) {
+    setStatus('ক্যামেরা চালু হয়নি: ' + e.message, 'err');
+  }
+}
+
+// ═══════════════════════════════════
+// DETECTION LOOP
+// ═══════════════════════════════════
+let detLoop;
+async function runDetection() {
+  detLoop = setInterval(async () => {
+    if (!camStream || video.paused || video.ended) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    try {
+      const det = await faceapi
+        .detectSingleFace(video, new faceapi.SsdMobilenetv1Options({minConfidence:0.5}))
+        .withFaceLandmarks();
+      if (det) {
+        const dims = faceapi.matchDimensions(canvas, video, true);
+        faceapi.draw.drawFaceLandmarks(canvas, faceapi.resizeResults(det, dims));
+      }
+    } catch(e) {}
+  }, 200);
+}
+
+// ═══════════════════════════════════
+// CAPTURE SAMPLE
+// ═══════════════════════════════════
+async function captureSample() {
+  if (busy || descriptors.length >= MAX) return;
+  busy = true;
+  document.getElementById('capture-btn').disabled = true;
+  setStatus('Face detect করছে...', 'scanning');
+
+  try {
+    const det = await faceapi
+      .detectSingleFace(video, new faceapi.SsdMobilenetv1Options({minConfidence:0.5}))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!det) {
+      setStatus('মুখ পাওয়া যায়নি — আবার চেষ্টা করুন', 'err');
+      setTimeout(()=>{ setStatus('মুখ ক্যামেরার দিকে রাখুন','scanning'); document.getElementById('capture-btn').disabled=false; }, 2000);
+    } else {
+      descriptors.push(Array.from(det.descriptor));
+
+      // thumbnail
+      const tc = document.createElement('canvas');
+      tc.width = 40; tc.height = 40;
+      const tcx = tc.getContext('2d');
+      const b = det.detection.box;
+      tcx.drawImage(video, b.x, b.y, b.width, b.height, 0, 0, 40, 40);
+      thumbs.push(tc.toDataURL('image/jpeg', 0.7));
+
+      updateUI();
+      const n = descriptors.length;
+      setStatus(`✅ Sample ${n}/${MAX} নেওয়া হয়েছে`, 'ok');
+
+      if (n >= MAX) {
+        setStatus('সব sample ready! নাম দিয়ে Save করুন ✅', 'ok');
+        document.getElementById('save-btn').disabled = false;
+        document.getElementById('reset-btn').disabled = false;
+        document.getElementById('capture-btn').disabled = true;
+        toast('সব sample নেওয়া হয়েছে!', 'ok');
+      } else {
+        setTimeout(()=>{ setStatus('মুখ ক্যামেরার দিকে রাখুন','scanning'); document.getElementById('capture-btn').disabled=false; }, 1200);
+      }
+    }
+  } catch(e) {
+    setStatus('Error: '+e.message, 'err');
+    setTimeout(()=>{ document.getElementById('capture-btn').disabled=false; }, 2000);
+  }
+  busy = false;
+}
+
+// ═══════════════════════════════════
+// UPDATE THUMBNAIL UI
+// ═══════════════════════════════════
+function updateUI() {
+  const strip = document.getElementById('thumbs-strip');
+  strip.innerHTML = '';
+  for (let i=0; i<MAX; i++) {
+    if (thumbs[i]) {
+      const img = document.createElement('img');
+      img.className = 'thumb-img'; img.src = thumbs[i];
+      strip.appendChild(img);
+    } else {
+      const d = document.createElement('div');
+      d.className = 'thumb-empty'; d.textContent = i+1;
+      strip.appendChild(d);
+    }
+  }
+  const pct = (descriptors.length / MAX) * 100;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-count').textContent = `${descriptors.length} / ${MAX}`;
+  document.getElementById('reset-btn').disabled = descriptors.length === 0;
+}
+
+// ═══════════════════════════════════
+// RESET
+// ═══════════════════════════════════
+function resetCapture() {
+  descriptors = []; thumbs = [];
+  updateUI();
+  document.getElementById('save-btn').disabled = true;
+  document.getElementById('reset-btn').disabled = true;
+  document.getElementById('capture-btn').disabled = false;
+  document.getElementById('e-name').value = '';
+  setStatus('মুখ ক্যামেরার দিকে রাখুন', 'scanning');
+}
+
+// ═══════════════════════════════════
+// SAVE → FIREBASE
+// ═══════════════════════════════════
+async function saveFace() {
+  const name = document.getElementById('e-name').value.trim();
+  if (!name) { toast('নাম লিখুন!', 'err'); document.getElementById('e-name').focus(); return; }
+  if (descriptors.length < MAX) { toast(`কমপক্ষে ${MAX}টি sample দরকার`, 'err'); return; }
+
+  document.getElementById('save-btn').disabled = true;
+  document.getElementById('save-btn').textContent = '⏳ SAVING...';
+  setStatus('Firebase-এ save হচ্ছে...', 'scanning');
+
+  try {
+    const key = name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Date.now();
+    await db.ref('faceProfiles/' + key).set({
+      name: name,
+      descriptors: descriptors,
+      addedAt: new Date().toISOString(),
+      samplesCount: descriptors.length
+    });
+    setStatus(`"${name}" সফলভাবে save হয়েছে! ✅`, 'ok');
+    toast(`"${name}" face save হয়েছে`, 'ok');
+    resetCapture();
+    loadFaceList();
+  } catch(e) {
+    setStatus('Save ব্যর্থ: ' + e.message, 'err');
+    toast('Firebase error: ' + e.message, 'err');
+  }
+  document.getElementById('save-btn').textContent = '✅ SAVE FACE TO FIREBASE';
+  document.getElementById('save-btn').disabled = (descriptors.length < MAX);
+}
+
+// ═══════════════════════════════════
+// LOAD FACE LIST
+// ═══════════════════════════════════
+function loadFaceList() {
+  const container = document.getElementById('face-list');
+  const badge = document.getElementById('face-count');
+  container.innerHTML = '<div class="face-empty">লোড হচ্ছে...</div>';
+
+  db.ref('faceProfiles').once('value').then(snap => {
+    container.innerHTML = '';
+    if (!snap.exists()) {
+      badge.textContent = '0 জন';
+      container.innerHTML = '<div class="face-empty">কোনো face save নেই</div>';
+      return;
+    }
+    const data = snap.val();
+    const keys = Object.keys(data).reverse();
+    badge.textContent = `${keys.length} জন`;
+
+    keys.forEach(key => {
+      const f = data[key];
+      const added = f.addedAt ? new Date(f.addedAt).toLocaleDateString('bn-BD') : 'অজানা';
+      const card = document.createElement('div');
+      card.className = 'face-card';
+      card.innerHTML = `
+        <div class="face-avatar">👤</div>
+        <div class="face-info">
+          <div class="face-name">${esc(f.name)}</div>
+          <div class="face-sub">${f.samplesCount||'?'} samples · ${added}</div>
+        </div>
+        <button class="del-btn" onclick="deleteFace('${key}','${esc(f.name)}')">🗑 DELETE</button>
+      `;
+      container.appendChild(card);
+    });
+  }).catch(e => {
+    container.innerHTML = `<div class="face-empty" style="color:var(--neon-red);">Load ব্যর্থ: ${e.message}</div>`;
+  });
+}
+
+// ═══════════════════════════════════
+// DELETE FACE
+// ═══════════════════════════════════
+function deleteFace(key, name) {
+  if (!confirm(`"${name}" কে মুছে দেবেন?`)) return;
+  db.ref('faceProfiles/' + key).remove()
+    .then(() => { toast(`"${name}" মুছে গেছে`, 'ok'); loadFaceList(); })
+    .catch(e => toast('Delete ব্যর্থ: '+e.message, 'err'));
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+window.addEventListener('load', () => {
+  const checkFA = setInterval(() => {
+    if (typeof faceapi !== 'undefined') {
+      clearInterval(checkFA);
+      loadModels();
+    }
+  }, 150);
+});
+</script>
+</body>
+</html>
