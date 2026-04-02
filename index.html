@@ -452,6 +452,155 @@
     @keyframes facePopIn { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
     .face-success-name { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: #10b981; margin-bottom: 3px; }
     .face-success-sub { font-size: 12px; color: #6b6b8a; margin-bottom: 16px; font-family: 'Fira Code', monospace; }
+
+    /* ── DATE GROUP ACCORDION ── */
+    .date-group { border-bottom: 1px solid #1a1a1a; }
+    .date-group-header {
+        padding: 8px 15px;
+        font-size: 0.72rem;
+        color: #0f0;
+        background: #0a0a0a;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        letter-spacing: 0.05em;
+        transition: background 0.15s;
+    }
+    .date-group-header:hover { background: #111; }
+    .date-group-arrow {
+        font-size: 0.6rem;
+        color: #444;
+        transition: transform 0.25s;
+        display: inline-block;
+    }
+    .date-group-header.open .date-group-arrow {
+        transform: rotate(90deg);
+        color: #0f0;
+    }
+    .date-group-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    .date-group-body.open { max-height: 2000px; }
+    .date-group-body .note-item {
+        padding-left: 28px;
+        font-size: 0.78rem;
+        border-left: 2px solid transparent;
+    }
+    .date-group-body .note-item:hover { border-left-color: #004d00; }
+    .date-group-body .note-item.active {
+        border-left-color: #0f0;
+        background: #0d1a0d;
+    }
+
+    /* ── LOCK SCREEN ── */
+    #lock-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2,2,2,0.97);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Fira Code', monospace;
+    }
+    #lock-overlay.active { display: flex; }
+    #lock-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        padding: 40px 36px;
+        background: #0d0d0d;
+        border: 1px solid #1f1f1f;
+        border-top: 2px solid #0f0;
+        box-shadow: 0 0 60px rgba(0,255,0,0.05);
+        width: 320px;
+        max-width: 90vw;
+    }
+    #lock-icon {
+        font-size: 2.2rem;
+        animation: lkPulse 3s ease-in-out infinite;
+    }
+    @keyframes lkPulse {
+        0%,100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+    #lock-title {
+        font-size: 0.85rem;
+        color: #0f0;
+        letter-spacing: 0.25em;
+        font-weight: 700;
+    }
+    #lock-sub {
+        font-size: 0.6rem;
+        color: #333;
+        letter-spacing: 0.15em;
+        margin-top: -8px;
+    }
+    #lock-input {
+        width: 100%;
+        background: #020202;
+        border: 1px solid #222;
+        border-bottom: 1px solid #0f0;
+        color: #0f0;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+        text-align: center;
+        letter-spacing: 0.3em;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #lock-input:focus {
+        border-color: #0f0;
+        box-shadow: 0 0 10px rgba(0,255,0,0.08);
+    }
+    #lock-err {
+        font-size: 0.65rem;
+        color: #ff003c;
+        letter-spacing: 0.1em;
+        min-height: 16px;
+        text-align: center;
+    }
+    #lock-btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #0f0;
+        color: #0f0;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        padding: 10px;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    #lock-btn:hover {
+        background: rgba(0,255,0,0.07);
+        box-shadow: 0 0 15px rgba(0,255,0,0.1);
+    }
+    #lock-foot {
+        font-size: 0.55rem;
+        color: #1f1f1f;
+        letter-spacing: 0.15em;
+    }
+    @keyframes lkShake {
+        0%,100% { transform: translateX(0); }
+        20% { transform: translateX(-8px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+    }
+    #lock-input.shake {
+        animation: lkShake 0.4s ease;
+        border-bottom-color: #ff003c;
+        color: #ff003c;
+    }
 </style>
 
 </head>  
@@ -1615,53 +1764,109 @@
     }
 
     function renderNoteList(data) {
-        const list = document.getElementById('notes-list');  
+        const list = document.getElementById('notes-list');
         const activeId = document.getElementById('current-id').value;
-        list.innerHTML = '';  
+        list.innerHTML = '';
         renderFolders(data);
         let allTags = new Set();
         let notesArr = [];
-        if (data) {  
-            Object.entries(data).forEach(([id, note]) => {  
+        if (data) {
+            Object.entries(data).forEach(([id, note]) => {
                 if (!note) return;
                 const noteFolder = note.folder || 'INBOX';
-                if(noteFolder !== activeFolder) return;
+                if (noteFolder !== activeFolder) return;
                 notesArr.push({id, ...note});
                 if (!note.lockHash && note.text) {
                     const tags = note.text.match(/#[a-z0-9_]+/gi);
-                    if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
+                    if (tags) tags.forEach(t => allTags.add(t.toLowerCase()));
                 }
             });
-            notesArr.sort((a, b) => {
-                if (a.pinned === b.pinned) return (b.timestamp || 0) - (a.timestamp || 0);
-                return a.pinned ? -1 : 1;
-            });
             renderTags(allTags);
-            notesArr.forEach(note => {
-                const noteText = (note.text || '').toLowerCase();
-                if(filterTag && !note.lockHash && !noteText.includes(filterTag)) return;
-                const div = document.createElement('div');
-                const isSelected = selectedNotes.has(note.id);
-                div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '') + (isSelected ? ' selected' : '');
-                const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
-                const isLocked = note.lockHash ? ' <span style="color:var(--neon-red)">[LOCKED]</span>' : '';
-                let checkHtml = isSelectionMode ? `<div class="custom-checkbox ${isSelected ? 'checked' : ''}"></div>` : '';
-                div.innerHTML = `
-                    <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
-                        ${checkHtml}
-                        <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                            <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i> 
-                            ${(note.title || 'UNTITLED') + isDirty + isLocked}
+
+            // Filter by tag
+            const filteredArr = notesArr.filter(note => {
+                if (!filterTag) return true;
+                if (note.lockHash) return false;
+                return (note.text || '').toLowerCase().includes(filterTag);
+            });
+
+            if (filteredArr.length === 0) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">EMPTY DIRECTORY</div>';
+                return;
+            }
+
+            // Group notes by date (DD MMM YYYY)
+            const dateGroups = {};
+            filteredArr.forEach(note => {
+                const d = new Date(note.timestamp || 0);
+                const label = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ');
+                if (!dateGroups[label]) dateGroups[label] = { ts: note.timestamp || 0, notes: [] };
+                dateGroups[label].notes.push(note);
+            });
+
+            // Sort groups newest first
+            const sortedDates = Object.keys(dateGroups).sort((a, b) => dateGroups[b].ts - dateGroups[a].ts);
+
+            sortedDates.forEach(dateLabel => {
+                const groupNotes = dateGroups[dateLabel].notes;
+
+                // Sort within group: pinned first, then timestamp descending
+                groupNotes.sort((a, b) => {
+                    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+                    return (b.timestamp || 0) - (a.timestamp || 0);
+                });
+
+                // Check if active note is in this group
+                const groupHasActive = groupNotes.some(n => n.id === activeId);
+
+                // Build group container
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'date-group';
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'date-group-header' + (groupHasActive ? ' open' : '');
+                header.innerHTML = `<span>▶ ${dateLabel} &nbsp;<span style="color:#444;font-size:0.65rem;">(${groupNotes.length})</span></span><span class="date-group-arrow">❯</span>`;
+
+                // Body
+                const body = document.createElement('div');
+                body.className = 'date-group-body' + (groupHasActive ? ' open' : '');
+
+                header.addEventListener('click', () => {
+                    const isOpen = header.classList.toggle('open');
+                    body.classList.toggle('open', isOpen);
+                });
+
+                // Note items
+                groupNotes.forEach(note => {
+                    const isSelected = selectedNotes.has(note.id);
+                    const div = document.createElement('div');
+                    div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '') + (isSelected ? ' selected' : '');
+                    const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
+                    const isLocked = note.lockHash ? ' <span style="color:var(--neon-red)">[LOCKED]</span>' : '';
+                    let checkHtml = isSelectionMode ? `<div class="custom-checkbox ${isSelected ? 'checked' : ''}"></div>` : '';
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
+                            ${checkHtml}
+                            <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i>
+                                ${(note.title || 'UNTITLED') + isDirty + isLocked}
+                            </div>
                         </div>
-                    </div>
-                    <i class="fas fa-star pin-icon"></i>
-                `;
-                if(isSelectionMode) div.onclick = (e) => toggleNoteSelection(note.id, e);
-                else div.onclick = () => loadNoteIntoEditor(note.id, note);  
-                list.appendChild(div);  
-            });  
+                        <i class="fas fa-star pin-icon"></i>
+                    `;
+                    if (isSelectionMode) div.onclick = (e) => toggleNoteSelection(note.id, e);
+                    else div.onclick = () => loadNoteIntoEditor(note.id, note);
+                    body.appendChild(div);
+                });
+
+                groupDiv.appendChild(header);
+                groupDiv.appendChild(body);
+                list.appendChild(groupDiv);
+            });
+        } else {
+            list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">EMPTY DIRECTORY</div>';
         }
-        if(notesArr.length === 0) list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">EMPTY DIRECTORY</div>';
     }
 
     function renderTags(tags) {
@@ -2631,7 +2836,92 @@
     });
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});  
+
+    /* ── SECRET LOCK SCREEN SYSTEM ── */
+    (function() {
+        const PASSKEY = 'samiya';
+        const SK = 'csm_unlocked';
+        const isMobile = () => /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+        function lock() {
+            sessionStorage.removeItem(SK);
+            const ov = document.getElementById('lock-overlay');
+            if (!ov) return;
+            ov.classList.add('active');
+            document.getElementById('app-layer').style.pointerEvents = 'none';
+            setTimeout(() => {
+                const inp = document.getElementById('lock-input');
+                if (inp) { inp.value = ''; inp.focus(); }
+                const err = document.getElementById('lock-err');
+                if (err) err.innerText = '';
+            }, 80);
+        }
+
+        function unlock() {
+            sessionStorage.setItem(SK, '1');
+            const ov = document.getElementById('lock-overlay');
+            if (ov) ov.classList.remove('active');
+            document.getElementById('app-layer').style.pointerEvents = '';
+        }
+
+        function attempt() {
+            const inp = document.getElementById('lock-input');
+            const err = document.getElementById('lock-err');
+            if (!inp) return;
+            if (inp.value === PASSKEY) {
+                unlock();
+            } else {
+                inp.classList.remove('shake');
+                void inp.offsetWidth;
+                inp.classList.add('shake');
+                if (err) err.innerText = '⚠ INVALID PASSKEY';
+                inp.value = '';
+                setTimeout(() => {
+                    inp.classList.remove('shake');
+                    if (err) err.innerText = '';
+                }, 1800);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('lock-btn');
+            if (btn) btn.addEventListener('click', attempt);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            const ov = document.getElementById('lock-overlay');
+            if (ov && ov.classList.contains('active') && e.key === 'Enter') {
+                e.preventDefault();
+                attempt();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                e.preventDefault();
+                lock();
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) lock();
+        });
+
+        window.addEventListener('load', function() {
+            const unlocked = sessionStorage.getItem(SK) === '1';
+            if (isMobile() || !unlocked) lock();
+        });
+    })();
 </script>
 
+<!-- SECRET LOCK SCREEN -->
+<div id="lock-overlay">
+  <div id="lock-box">
+    <div id="lock-icon">🔒</div>
+    <div id="lock-title">CSM NOTEPAD</div>
+    <div id="lock-sub">SECURE ACCESS REQUIRED</div>
+    <input type="password" id="lock-input" placeholder="ENTER PASSKEY" autocomplete="off" spellcheck="false" />
+    <div id="lock-err"></div>
+    <button id="lock-btn">UNLOCK</button>
+    <div id="lock-foot">PERSONAL &amp; CONFIDENTIAL</div>
+  </div>
+</div>
 </body>  
 </html>
