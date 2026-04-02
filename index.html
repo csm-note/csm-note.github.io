@@ -2859,7 +2859,8 @@
             const ov = document.getElementById('lock-overlay');
             if (!ov) return;
             ov.classList.add('active');
-            document.getElementById('app-layer').style.pointerEvents = 'none';
+            const appLayer = document.getElementById('app-layer');
+            if (appLayer) appLayer.style.pointerEvents = 'none';
             setTimeout(() => {
                 const inp = document.getElementById('lock-input');
                 if (inp) { inp.value = ''; inp.focus(); }
@@ -2901,15 +2902,16 @@
         });
 
         document.addEventListener('keydown', function(e) {
+            // Escape → lock always (even on lock screen — resets it)
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                lock();
+                return;
+            }
+            // Enter on lock screen → attempt unlock
             if (isLocked() && e.key === 'Enter') {
                 e.preventDefault();
                 attempt();
-                return;
-            }
-            // Desktop: শুধু Escape press করলে lock হবে
-            if (!isMobile() && !isLocked() && e.key === 'Escape') {
-                e.preventDefault();
-                lock();
                 return;
             }
             // Manual lock shortcut: Ctrl+Shift+L (both mobile & desktop)
@@ -2919,7 +2921,7 @@
             }
         });
 
-        // ── Tab switch / minimize → lock (both platforms) ──
+        // ── Tab switch / minimize → lock always (both platforms) ──
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) lock();
         });
@@ -2931,7 +2933,7 @@
             const SHAKE_THRESHOLD = 18; // higher = harder shake needed
 
             window.addEventListener('devicemotion', function(e) {
-                if (isLocked()) return; // already locked, ignore
+                // shake locks anytime — even on auth/login screen
                 const acc = e.accelerationIncludingGravity;
                 if (!acc) return;
                 const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
