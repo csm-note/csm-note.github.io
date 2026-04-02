@@ -1795,12 +1795,18 @@
                 return;
             }
 
-            // Group notes by date (DD MMM YYYY)
+            // Group notes by date (DD MMM YYYY) - fixed, locale-independent
+            const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             const dateGroups = {};
             filteredArr.forEach(note => {
-                const d = new Date(note.timestamp || 0);
-                const label = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ');
-                if (!dateGroups[label]) dateGroups[label] = { ts: note.timestamp || 0, notes: [] };
+                const ts = note.timestamp || 0;
+                const d = new Date(ts);
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = _MONTHS[d.getMonth()];
+                const yyyy = d.getFullYear();
+                const label = `${dd} ${mm} ${yyyy}`;
+                if (!dateGroups[label]) dateGroups[label] = { ts: ts, notes: [] };
+                if (ts > dateGroups[label].ts) dateGroups[label].ts = ts;
                 dateGroups[label].notes.push(note);
             });
 
@@ -2843,6 +2849,11 @@
         const SK = 'csm_unlocked';
         const isMobile = () => /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
+        function isLocked() {
+            const ov = document.getElementById('lock-overlay');
+            return ov && ov.classList.contains('active');
+        }
+
         function lock() {
             sessionStorage.removeItem(SK);
             const ov = document.getElementById('lock-overlay');
@@ -2883,27 +2894,70 @@
             }
         }
 
+        // ── UNLOCK button & Enter key ──
         document.addEventListener('DOMContentLoaded', function() {
             const btn = document.getElementById('lock-btn');
             if (btn) btn.addEventListener('click', attempt);
         });
 
         document.addEventListener('keydown', function(e) {
-            const ov = document.getElementById('lock-overlay');
-            if (ov && ov.classList.contains('active') && e.key === 'Enter') {
+            if (isLocked() && e.key === 'Enter') {
                 e.preventDefault();
                 attempt();
+                return;
             }
+            // Desktop: শুধু Escape press করলে lock হবে
+            if (!isMobile() && !isLocked() && e.key === 'Escape') {
+                e.preventDefault();
+                lock();
+                return;
+            }
+            // Manual lock shortcut: Ctrl+Shift+L (both mobile & desktop)
             if (e.ctrlKey && e.shiftKey && e.key === 'L') {
                 e.preventDefault();
                 lock();
             }
         });
 
+        // ── Tab switch / minimize → lock (both platforms) ──
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) lock();
         });
 
+        // ── MOBILE: Shake to lock ──
+        if (isMobile() && window.DeviceMotionEvent) {
+            let lastX = null, lastY = null, lastZ = null;
+            let shakeTimeout = null;
+            const SHAKE_THRESHOLD = 18; // higher = harder shake needed
+
+            window.addEventListener('devicemotion', function(e) {
+                if (isLocked()) return; // already locked, ignore
+                const acc = e.accelerationIncludingGravity;
+                if (!acc) return;
+                const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+                if (lastX !== null) {
+                    const delta = Math.abs(x - lastX) + Math.abs(y - lastY) + Math.abs(z - lastZ);
+                    if (delta > SHAKE_THRESHOLD) {
+                        if (!shakeTimeout) {
+                            shakeTimeout = setTimeout(() => { shakeTimeout = null; }, 1000);
+                            lock();
+                        }
+                    }
+                }
+                lastX = x; lastY = y; lastZ = z;
+            }, { passive: true });
+
+            // iOS 13+ requires permission for DeviceMotion
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                // Ask permission after first user interaction
+                document.addEventListener('touchend', function askPerm() {
+                    DeviceMotionEvent.requestPermission().catch(() => {});
+                    document.removeEventListener('touchend', askPerm);
+                }, { once: true });
+            }
+        }
+
+        // ── Page load ──
         window.addEventListener('load', function() {
             const unlocked = sessionStorage.getItem(SK) === '1';
             if (isMobile() || !unlocked) lock();
