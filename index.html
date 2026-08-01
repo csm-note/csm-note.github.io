@@ -997,7 +997,7 @@
                     <button class="btn" onclick="editorUndo()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
                     <button class="btn" onclick="editorRedo()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
                     <button class="btn" onclick="openVersionHistory()" title="Snapshots"><i class="fas fa-history"></i></button>
-                    <button class="btn btn-info" onclick="generateShareLink()" title="Share Link"><i class="fas fa-link"></i></button>
+                    <button class="btn btn-info" id="publish-btn" onclick="openPublishModal()" title="Publish Note"><i class="fas fa-globe"></i></button>
                 </div>
             </div>
 
@@ -1580,6 +1580,13 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    function randSig(len = 8) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const arr = new Uint8Array(len);
+        crypto.getRandomValues(arr);
+        return Array.from(arr, b => chars[b % chars.length]).join('');
+    }
+
     function logActivity(msg, type = 'info') {
         const container = document.getElementById('alert-system');
         const box = document.createElement('div');
@@ -2138,6 +2145,7 @@
         noteHistory.push(note.text || '');
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         renderNoteList(getLocalCache());
+        updatePublishBtnUI(note.publicShareId || null);
         logActivity(`OPENED: ${note.title || 'UNTITLED'}`, "info");
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
@@ -2162,9 +2170,11 @@
         const cache = getLocalCache();
         const existingNote = cache[id] || {};
         const lockHash = existingNote.lockHash || null;
+        const publicShareId = existingNote.publicShareId || null;
         const ts = Date.now();
         const payload = { title, text, pinned, folder, timestamp: ts };  
         if (lockHash) payload.lockHash = lockHash;
+        if (publicShareId) payload.publicShareId = publicShareId;
         cache[id] = payload;
         setLocalCache(cache);
         renderNoteList(cache); 
@@ -2691,14 +2701,144 @@
         else if(e.key === 'Escape') { toggleCommandPalette(); }
     });
 
-    function generateShareLink() {
+    /* ── PUBLIC PUBLISH SYSTEM ──
+       Notes are private by default. Publishing creates a random,
+       unguessable public link (note-id + random signature) stored
+       separately under public_shares/, optionally password-protected.
+       The real Firebase user id is never exposed in the link. */
+
+    function updatePublishBtnUI(shareId) {
+        const btn = document.getElementById('publish-btn');
+        if (!btn) return;
+        const icon = btn.querySelector('i');
+        if (shareId) {
+            btn.title = 'Published — manage link';
+            btn.style.color = '#4ade80';
+            btn.style.borderColor = '#166534';
+            if (icon) icon.className = 'fas fa-globe-americas';
+        } else {
+            btn.title = 'Publish Note';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+            if (icon) icon.className = 'fas fa-globe';
+        }
+    }
+
+    function openPublishModal() {
         const id = document.getElementById('current-id').value;
-        if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
-        const link = `${window.location.origin}${window.location.pathname}?share=${id}&user=${currentUser}`;
-        navigator.clipboard.writeText(link).then(() => {
-            logActivity("LINK COPIED TO CLIPBOARD", "success");
-            SystemUI.show("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;">`);
-        });
+        if (!id || id.startsWith('temp_')) { logActivity("SYNC NOTE BEFORE PUBLISHING", "error"); return; }
+        const cache = getLocalCache();
+        const note = cache[id] || {};
+        if (note.publicShareId) {
+            db.ref(`public_shares/${note.publicShareId}`).once('value').then(snap => {
+                if (snap.exists()) {
+                    const val = snap.val();
+                    showPublishedLink(note.publicShareId, val.passwordHash ? 'password' : 'public');
+                } else {
+                    delete note.publicShareId;
+                    cache[id] = note; setLocalCache(cache);
+                    updatePublishBtnUI(null);
+                    showPublishForm();
+                }
+            });
+        } else {
+            showPublishForm();
+        }
+    }
+
+    function showPublishForm() {
+        window._pubMode = 'public';
+        const html = `
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <p style="margin:0;color:var(--text-soft);font-size:0.85rem;">এই নোটটি একটি ইউনিক public link দিয়ে যে কেউ দেখতে পারবে। Access type বেছে নাও:</p>
+                <div style="display:flex;gap:10px;">
+                    <button type="button" id="pub-mode-public" class="btn active" style="flex:1;" onclick="setPublishMode('public')">🌐 FULLY PUBLIC</button>
+                    <button type="button" id="pub-mode-pass" class="btn" style="flex:1;" onclick="setPublishMode('password')">🔒 PASSWORD PROTECTED</button>
+                </div>
+                <div id="pub-pass-wrap" style="display:none;">
+                    <label style="font-size:0.65rem;color:#666;letter-spacing:1px;">SET PASSWORD</label>
+                    <input type="text" id="pub-password" class="modal-input" placeholder="e.g. samiya123" autocomplete="off">
+                </div>
+            </div>`;
+        const actions = `
+            <button class="btn btn-info" onclick="confirmPublish()">🚀 PUBLISH</button>
+            <button class="btn" onclick="SystemUI.close()">CANCEL</button>
+        `;
+        SystemUI.show("🌍 PUBLISH NOTE", html, actions);
+    }
+
+    function setPublishMode(mode) {
+        window._pubMode = mode;
+        document.getElementById('pub-mode-public').classList.toggle('active', mode === 'public');
+        document.getElementById('pub-mode-pass').classList.toggle('active', mode === 'password');
+        document.getElementById('pub-pass-wrap').style.display = mode === 'password' ? 'block' : 'none';
+        if (mode === 'password') document.getElementById('pub-password').focus();
+    }
+
+    async function confirmPublish() {
+        const id = document.getElementById('current-id').value;
+        if (!id || id.startsWith('temp_')) { logActivity("SYNC NOTE BEFORE PUBLISHING", "error"); return; }
+        const mode = window._pubMode || 'public';
+        let passwordHash = null;
+        if (mode === 'password') {
+            const pw = (document.getElementById('pub-password')?.value || '').trim();
+            if (!pw) { logActivity("ENTER A PASSWORD", "error"); return; }
+            passwordHash = await sha256(pw);
+        }
+        const shareId = `${id}-${randSig(8)}`;
+        try {
+            await db.ref(`public_shares/${shareId}`).set({
+                uid: currentUser,
+                noteId: id,
+                passwordHash: passwordHash || null,
+                createdAt: Date.now()
+            });
+            await db.ref(`notes/${currentUser}/${id}/publicShareId`).set(shareId);
+            const cache = getLocalCache();
+            if (cache[id]) { cache[id].publicShareId = shareId; setLocalCache(cache); }
+            updatePublishBtnUI(shareId);
+            logActivity("NOTE PUBLISHED", "success");
+            showPublishedLink(shareId, mode);
+        } catch (e) {
+            logActivity("PUBLISH FAILED: " + e.message, "error");
+        }
+    }
+
+    function showPublishedLink(shareId, mode) {
+        const link = `${window.location.origin}${window.location.pathname}?shared=${shareId}`;
+        const modeLabel = mode === 'password' ? '🔒 Password Protected' : '🌐 Fully Public';
+        const html = `
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="font-size:0.75rem;color:var(--neon-main);">${modeLabel}</div>
+                <input type="text" id="pub-link-box" class="modal-input" value="${link}" readonly onclick="this.select()">
+            </div>`;
+        const actions = `
+            <button class="btn btn-info" onclick="copyPublicLink('${link}')">📋 COPY LINK</button>
+            <button class="btn" onclick="showPublishForm()">⚙ CHANGE</button>
+            <button class="btn btn-danger" onclick="unpublishNote('${shareId}')">🚫 UNPUBLISH</button>
+        `;
+        SystemUI.show("✅ NOTE PUBLISHED", html, actions);
+    }
+
+    function copyPublicLink(link) {
+        navigator.clipboard.writeText(link).then(() => logActivity("LINK COPIED TO CLIPBOARD", "success"));
+    }
+
+    async function unpublishNote(shareId) {
+        const yes = await SystemUI.confirm("UNPUBLISH NOTE?", "Public link টি আর কাজ করবে না।", true);
+        if (!yes) return;
+        const id = document.getElementById('current-id').value;
+        try {
+            await db.ref(`public_shares/${shareId}`).remove();
+            if (id) await db.ref(`notes/${currentUser}/${id}/publicShareId`).remove();
+            const cache = getLocalCache();
+            if (id && cache[id]) { delete cache[id].publicShareId; setLocalCache(cache); }
+            updatePublishBtnUI(null);
+            logActivity("NOTE UNPUBLISHED", "error");
+            SystemUI.close();
+        } catch (e) {
+            logActivity("FAILED: " + e.message, "error");
+        }
     }
 
     function showShortcuts() {
@@ -2725,26 +2865,71 @@
         SystemUI.show("KEYBOARD CONTROLS", html);
     }
 
-    // Public link handler
-    const urlParams = new URLSearchParams(window.location.search);
-    const shareId = urlParams.get('share');
-    const shareUser = urlParams.get('user');
-    if(shareId && shareUser) {
+    // ── Public link handler ──
+    function enterPublicViewMode() {
         document.getElementById('auth-layer').style.display = 'none';
         document.getElementById('app-layer').style.display = 'flex';
-        document.querySelector('header').style.display = 'none'; 
+        document.querySelector('header').style.display = 'none';
         document.getElementById('sidebar').style.display = 'none';
+    }
+
+    function renderPublicNote(title, text) {
         document.getElementById('doc-body').setAttribute('readonly', true);
         document.getElementById('doc-title').setAttribute('readonly', true);
         document.querySelector('.editor-toolbar').innerHTML = '<div style="padding:10px; color:var(--neon-main); font-weight:bold;">:: PUBLIC VIEW MODE ::</div>';
+        document.getElementById('doc-title').value = title || '';
+        document.getElementById('doc-body').value = text || '';
+        toggleMarkdown();
+    }
+
+    function showPublicError(msg) {
+        document.querySelector('.editor-toolbar').innerHTML = '';
+        document.getElementById('doc-title').value = '⚠ NOT AVAILABLE';
+        document.getElementById('doc-body').value = msg;
+        document.getElementById('doc-title').setAttribute('readonly', true);
+        document.getElementById('doc-body').setAttribute('readonly', true);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const publicShareParam = urlParams.get('shared');
+    const shareId = urlParams.get('share');
+    const shareUser = urlParams.get('user');
+
+    if (publicShareParam) {
+        // New secure publish system: random link, real uid/note-id hidden inside
+        enterPublicViewMode();
+        db.ref(`public_shares/${publicShareParam}`).once('value').then(snap => {
+            if (!snap.exists()) { showPublicError("এই লিঙ্কটি আর সক্রিয় নেই অথবা ভুল লিঙ্ক।"); return; }
+            const meta = snap.val();
+            const loadNote = () => {
+                db.ref(`notes/${meta.uid}/${meta.noteId}`).once('value').then(nsnap => {
+                    if (!nsnap.exists()) { showPublicError("এই নোটটি খুঁজে পাওয়া যায়নি।"); return; }
+                    const val = nsnap.val();
+                    renderPublicNote(val.title, val.text);
+                });
+            };
+            if (meta.passwordHash) {
+                const attemptPassword = async () => {
+                    const pw = await SystemUI.prompt("🔒 PROTECTED NOTE", "এই নোটটি দেখতে পাসওয়ার্ড দিন:", "password");
+                    if (pw === null) { showPublicError("Access denied — এই নোটটি পাসওয়ার্ড-প্রোটেক্টেড।"); return; }
+                    const hash = await sha256(pw);
+                    if (hash === meta.passwordHash) loadNote();
+                    else { logActivity("WRONG PASSWORD", "error"); attemptPassword(); }
+                };
+                attemptPassword();
+            } else {
+                loadNote();
+            }
+        });
+    } else if (shareId && shareUser) {
+        // Legacy share links (?share=id&user=uid) — kept working for old links
+        enterPublicViewMode();
         db.ref(`notes/${shareUser}/${shareId}`).once('value').then(snap => {
             if(snap.exists()) {
                 const val = snap.val();
-                document.getElementById('doc-title').value = val.title;
-                document.getElementById('doc-body').value = val.text;
-                toggleMarkdown();
+                renderPublicNote(val.title, val.text);
             } else {
-                alert("Shared note not found or access denied.");
+                showPublicError("Shared note not found or access denied.");
             }
         });
     }
@@ -2790,6 +2975,7 @@
         }
         document.getElementById('date-display').innerText = '';
         updatePinBtnUI(false);
+        updatePublishBtnUI(null);
         document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
         updateWordCount();
         if(!passive) { document.getElementById('doc-title').focus(); logActivity("NEW WORKSPACE", "info"); }
