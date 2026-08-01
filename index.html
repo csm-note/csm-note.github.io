@@ -2816,7 +2816,7 @@
     }
 
     function showPublishedLink(shareId, mode) {
-        const link = `${window.location.origin}${window.location.pathname}?shared=${shareId}`;
+        const link = `${window.location.origin}/shared/?id=${shareId}`;
         const modeLabel = mode === 'password' ? '🔒 Password Protected' : '🌐 Fully Public';
         const html = `
             <div style="display:flex;flex-direction:column;gap:12px;">

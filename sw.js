@@ -1,7 +1,5 @@
-const CACHE_NAME = 'csm-notepad-facelock-v1';
+const CACHE_NAME = 'csm-notepad-facelock-v2';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
     '/manifest.json',
     '/face-api.min.js',
     '/models/tiny_face_detector_model-shard1',
@@ -46,6 +44,22 @@ self.addEventListener('fetch', (event) => {
         url.includes('firebasedatabase.app') ||
         url.includes('googleapis.com/google.firestore')) return;
 
+    // HTML / navigation requests: ALWAYS go to network first so new deploys
+    // (like the index.html or /shared/ page) show up immediately. Falls
+    // back to cache only if fully offline.
+    if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+        event.respondWith(
+            fetch(event.request).then((res) => {
+                const clone = res.clone();
+                caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+                return res;
+            }).catch(() => caches.match(event.request).then(c => c || caches.match('/index.html')))
+        );
+        return;
+    }
+
+    // Everything else (JS libs, fonts, face-recognition models): cache-first,
+    // since these are large/static and rarely change.
     event.respondWith(
         caches.match(event.request).then((cached) => {
             if (cached) return cached;
