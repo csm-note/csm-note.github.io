@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Shared Note — CSM NOTEPAD</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<style>
+    :root {
+        --bg-deep: #060816;
+        --bg-panel: rgba(13, 18, 38, 0.74);
+        --text-main: #eaf2ff;
+        --text-soft: #9db0d1;
+        --neon-main: #7c9cff;
+        --neon-dim: rgba(124, 156, 255, 0.34);
+        --neon-red: #ff5f8f;
+        --border-color: rgba(160, 184, 255, 0.18);
+        --font-stack: 'Fira Code', monospace;
+    }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--neon-dim); }
+    body {
+        margin: 0; min-height: 100vh; min-height: 100dvh;
+        background:
+            radial-gradient(circle at 12% 18%, rgba(107, 231, 255, 0.12), transparent 22%),
+            radial-gradient(circle at 88% 14%, rgba(124, 156, 255, 0.18), transparent 24%),
+            radial-gradient(circle at 50% 85%, rgba(255, 95, 143, 0.10), transparent 28%),
+            var(--bg-deep);
+        color: var(--text-main);
+        font-family: var(--font-stack);
+        display: flex; flex-direction: column;
+    }
+    header {
+        padding: 14px 18px; border-bottom: 2px solid var(--border-color);
+        background: var(--bg-panel); font-weight: bold; color: var(--neon-main);
+        letter-spacing: 1px; flex-shrink: 0;
+    }
+    main { flex: 1; padding: 24px 18px 60px; max-width: 760px; width: 100%; margin: 0 auto; }
+    #note-title {
+        font-size: 1.4rem; font-weight: 700; margin: 0 0 18px; word-break: break-word;
+        border-bottom: 1px dashed var(--border-color); padding-bottom: 14px;
+    }
+    #note-body {
+        font-size: 0.95rem; line-height: 1.7; color: var(--text-main); word-break: break-word;
+    }
+    #note-body pre { background: #000; padding: 12px; overflow-x: auto; border: 1px solid var(--border-color); }
+    #note-body code { background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; }
+    #note-body blockquote { border-left: 3px solid var(--neon-main); margin: 0; padding-left: 14px; color: var(--text-soft); }
+    #note-body img { max-width: 100%; }
+    #note-body a { color: var(--neon-main); }
+    #state-box {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 14px; padding: 60px 20px; text-align: center; color: var(--text-soft);
+    }
+    #state-box i { font-size: 2rem; color: var(--neon-main); }
+    #state-box.error i { color: var(--neon-red); }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #pass-overlay {
+        position: fixed; inset: 0; background: var(--bg-deep); z-index: 999;
+        display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    #pass-box {
+        width: 100%; max-width: 360px; padding: 32px 26px; text-align: center;
+        border: 2px solid var(--neon-main); background: rgba(0,10,0,0.95);
+        box-shadow: 0 0 24px var(--neon-dim);
+    }
+    #pass-box i { font-size: 1.8rem; color: var(--neon-main); }
+    #pass-box h2 { font-size: 1rem; margin: 12px 0 4px; letter-spacing: 1px; }
+    #pass-box p { font-size: 0.75rem; color: var(--text-soft); margin: 0 0 16px; }
+    #pass-input {
+        width: 100%; padding: 11px; background: black; border: 1px solid var(--neon-dim);
+        color: var(--neon-main); font-family: var(--font-stack); text-align: center;
+    }
+    #pass-input:focus { outline: none; border-color: var(--neon-main); box-shadow: 0 0 6px var(--neon-dim); }
+    #pass-err { color: var(--neon-red); font-size: 0.7rem; height: 16px; margin-top: 8px; }
+    #pass-btn {
+        margin-top: 14px; width: 100%; padding: 11px; background: transparent;
+        border: 1px solid var(--neon-main); color: var(--neon-main); font-family: var(--font-stack);
+        cursor: pointer; letter-spacing: 1px;
+    }
+    #pass-btn:hover { background: var(--neon-main); color: black; }
+    footer { text-align: center; padding: 16px; font-size: 0.65rem; color: #444; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div id="pass-overlay" style="display:none;">
+    <div id="pass-box">
+        <i class="fas fa-lock"></i>
+        <h2>PROTECTED NOTE</h2>
+        <p>এই নোটটি দেখতে পাসওয়ার্ড দিন</p>
+        <input type="password" id="pass-input" placeholder="ENTER PASSWORD" autocomplete="off">
+        <div id="pass-err"></div>
+        <button id="pass-btn">UNLOCK →</button>
+    </div>
+</div>
+
+<header>:: CSM NOTEPAD — PUBLIC VIEW ::</header>
+<main>
+    <div id="state-box">
+        <i class="fas fa-circle-notch spin"></i>
+        <div>Loading shared note…</div>
+    </div>
+    <h1 id="note-title" style="display:none;"></h1>
+    <div id="note-body" style="display:none;"></div>
+</main>
+<footer>CSM MOHASIN NOTEPAD · Read-only public link</footer>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
+        authDomain: "notepad-c5b98.firebaseapp.com",
+        databaseURL: "https://notepad-c5b98-default-rtdb.firebaseio.com",
+        projectId: "notepad-c5b98",
+        storageBucket: "notepad-c5b98.firebasestorage.app",
+        messagingSenderId: "737040022800",
+        appId: "1:737040022800:web:5e5eb1971ccadf6d753995"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    async function sha256(message) {
+        if (!message) return null;
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function showState(iconClass, text, isError) {
+        const box = document.getElementById('state-box');
+        box.style.display = 'flex';
+        box.className = isError ? 'error' : '';
+        box.innerHTML = `<i class="fas ${iconClass}"></i><div>${text}</div>`;
+        document.getElementById('note-title').style.display = 'none';
+        document.getElementById('note-body').style.display = 'none';
+    }
+
+    function showNote(title, text) {
+        document.getElementById('state-box').style.display = 'none';
+        const titleEl = document.getElementById('note-title');
+        const bodyEl = document.getElementById('note-body');
+        titleEl.style.display = 'block';
+        bodyEl.style.display = 'block';
+        titleEl.textContent = title || '(Untitled)';
+        bodyEl.innerHTML = text ? marked.parse(text) : '<span style="color:#666;">(This note is empty)</span>';
+    }
+
+    function getShareId() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('id')) return params.get('id');
+        // fallback: /shared/<id> style path
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        const last = parts[parts.length - 1];
+        return (last && last !== 'shared') ? last : null;
+    }
+
+    const shareId = getShareId();
+
+    if (!shareId) {
+        showState('fa-triangle-exclamation', 'কোনো নোট আইডি পাওয়া যায়নি — লিঙ্কটি সম্পূর্ণ কিনা চেক করো।', true);
+    } else {
+        db.ref('public_shares/' + shareId).once('value').then(snap => {
+            if (!snap.exists()) {
+                showState('fa-triangle-exclamation', 'এই লিঙ্কটি আর সক্রিয় নেই অথবা ভুল লিঙ্ক।', true);
+                return;
+            }
+            const meta = snap.val();
+            const loadNote = () => {
+                db.ref(`notes/${meta.uid}/${meta.noteId}`).once('value').then(nsnap => {
+                    if (!nsnap.exists()) {
+                        showState('fa-triangle-exclamation', 'এই নোটটি খুঁজে পাওয়া যায়নি।', true);
+                        return;
+                    }
+                    const val = nsnap.val();
+                    showNote(val.title, val.text);
+                }).catch(err => showState('fa-triangle-exclamation', 'লোড করতে সমস্যা হয়েছে: ' + err.message, true));
+            };
+            if (meta.passwordHash) {
+                document.getElementById('state-box').style.display = 'none';
+                const overlay = document.getElementById('pass-overlay');
+                const input = document.getElementById('pass-input');
+                const err = document.getElementById('pass-err');
+                const btn = document.getElementById('pass-btn');
+                overlay.style.display = 'flex';
+                setTimeout(() => input.focus(), 100);
+                const attempt = async () => {
+                    const hash = await sha256(input.value);
+                    if (hash === meta.passwordHash) {
+                        overlay.style.display = 'none';
+                        showState('fa-circle-notch spin', 'Loading…', false);
+                        loadNote();
+                    } else {
+                        err.innerText = '⚠ WRONG PASSWORD';
+                        input.value = '';
+                        input.focus();
+                    }
+                };
+                btn.onclick = attempt;
+                input.onkeydown = (e) => { if (e.key === 'Enter') attempt(); };
+            } else {
+                loadNote();
+            }
+        }).catch(err => showState('fa-triangle-exclamation', 'লোড করতে সমস্যা হয়েছে: ' + err.message, true));
+    }
+</script>
+</body>
+</html>
