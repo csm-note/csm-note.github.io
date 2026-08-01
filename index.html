@@ -2785,6 +2785,17 @@
             if (!pw) { logActivity("ENTER A PASSWORD", "error"); return; }
             passwordHash = await sha256(pw);
         }
+        // Force-sync the CURRENT editor content to Firebase first — avoids
+        // publishing stale/old text if this runs before the autosave debounce fires.
+        const liveTitle = document.getElementById('doc-title').value;
+        const liveText = document.getElementById('doc-body').value;
+        clearTimeout(autoSaveTimer);
+        try {
+            await db.ref(`notes/${currentUser}/${id}`).update({ title: liveTitle, text: liveText, timestamp: Date.now() });
+        } catch (e) {
+            logActivity("SYNC FAILED — TRY AGAIN: " + e.message, "error");
+            return;
+        }
         const shareId = `${id}-${randSig(8)}`;
         try {
             await db.ref(`public_shares/${shareId}`).set({
@@ -2795,7 +2806,7 @@
             });
             await db.ref(`notes/${currentUser}/${id}/publicShareId`).set(shareId);
             const cache = getLocalCache();
-            if (cache[id]) { cache[id].publicShareId = shareId; setLocalCache(cache); }
+            if (cache[id]) { cache[id].title = liveTitle; cache[id].text = liveText; cache[id].publicShareId = shareId; setLocalCache(cache); }
             updatePublishBtnUI(shareId);
             logActivity("NOTE PUBLISHED", "success");
             showPublishedLink(shareId, mode);
@@ -2879,6 +2890,7 @@
         document.querySelector('.editor-toolbar').innerHTML = '<div style="padding:10px; color:var(--neon-main); font-weight:bold;">:: PUBLIC VIEW MODE ::</div>';
         document.getElementById('doc-title').value = title || '';
         document.getElementById('doc-body').value = text || '';
+        if (!text) document.getElementById('doc-body').placeholder = '(This note is empty)';
         toggleMarkdown();
     }
 
@@ -2906,7 +2918,7 @@
                     if (!nsnap.exists()) { showPublicError("এই নোটটি খুঁজে পাওয়া যায়নি।"); return; }
                     const val = nsnap.val();
                     renderPublicNote(val.title, val.text);
-                });
+                }).catch(err => showPublicError("লোড করতে সমস্যা হয়েছে: " + err.message));
             };
             if (meta.passwordHash) {
                 const attemptPassword = async () => {
@@ -2920,7 +2932,7 @@
             } else {
                 loadNote();
             }
-        });
+        }).catch(err => showPublicError("লোড করতে সমস্যা হয়েছে: " + err.message));
     } else if (shareId && shareUser) {
         // Legacy share links (?share=id&user=uid) — kept working for old links
         enterPublicViewMode();
@@ -2931,7 +2943,7 @@
             } else {
                 showPublicError("Shared note not found or access denied.");
             }
-        });
+        }).catch(err => showPublicError("লোড করতে সমস্যা হয়েছে: " + err.message));
     }
 
     function triggerSave() {  
